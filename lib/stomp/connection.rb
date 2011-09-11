@@ -497,16 +497,19 @@ module Stomp
         ssl.connect
         ssl
       end
-      
+
       def close_socket
         begin
+          # Need to set @closed = true before closing the socket
+          # within the @read_semaphore thread
+          @closed = true
           @read_semaphore.synchronize do
             @socket.close
           end
         rescue
           #Ignoring if already closed
         end
-        @closed = true
+        @closed
       end
 
       def open_socket
