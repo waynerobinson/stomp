@@ -499,14 +499,12 @@ module Stomp
       end
       
       def close_socket
-        if @socket && @socket.respond_to?(:close)
-          begin
-            @read_semaphore.synchronize do
-              @socket.close
-            end
-          rescue
-            #Ignoring if already closed
+        begin
+          @read_semaphore.synchronize do
+            @socket.close
           end
+        rescue
+          #Ignoring if already closed
         end
         @closed = true
       end
