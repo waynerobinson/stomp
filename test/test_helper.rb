@@ -7,10 +7,10 @@ require 'stomp'
 # Helper routines
 module TestBase
   def user
-    ENV['STOMP_USER'] || "test"
+    ENV['STOMP_USER'] || "guest"
   end
   def passcode
-    ENV['STOMP_PASSCODE'] || "user"
+    ENV['STOMP_PASSCODE'] || "guest"
   end
   # Get host
   def host
@@ -39,7 +39,7 @@ module TestBase
 
   def make_destination
     name = caller_method_name unless name
-    qname = ENV['STOMP_APOLLO'] ? "/queue/test.ruby.stomp." + name : "/queue/test/ruby/stomp/" + name
+    qname = ENV['STOMP_DOTQUEUE'] ? "/queue/test.ruby.stomp." + name : "/queue/test/ruby/stomp/" + name
   end
 
 end

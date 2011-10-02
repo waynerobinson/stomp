@@ -28,7 +28,7 @@ class TestClient < Test::Unit::TestCase
     @client.acknowledge(received) {|r| receipt = r}
     sleep 0.01 until receipt
     assert_not_nil receipt.headers['receipt-id']
-  end
+  end unless ENV['STOMP_RABBIT']
 
   def test_asynch_subscribe
     received = false
@@ -57,7 +57,7 @@ class TestClient < Test::Unit::TestCase
 
     assert_equal message_text, received2.body
     assert_equal received.body, received2.body
-    assert_equal received.headers['message-id'], received2.headers['message-id']
+    assert_equal received.headers['message-id'], received2.headers['message-id'] unless ENV['STOMP_RABBIT']
   end
 
   def test_receipts
@@ -236,7 +236,7 @@ class TestClient < Test::Unit::TestCase
       end
     end
     assert results.all?{|a| a == true }
-  end unless ENV['STOMP_NOWILD'] || ENV['STOMP_APOLLO']
+  end unless ENV['STOMP_NOWILD'] || ENV['STOMP_DOTQUEUE']
 
   def test_transaction_with_client_side_redelivery
     @client.publish make_destination, message_text
@@ -261,7 +261,7 @@ class TestClient < Test::Unit::TestCase
     @client.acknowledge message, :transaction => 'tx2'
     @client.commit 'tx2'
   end
-  
+
   def test_connection_frame
   	assert_not_nil @client.connection_frame
   end
@@ -293,7 +293,7 @@ class TestClient < Test::Unit::TestCase
       end
     }
     assert_equal to_send, message_copy.body, "second body check"
-    assert_equal message.headers['message-id'], message_copy.headers['message-id'], "header check"
+    assert_equal message.headers['message-id'], message_copy.headers['message-id'], "header check" unless ENV['STOMP_RABBIT']
   end
 
   def test_thread_one_subscribe

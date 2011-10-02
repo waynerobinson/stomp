@@ -32,7 +32,7 @@ class TestStomp < Test::Unit::TestCase
       { :suppress_content_length => true }
     msg2 = @conn.receive
     assert_equal "test_stomp#test_", msg2.body
-  end
+  end unless ENV['STOMP_RABBIT']
 
   def test_explicit_receive
     @conn.subscribe make_destination
