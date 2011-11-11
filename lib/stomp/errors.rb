@@ -23,6 +23,12 @@ module Stomp
         "Packet parsing timeout"
       end
     end
+
+    class SocketOpenTimeout < RuntimeError
+      def message
+        "Socket open timeout"
+      end
+    end
     
     class MaxReconnectAttempts < RuntimeError
       def message

@@ -40,7 +40,7 @@ module Stomp
     #     :max_reconnect_attempts => 0,
     #     :randomize => false,
     #     :backup => false,
-    #     :timeout => -1,
+    #     :connect_timeout => 0,
     #     :connect_headers => {},
     #     :parse_timeout => 5,
     #     :logger => nil,
@@ -73,6 +73,7 @@ module Stomp
         @ssl = false
         @parameters = nil
         @parse_timeout = 5		# To override, use hashed parameters
+        @connect_timeout = 0	# To override, use hashed parameters
         @logger = nil     		# To override, use hashed parameters
       end
       
@@ -96,6 +97,7 @@ module Stomp
       @reconnect_delay = @parameters[:initial_reconnect_delay]
       @connect_headers = @parameters[:connect_headers]
       @parse_timeout =  @parameters[:parse_timeout]
+      @connect_timeout =  @parameters[:connect_timeout]
       @logger =  @parameters[:logger]
       #sets the first host to connect
       change_host
@@ -163,7 +165,7 @@ module Stomp
         :max_reconnect_attempts => 0,
         :randomize => false,
         :backup => false,
-        :timeout => -1,
+        :connect_timeout => 0,
         # Parse Timeout
         :parse_timeout => 5
       }
@@ -468,7 +470,10 @@ module Stomp
       end
       
       def open_tcp_socket
-        tcp_socket = TCPSocket.open @host, @port
+				tcp_socket = nil
+				Timeout::timeout(@connect_timeout, Stomp::Error::SocketOpenTimeout) do
+        	tcp_socket = TCPSocket.open @host, @port
+				end
 
         tcp_socket
       end
@@ -489,8 +494,10 @@ module Stomp
         # ctx.cert_store = truststores
 
         ctx.verify_mode = OpenSSL::SSL::VERIFY_NONE  
-
-        ssl = OpenSSL::SSL::SSLSocket.new(open_tcp_socket, ctx)
+				ssl = nil
+				Timeout::timeout(@connect_timeout, Stomp::Error::SocketOpenTimeout) do
+        	ssl = OpenSSL::SSL::SSLSocket.new(open_tcp_socket, ctx)
+				end
         def ssl.ready?
           ! @rbuffer.empty? || @io.ready?
         end
