@@ -29,6 +29,12 @@ module Stomp
         "Socket open timeout"
       end
     end
+
+    class NoCurrentConnection < RuntimeError
+      def message
+        "no current connection exists"
+      end
+    end
     
     class MaxReconnectAttempts < RuntimeError
       def message

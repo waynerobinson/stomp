@@ -213,6 +213,7 @@ module Stomp
 
     # Begin a transaction, requires a name for the transaction
     def begin(name, headers = {})
+      raise Stomp::Error::NoCurrentConnection if closed?
       headers[:transaction] = name
       transmit("BEGIN", headers)
     end
@@ -222,24 +223,28 @@ module Stomp
     #
     # Accepts a transaction header ( :transaction => 'some_transaction_id' )
     def ack(message_id, headers = {})
+      raise Stomp::Error::NoCurrentConnection if closed?
       headers['message-id'] = message_id
       transmit("ACK", headers)
     end
 
     # Commit a transaction by name
     def commit(name, headers = {})
+      raise Stomp::Error::NoCurrentConnection if closed?
       headers[:transaction] = name
       transmit("COMMIT", headers)
     end
 
     # Abort a transaction by name
     def abort(name, headers = {})
+      raise Stomp::Error::NoCurrentConnection if closed?
       headers[:transaction] = name
       transmit("ABORT", headers)
     end
 
     # Subscribe to a destination, must specify a name
     def subscribe(name, headers = {}, subId = nil)
+      raise Stomp::Error::NoCurrentConnection if closed?
       headers[:destination] = name
       transmit("SUBSCRIBE", headers)
 
@@ -252,6 +257,7 @@ module Stomp
 
     # Unsubscribe from a destination, must specify a name
     def unsubscribe(name, headers = {}, subId = nil)
+      raise Stomp::Error::NoCurrentConnection if closed?
       headers[:destination] = name
       transmit("UNSUBSCRIBE", headers)
       if @reliable
@@ -265,6 +271,7 @@ module Stomp
     # To disable content length header ( :suppress_content_length => true )
     # Accepts a transaction header ( :transaction => 'some_transaction_id' )
     def publish(destination, message, headers = {})
+      raise Stomp::Error::NoCurrentConnection if closed?
       headers[:destination] = destination
       transmit("SEND", headers, message)
     end
@@ -284,6 +291,7 @@ module Stomp
     # Accepts a limit number of redeliveries option ( :max_redeliveries => 6 )
     # Accepts a force client acknowledgement option (:force_client_ack => true)
     def unreceive(message, options = {})
+      raise Stomp::Error::NoCurrentConnection if closed?
       options = { :dead_letter_queue => "/queue/DLQ", :max_redeliveries => 6 }.merge options
       # Lets make sure all keys are symbols
       message.headers = message.headers.symbolize_keys
@@ -320,6 +328,7 @@ module Stomp
 
     # Close this connection
     def disconnect(headers = {})
+      raise Stomp::Error::NoCurrentConnection if closed?
       transmit("DISCONNECT", headers)
       headers = headers.symbolize_keys
       @disconnect_receipt = receive if headers[:receipt]
@@ -332,6 +341,7 @@ module Stomp
     # Return a pending message if one is available, otherwise
     # return nil
     def poll
+      raise Stomp::Error::NoCurrentConnection if closed?
       # No need for a read lock here.  The receive method eventually fulfills
       # that requirement.
       return nil if @socket.nil? || !@socket.ready?
@@ -359,6 +369,7 @@ module Stomp
     end
 
     def receive
+      raise Stomp::Error::NoCurrentConnection if closed?
       super_result = __old_receive
       if super_result.nil? && @reliable && !closed?
         errstr = "connection.receive returning EOF as nil - resetting connection.\n"
@@ -470,10 +481,10 @@ module Stomp
       end
       
       def open_tcp_socket
-				tcp_socket = nil
-				Timeout::timeout(@connect_timeout, Stomp::Error::SocketOpenTimeout) do
+      	tcp_socket = nil
+      	Timeout::timeout(@connect_timeout, Stomp::Error::SocketOpenTimeout) do
         	tcp_socket = TCPSocket.open @host, @port
-				end
+      	end
 
         tcp_socket
       end
@@ -494,10 +505,10 @@ module Stomp
         # ctx.cert_store = truststores
 
         ctx.verify_mode = OpenSSL::SSL::VERIFY_NONE  
-				ssl = nil
-				Timeout::timeout(@connect_timeout, Stomp::Error::SocketOpenTimeout) do
+      	ssl = nil
+      	Timeout::timeout(@connect_timeout, Stomp::Error::SocketOpenTimeout) do
         	ssl = OpenSSL::SSL::SSLSocket.new(open_tcp_socket, ctx)
-				end
+      	end
         def ssl.ready?
           ! @rbuffer.empty? || @io.ready?
         end

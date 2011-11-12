@@ -13,7 +13,7 @@ class TestStomp < Test::Unit::TestCase
   end
 
   def teardown
-    @conn.disconnect if @conn # allow tests to disconnect
+    @conn.disconnect if @conn.open? # allow tests to disconnect
   end
 
   def test_connection_exists
@@ -54,7 +54,6 @@ class TestStomp < Test::Unit::TestCase
       assert_equal(@conn.disconnect_receipt.headers['receipt-id'],
         "abc123", "receipt sent and received should match")
     }
-    @conn = nil
   end
 
   def test_client_ack_with_symbol
@@ -81,6 +80,54 @@ class TestStomp < Test::Unit::TestCase
     assert_equal false, @conn.closed?
     @conn.disconnect
     assert_equal true, @conn.closed?
+  end
+
+  def test_closed_checks_conn
+    @conn.disconnect
+    #
+    assert_raise Stomp::Error::NoCurrentConnection do
+      @conn.ack("dummy_data")
+    end
+    #
+    assert_raise Stomp::Error::NoCurrentConnection do
+      @conn.begin("dummy_data")
+    end
+    #
+    assert_raise Stomp::Error::NoCurrentConnection do
+      @conn.commit("dummy_data")
+    end
+    #
+    assert_raise Stomp::Error::NoCurrentConnection do
+      @conn.abort("dummy_data")
+    end
+    #
+    assert_raise Stomp::Error::NoCurrentConnection do
+      @conn.subscribe("dummy_data")
+    end
+    #
+    assert_raise Stomp::Error::NoCurrentConnection do
+      @conn.unsubscribe("dummy_data")
+    end
+    #
+    assert_raise Stomp::Error::NoCurrentConnection do
+      @conn.publish("dummy_data","dummy_data")
+    end
+    #
+    assert_raise Stomp::Error::NoCurrentConnection do
+      @conn.unreceive("dummy_data")
+    end
+    #
+    assert_raise Stomp::Error::NoCurrentConnection do
+      @conn.disconnect("dummy_data")
+    end
+    #
+    assert_raise Stomp::Error::NoCurrentConnection do
+      m = @conn.receive
+    end
+    #
+    assert_raise Stomp::Error::NoCurrentConnection do
+      m = @conn.poll
+    end
   end
 
   def test_response_is_instance_of_message_class

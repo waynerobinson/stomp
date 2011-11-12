@@ -13,7 +13,7 @@ class TestClient < Test::Unit::TestCase
   end
 
   def teardown
-    @client.close if @client # allow tests to close
+    @client.close if @client.open? # allow tests to close
   end
 
   def test_ack_api_works
@@ -78,7 +78,6 @@ class TestClient < Test::Unit::TestCase
       assert_equal(@client.disconnect_receipt.headers['receipt-id'],
         "xyz789", "receipt sent and received should match")
     }
-    @client = nil
   end
 
   def test_publish_then_sub
@@ -349,6 +348,47 @@ class TestClient < Test::Unit::TestCase
       sleep sleep_incr
     end
     assert_equal @max_msgs, msg_ctr
+  end
+
+  def test_closed_checks_client
+    @client.close
+    #
+    assert_raise Stomp::Error::NoCurrentConnection do
+      m = Stomp::Message.new("")
+      @client.acknowledge(m) {|r| receipt = r}
+    end
+    #
+    assert_raise Stomp::Error::NoCurrentConnection do
+      @client.begin("dummy_data")
+    end
+    #
+    assert_raise Stomp::Error::NoCurrentConnection do
+      @client.commit("dummy_data")
+    end
+    #
+    assert_raise Stomp::Error::NoCurrentConnection do
+      @client.abort("dummy_data")
+    end
+    #
+    assert_raise Stomp::Error::NoCurrentConnection do
+      @client.subscribe("dummy_data", {:ack => 'auto'}) {|msg| received = msg}
+    end
+    #
+    assert_raise Stomp::Error::NoCurrentConnection do
+      @client.unsubscribe("dummy_data")
+    end
+    #
+    assert_raise Stomp::Error::NoCurrentConnection do
+      @client.publish("dummy_data","dummy_data")
+    end
+    #
+    assert_raise Stomp::Error::NoCurrentConnection do
+      @client.unreceive("dummy_data")
+    end
+    #
+    assert_raise Stomp::Error::NoCurrentConnection do
+      @client.close("dummy_data")
+    end
   end
 
   private
