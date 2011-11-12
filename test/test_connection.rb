@@ -311,5 +311,16 @@ class TestStomp < Test::Unit::TestCase
     assert_equal "txn message", msg.body
   end
 
+  def test_duplicate_subscription
+    @conn.disconnect # not reliable
+    @conn = Stomp::Connection.open(user, passcode, host, port, true) # reliable
+    dest = make_destination
+    @conn.subscribe dest
+    #
+    assert_raise Stomp::Error::DuplicateSubscription do
+      @conn.subscribe dest
+    end
+  end
+
 end
 

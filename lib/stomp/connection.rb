@@ -246,13 +246,15 @@ module Stomp
     def subscribe(name, headers = {}, subId = nil)
       raise Stomp::Error::NoCurrentConnection if closed?
       headers[:destination] = name
-      transmit("SUBSCRIBE", headers)
 
       # Store the sub so that we can replay if we reconnect.
       if @reliable
         subId = name if subId.nil?
+        raise Stomp::Error::DuplicateSubscription if @subscriptions[subId]
         @subscriptions[subId] = headers
       end
+
+      transmit("SUBSCRIBE", headers)
     end
 
     # Unsubscribe from a destination, must specify a name

@@ -41,5 +41,12 @@ module Stomp
         "Maximum number of reconnection attempts reached"
       end
     end
+    
+    class DuplicateSubscription < RuntimeError
+      def message
+        "duplicate subscription disallowed"
+      end
+    end
   end
+
 end
