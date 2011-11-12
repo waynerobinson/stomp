@@ -246,6 +246,9 @@ module Stomp
     def subscribe(name, headers = {}, subId = nil)
       raise Stomp::Error::NoCurrentConnection if closed?
       headers[:destination] = name
+      if @logger && @logger.respond_to?(:on_subscribe)            
+        @logger.on_subscribe(log_params, headers)
+      end
 
       # Store the sub so that we can replay if we reconnect.
       if @reliable
@@ -275,6 +278,9 @@ module Stomp
     def publish(destination, message, headers = {})
       raise Stomp::Error::NoCurrentConnection if closed?
       headers[:destination] = destination
+      if @logger && @logger.respond_to?(:on_publish)            
+        @logger.on_publish(log_params, message, headers)
+      end
       transmit("SEND", headers, message)
     end
     
@@ -382,6 +388,10 @@ module Stomp
         end
         @socket = nil
         super_result = __old_receive
+      end
+      #
+      if @logger && @logger.respond_to?(:on_receive)            
+        @logger.on_receive(log_params, super_result)
       end
       return super_result
     end

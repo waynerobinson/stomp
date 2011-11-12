@@ -17,7 +17,7 @@ mylog = Slogger::new  # The client provided STOMP callback logger
 
 # //////////////////////////////////////////////////////////////////////////////
 user =      ENV['STOMP_USER'] ? ENV['STOMP_USER'] : 'guest'
-password =  ENV['STOMP_PASSWORD'] ? ENV['STOMP_PASSWORD'] : 'guestpw'
+password =  ENV['STOMP_PASSWORD'] ? ENV['STOMP_PASSWORD'] : 'guest'
 host =      ENV['STOMP_HOST'] ? ENV['STOMP_HOST'] : 'localhost'
 port =      ENV['STOMP_PORT'] ? ENV['STOMP_PORT'].to_i : 61613
 # //////////////////////////////////////////////////////////////////////////////
@@ -33,6 +33,7 @@ hash = { :hosts => [
 
 # //////////////////////////////////////////////////////////////////////////////
 # For a Connection:
+llog.debug "LE Connection processing starts"
 conn = Stomp::Connection.new(hash)
 conn.disconnect
 # //////////////////////////////////////////////////////////////////////////////
@@ -40,10 +41,24 @@ llog.debug "LE Connection processing complete"
 
 # //////////////////////////////////////////////////////////////////////////////
 # For a Client:
+llog.debug "LE Client processing starts"
 conn = Stomp::Client.new(hash)
 conn.close
 # //////////////////////////////////////////////////////////////////////////////
-# llog.debug "LE Client processing complete"
+llog.debug "LE Client processing complete"
+
+# //////////////////////////////////////////////////////////////////////////////
+# For a Connection with other calls:
+llog.debug "LE Connection Enhanced processing starts"
+conn = Stomp::Connection.new(hash)
+#
+dest = "/queue/loggerq1"
+conn.publish dest, "a logger message"
+conn.subscribe dest
+msg = conn.receive
+conn.disconnect
+# //////////////////////////////////////////////////////////////////////////////
+llog.debug "LE Connection Enhanced processing complete"
 
 # //////////////////////////////////////////////////////////////////////////////
 llog.debug "LE Ending"

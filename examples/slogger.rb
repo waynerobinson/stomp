@@ -69,7 +69,6 @@ class Slogger
     end
   end
 
-
   # Log miscellaneous errors
   def on_miscerr(parms, errstr)
     begin
@@ -77,6 +76,37 @@ class Slogger
       @log.debug "Miscellaneous Error String #{errstr}"
     rescue
       @log.debug "Miscellaneous Error oops"
+    end
+  end
+
+  # Subscribe
+  def on_subscribe(parms, headers)
+    begin
+      @log.debug "Subscribe Parms #{info(parms)}"
+      @log.debug "Subscribe Headers #{headers}"
+    rescue
+      @log.debug "Subscribe oops"
+    end
+  end
+
+  # Publish
+  def on_publish(parms, message, headers)
+    begin
+      @log.debug "Publish Parms #{info(parms)}"
+      @log.debug "Publish Message #{message}"
+      @log.debug "Publish Headers #{headers}"
+    rescue
+      @log.debug "Publish oops"
+    end
+  end
+
+  # Receive
+  def on_receive(parms, result)
+    begin
+      @log.debug "Receive Parms #{info(parms)}"
+      @log.debug "Receive Result #{result}"
+    rescue
+      @log.debug "Receive oops"
     end
   end
 
