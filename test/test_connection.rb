@@ -241,7 +241,7 @@ class TestStomp < Test::Unit::TestCase
       sleep sleep_incr
     end
     assert_equal @max_msgs, msg_ctr
-  end
+  end unless RUBY_ENGINE =~ /jruby/
 
   def test_multi_thread_poll
     #
@@ -283,7 +283,7 @@ class TestStomp < Test::Unit::TestCase
       sleep sleep_incr
     end
     assert_equal @max_msgs, msg_ctr
-  end
+  end unless RUBY_ENGINE =~ /jruby/
 
   def test_nil_body
     dest = make_destination

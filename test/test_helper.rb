@@ -4,6 +4,12 @@ require 'test/unit'
 require 'timeout'
 require 'stomp'
 
+begin
+  dummy = RUBY_ENGINE
+rescue NameError => ne
+  RUBY_ENGINE = "unknown"
+end
+
 # Helper routines
 module TestBase
   def user
