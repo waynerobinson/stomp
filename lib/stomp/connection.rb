@@ -9,6 +9,7 @@ module Stomp
   class Connection
     attr_reader :connection_frame
     attr_reader :disconnect_receipt
+    attr_reader :protocol
     #alias :obj_send :send
 
     def self.default_port(ssl)
@@ -59,6 +60,7 @@ module Stomp
     #
     def initialize(login = '', passcode = '', host = 'localhost', port = 61613, reliable = false, reconnect_delay = 5, connect_headers = {})
       @received_messages = []
+      @protocol = Stomp::SPL_10 # assumed at first
 
       if login.is_a?(Hash)
         hashed_initialize(login)
@@ -562,8 +564,10 @@ module Stomp
         headers = @connect_headers.clone
         headers[:login] = @login
         headers[:passcode] = @passcode
+        _pre_connect
         _transmit(used_socket, "CONNECT", headers)
         @connection_frame = _receive(used_socket)
+        _post_connect
         @disconnect_receipt = nil
         # replay any subscriptions.
         @subscriptions.each { |k,v| _transmit(used_socket, "SUBSCRIBE", v) }
@@ -582,7 +586,19 @@ module Stomp
         #
         lparms
       end
-  end
 
-end
+      def _pre_connect
+        raise Stomp::Error::ProtocolErrorConnect if (@connect_headers["accept-version"] && !@connect_headers[:host])
+        raise Stomp::Error::ProtocolErrorConnect if (!@connect_headers["accept-version"] && @connect_headers[:host])
+        return unless (@connect_headers["accept-version"] && @connect_headers[:host])
+      end
+
+      def _post_connect
+        return unless (@connect_headers["accept-version"] && @connect_headers[:host])
+        return if @connection_frame.command == Stomp::CMD_ERROR
+        @protocol = @connection_frame.headers["version"]
+      end
+
+  end # class
+end # module
 

@@ -47,6 +47,13 @@ module Stomp
         "duplicate subscription disallowed"
       end
     end
-  end
+    
+    class ProtocolErrorConnect < RuntimeError
+      def message
+        "protocol error on CONNECT"
+      end
+    end
 
-end
+  end # module Error
+end # module Stomp
+
