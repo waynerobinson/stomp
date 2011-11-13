@@ -11,6 +11,10 @@ Optional callback methods:
 
     on_miscerr: on miscellaneous xmit/recv errors
 
+    on_publish: publish called
+    on_subscribe: subscribe called
+    on_receive: receive called and successful
+
 All methods are optional, at the user's requirements.
 
 If a method is not provided, it is not called (of course.)
