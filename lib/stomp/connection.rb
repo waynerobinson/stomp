@@ -396,6 +396,11 @@ module Stomp
       return super_result
     end
 
+    # Convenience method
+    def set_logger(logger)
+      @logger = logger
+    end
+
     private
 
       def _receive( read_socket )

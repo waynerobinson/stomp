@@ -238,6 +238,11 @@ module Stomp
       @listener_thread && !!@listener_thread.status
     end
 
+    # Convenience method
+    def set_logger(logger)
+      @connection.set_logger(logger)
+    end
+
     private
       # Set a subscription id in the headers hash if one does not already exist.
       # For simplicities sake, all subscriptions have a subscription ID.
