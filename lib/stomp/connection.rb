@@ -61,6 +61,7 @@ module Stomp
     def initialize(login = '', passcode = '', host = 'localhost', port = 61613, reliable = false, reconnect_delay = 5, connect_headers = {})
       @received_messages = []
       @protocol = Stomp::SPL_10 # assumed at first
+      @hbdata = nil # 1.1 heartbeat data (if any)
 
       if login.is_a?(Hash)
         hashed_initialize(login)
@@ -590,13 +591,44 @@ module Stomp
       def _pre_connect
         raise Stomp::Error::ProtocolErrorConnect if (@connect_headers["accept-version"] && !@connect_headers[:host])
         raise Stomp::Error::ProtocolErrorConnect if (!@connect_headers["accept-version"] && @connect_headers[:host])
-        return unless (@connect_headers["accept-version"] && @connect_headers[:host])
+        return unless (@connect_headers["accept-version"] && @connect_headers[:host]) # 1.0
+        # Try 1.1 or greater
+        okvers = []
+        avers = @connect_headers["accept-version"].split(",")
+        avers.each do |nver|
+          if Stomp::SUPPORTED.index(nver)
+            okvers << nver
+          end
+        end
+        raise Stomp::Error::UnsupportedProtocolError if okvers == []
+        @connect_headers["accept-version"] = okvers # This goes to server
+        # Heartbeats - pre connect
+        return unless @connect_headers["heart-beat"]
+        _validate_hbheader()
       end
 
       def _post_connect
         return unless (@connect_headers["accept-version"] && @connect_headers[:host])
         return if @connection_frame.command == Stomp::CMD_ERROR
         @protocol = @connection_frame.headers["version"]
+        # Should not happen, but check anyway
+        raise Stomp::Error::UnsupportedProtocolError unless Stomp::SUPPORTED.index(@protocol)
+        # Heartbeats
+        return unless @connect_headers["heart-beat"]
+        _init_heartbeats()
+      end
+
+      def _init_heartbeats()
+        return if @connect_headers["heart-beat"] == "0,0"
+        raise Stomp::Error::HeartbeatsUnsupportedError # TODO: add support
+      end
+
+      def _validate_hbheader()
+        return if @connect_headers["heart-beat"] == "0,0"
+        parts = @connect_headers["heart-beat"].split(",")
+        if (parts.size != 2) || (parts[0] != parts[0].to_i.to_s) || (parts[1] != parts[1].to_i.to_s)
+          raise Stomp::Error::InvalidHeartBeatHeaderError
+        end
       end
 
   end # class

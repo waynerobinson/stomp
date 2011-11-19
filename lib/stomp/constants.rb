@@ -24,6 +24,6 @@ module Stomp
 	SPL_11 = "1.1"
 
   # To be: No 1.1 yet
-  SUPPPORTED = [SPL_10, SPL_11]
+  SUPPORTED = [SPL_10, SPL_11]
 
 end

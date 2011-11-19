@@ -53,6 +53,24 @@ module Stomp
         "protocol error on CONNECT"
       end
     end
+    
+    class UnsupportedProtocolError < RuntimeError
+      def message
+        "unsupported protocol level(s)"
+      end
+    end
+    
+    class HeartbeatsUnsupportedError < RuntimeError
+      def message
+        "currently unsupported STOMP feature: heartbeats"
+      end
+    end
+    
+    class InvalidHeartBeatHeaderError < RuntimeError
+      def message
+        "heart-beat header is malformed"
+      end
+    end
 
   end # module Error
 end # module Stomp
