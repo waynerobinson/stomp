@@ -1,3 +1,18 @@
+== 1.1.11 yyyy-dd-mm (TBD)
+
+* Add connect timeout with hashed parameters
+* Do not allow calls after close/disconnect
+* Enhance supported logger callbacks
+* Fix subscription id in find_listener
+* Start to bootstrap STOMP 1.1 support
+
+== 1.1.10 2011-07-11
+
+* Fixes for JRuby support
+* Fix EOF error on disconnect
+* Refactoring and additional test
+* Set up tests for use of RabbitMQ
+
 == 1.1.9 2011-15-06
 
 * Support wildcard destinations

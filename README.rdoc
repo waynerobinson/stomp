@@ -8,8 +8,7 @@
 
 An implementation of the Stomp protocol for Ruby. See:
 
-* [STOMP 1.0] (http://stomp.codehaus.org/Protocol)
-* [STOMP 1.0 and 1.1 Draft] (http://stomp.github.com/index.html)
+* [STOMP 1.0 and 1.1] (http://stomp.github.com/index.html)
 
 
 ===Example Usage
@@ -83,7 +82,6 @@ Project Home :
 Stomp Protocol Info :
 
   http://stomp.github.com/index.html
-  http://stomp.codehaus.org/Protocol
 
 = Contributors
 
@@ -104,4 +102,7 @@ The following people have contributed to Stomp:
 * Dinesh Majrekar
 * Kiall Mac Innes
 * Rob Skaggs
+* Tom May
+* Lucas Hills
+* Chris Needham
 
