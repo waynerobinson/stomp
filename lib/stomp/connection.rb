@@ -10,6 +10,8 @@ module Stomp
     attr_reader :connection_frame
     attr_reader :disconnect_receipt
     attr_reader :protocol
+    attr_reader :session
+    attr_reader :hb_received # Heartbeat received on time
     #alias :obj_send :send
 
     def self.default_port(ssl)
@@ -60,8 +62,9 @@ module Stomp
     #
     def initialize(login = '', passcode = '', host = 'localhost', port = 61613, reliable = false, reconnect_delay = 5, connect_headers = {})
       @received_messages = []
-      @protocol = Stomp::SPL_10 # assumed at first
-      @hbdata = nil # 1.1 heartbeat data (if any)
+      @protocol = Stomp::SPL_10 # Assumed at first
+      @hb_received = true # Assumed at first
+      @hbs = @hbr = false # Sending/Receiving heartbeats. Assume no for now.
 
       if login.is_a?(Hash)
         hashed_initialize(login)
@@ -340,6 +343,10 @@ module Stomp
     # Close this connection
     def disconnect(headers = {})
       raise Stomp::Error::NoCurrentConnection if closed?
+      if @protocol > Stomp::SPL_10
+        @st.kill if @st # Kill ticker thread if any
+        @rt.kill if @rt # Kill ticker thread if any
+      end
       transmit("DISCONNECT", headers)
       headers = headers.symbolize_keys
       @disconnect_receipt = receive if headers[:receipt]
@@ -408,11 +415,18 @@ module Stomp
 
       def _receive( read_socket )
         @read_semaphore.synchronize do
-          # Throw away leading newlines, which are actually trailing
-          # newlines from the preceding message.
+          # Throw away leading newlines, which are perhaps trailing
+          # newlines from the preceding message, or alterantely a 1.1+ server
+          # heartbeat.
           begin
             last_char = read_socket.getc
             return nil if last_char.nil?
+            if @protocol > Stomp::SPL_10
+              plc = parse_char(last_char)
+              if plc == "\n" # Server Heartbeat
+                @lr = Time.now.to_f if @hbr
+              end
+            end
           end until parse_char(last_char) != "\n"
           read_socket.ungetc(last_char)
 
@@ -440,6 +454,10 @@ module Stomp
             # Else reads, the rest of the message until the first \0
             else
               message_body << char while (char = parse_char(read_socket.getc)) != "\0"
+            end
+
+            if @protocol > Stomp::SPL_10
+              @lr = Time.now.to_f if @hbr
             end
 
             # Adds the excluded \n and \0 and tries to create a new message with it
@@ -497,6 +515,11 @@ module Stomp
           used_socket.puts
           used_socket.write body
           used_socket.write "\0"
+
+          if @protocol > Stomp::SPL_10
+            @ls = Time.now.to_f if @hbs
+          end
+
         end
       end
       
@@ -570,6 +593,7 @@ module Stomp
         @connection_frame = _receive(used_socket)
         _post_connect
         @disconnect_receipt = nil
+        @session = @connection_frame.headers["session"] if @connection_frame
         # replay any subscriptions.
         @subscriptions.each { |k,v| _transmit(used_socket, "SUBSCRIBE", v) }
       end
@@ -601,7 +625,7 @@ module Stomp
           end
         end
         raise Stomp::Error::UnsupportedProtocolError if okvers == []
-        @connect_headers["accept-version"] = okvers # This goes to server
+        @connect_headers["accept-version"] = okvers.join(",") # This goes to server
         # Heartbeats - pre connect
         return unless @connect_headers["heart-beat"]
         _validate_hbheader()
@@ -618,19 +642,117 @@ module Stomp
         _init_heartbeats()
       end
 
-      def _init_heartbeats()
-        return if @connect_headers["heart-beat"] == "0,0"
-        raise Stomp::Error::HeartbeatsUnsupportedError # TODO: add support
-      end
-
       def _validate_hbheader()
-        return if @connect_headers["heart-beat"] == "0,0"
+        return if @connect_headers["heart-beat"] == "0,0" # Caller does not want heartbeats.  OK.
         parts = @connect_headers["heart-beat"].split(",")
         if (parts.size != 2) || (parts[0] != parts[0].to_i.to_s) || (parts[1] != parts[1].to_i.to_s)
           raise Stomp::Error::InvalidHeartBeatHeaderError
         end
       end
 
+      def _init_heartbeats()
+        return if @connect_headers["heart-beat"] == "0,0" # Caller does not want heartbeats.  OK.
+        #
+        @cx = @cy = @sx = @sy = 0, # Variable names as in spec
+        #
+        @sti = @rti = 0.0 # Send/Receive ticker interval.
+        #
+        @ls = @lr = -1.0 # Last send/receive time (from Time.now.to_f)
+        #
+        @st = @rt = nil # Send/receive ticker thread
+        #
+        return if @connection_frame.headers["heart-beat"] == "0,0" # Server does not want heartbeats
+        #
+        parts = @connect_headers["heart-beat"].split(",")
+        @cx = parts[0].to_i
+        @cy = parts[1].to_i
+        #
+        parts = @connection_frame.headers["heart-beat"].split(",")
+        @sx = parts[0].to_i
+        @sy = parts[1].to_i
+        # Catch odd situations like someone has used => heart-beat:000,00000
+        return if (@cx == 0 && @cy == 0) || (@sx == 0 && @sy == 0)
+        #
+        @hbs = @hbr = true # Sending/Receiving heartbeats. Assume yes at first.
+        # Check for sending
+        @hbs = false if @cx == 0 || @sy == 0
+        # Check for receiving
+        @hbr = false if @sx == 0 || @cy == 0
+        # Should not do heartbeats at all
+        return if (!@hbs && !@hbr)
+        # If sending
+        if @hbs
+          sm = @cx >= @sy ? @cx : @sy # ticker interval, ms
+          @sti = 1000.0 * sm # ticker interval, μs
+          @ls = Time.now.to_f # best guess at start
+          _start_send_ticker
+        end
+
+        # If receiving
+        if @hbr
+          rm = @sx >= @cy ? @sx : @cy # ticker interval, ms
+          @rti = 1000.0 * rm # ticker interval, μs
+          @lr = Time.now.to_f # best guess at start
+          _start_receive_ticker
+        end
+
+      end
+
+      def _start_send_ticker
+        sleeptime = @sti / 1000000.0 # Sleep time secs
+        @st = Thread.new {
+          while true do
+            sleep sleeptime
+            curt = Time.now.to_f
+            delta = curt - @ls
+            if delta > (@sti - (@sti/5.0)) / 1000000.0 # Be tolerant (minus)
+              # Send a heartbeat
+              @transmit_semaphore.synchronize do
+                @socket.puts
+                @ls = curt # Update last send
+              end
+            end
+            Thread.pass
+          end
+        }
+      end
+
+      def _start_receive_ticker
+        sleeptime = @rti / 1000000.0 # Sleep time secs
+        @rt = Thread.new {
+          while true do
+            sleep sleeptime
+            curt = Time.now.to_f
+            delta = curt - @lr
+            if delta > ((@rti + (@rti/5.0)) / 1000000.0) # Be tolerant (plus)
+              # Client code could be off doing something else (that is, no reading of
+              # the socket has been requested by the caller).  Try to  handle that case.
+              lock = @read_semaphore.try_lock
+              if lock
+                last_char = @socket.getc
+                plc = parse_char(last_char)
+                if plc == "\n" # Server Heartbeat
+                  @lr = Time.now.to_f
+                else
+                  @socket.ungetc(last_char)
+                end
+                @read_semaphore.unlock
+              else
+                # Shrug.  Have not received one.  Just set warning flag.
+                @hb_received = false
+                if @logger && @logger.respond_to?(:on_hbread_fail)
+                  @logger.on_hbread_fail(log_params, {"ticker_interval" => @rti}) 
+                end
+              end
+            else
+              @hb_received = true # Reset if necessary
+            end
+            Thread.pass
+          end
+        }
+      end
+
   end # class
+
 end # module
 

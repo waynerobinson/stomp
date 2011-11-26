@@ -60,12 +60,6 @@ module Stomp
       end
     end
     
-    class HeartbeatsUnsupportedError < RuntimeError
-      def message
-        "currently unsupported STOMP feature: heartbeats"
-      end
-    end
-    
     class InvalidHeartBeatHeaderError < RuntimeError
       def message
         "heart-beat header is malformed"
