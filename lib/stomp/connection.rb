@@ -12,6 +12,7 @@ module Stomp
     attr_reader :protocol
     attr_reader :session
     attr_reader :hb_received # Heartbeat received on time
+    attr_reader :hb_sent # Heartbeat sent successfully
     #alias :obj_send :send
 
     def self.default_port(ssl)
@@ -64,6 +65,7 @@ module Stomp
       @received_messages = []
       @protocol = Stomp::SPL_10 # Assumed at first
       @hb_received = true # Assumed at first
+      @hb_sent = true # Assumed at first
       @hbs = @hbr = false # Sending/Receiving heartbeats. Assume no for now.
 
       if login.is_a?(Hash)
@@ -708,8 +710,18 @@ module Stomp
             if delta > (@sti - (@sti/5.0)) / 1000000.0 # Be tolerant (minus)
               # Send a heartbeat
               @transmit_semaphore.synchronize do
-                @socket.puts
-                @ls = curt # Update last send
+                begin
+                  @socket.puts
+                  @ls = curt # Update last send
+                  @hb_sent = true # Reset if necessary
+                rescue Exception => sendex
+                  @hb_sent = false # Set the warning flag
+                  if @logger && @logger.respond_to?(:on_hbwrite_fail)
+                    @logger.on_hbwrite_fail(log_params, {"ticker_interval" => @sti,
+                      "exception" => sendex}) 
+                  end
+                  raise # Re-raise.  What else could be done here?
+                end
               end
             end
             Thread.pass

@@ -124,6 +124,16 @@ class Slogger
     end
   end
 
+  # Stomp 1.1+ - heart beat send (transmit) failed
+  def on_hbwrite_fail(parms, ticker_data)
+    begin
+      @log.debug "Hbwritef Parms #{info(parms)}"
+      @log.debug "Hbwritef Result #{ticker_data}"
+    rescue
+      @log.debug "Hbwritef oops"
+    end
+  end
+
   private
 
   def info(parms)
