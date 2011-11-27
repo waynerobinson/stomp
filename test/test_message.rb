@@ -1,4 +1,10 @@
-# -*- encoding: utf-8 -*-
+#
+# !!!!
+#
+# This can *NOT* currently be marked as UTF-8 encoded. It uses invalid UTF-8
+# sequences for testing.  Tests will fail under 1.9.x+ if this file is marked
+# as UTF-8 encoded.
+#
 
 $:.unshift(File.dirname(__FILE__))
 #
