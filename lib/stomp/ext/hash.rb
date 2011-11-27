@@ -1,3 +1,5 @@
+# -*- encoding: utf-8 -*-
+
 class ::Hash
   def uncamelize_and_symbolize_keys
     self.uncamelize_and_stringify_keys.symbolize_keys

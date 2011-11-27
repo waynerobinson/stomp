@@ -1,3 +1,5 @@
+# -*- encoding: utf-8 -*-
+
 module Stomp
 
   # Container class for frames, misnamed technically

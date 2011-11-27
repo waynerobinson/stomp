@@ -1,3 +1,5 @@
+# -*- encoding: utf-8 -*-
+
 $:.unshift(File.dirname(__FILE__))
 #
 # Test Ruby 1.8 with $KCODE='U'

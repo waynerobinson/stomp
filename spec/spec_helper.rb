@@ -1,3 +1,5 @@
+# -*- encoding: utf-8 -*-
+
 require 'rspec'
 dir = File.dirname(__FILE__)
 lib_path = File.expand_path("#{dir}/../lib")

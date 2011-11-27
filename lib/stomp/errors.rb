@@ -1,3 +1,5 @@
+# -*- encoding: utf-8 -*-
+
 module Stomp
   module Error
     class InvalidFormat < RuntimeError

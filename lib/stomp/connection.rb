@@ -1,3 +1,5 @@
+# -*- encoding: utf-8 -*-
+
 require 'socket'
 require 'timeout'
 require 'io/wait'

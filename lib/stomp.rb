@@ -1,3 +1,5 @@
+# -*- encoding: utf-8 -*-
+
 #   Copyright 2005-2006 Brian McCallister
 #   Copyright 2006 LogicBlaze Inc.
 #
