@@ -617,45 +617,46 @@ module Stomp
       end
 
       def _pre_connect
-        raise Stomp::Error::ProtocolErrorConnect if (@connect_headers["accept-version"] && !@connect_headers[:host])
-        raise Stomp::Error::ProtocolErrorConnect if (!@connect_headers["accept-version"] && @connect_headers[:host])
-        return unless (@connect_headers["accept-version"] && @connect_headers[:host]) # 1.0
+        @connect_headers = @connect_headers.symbolize_keys
+        raise Stomp::Error::ProtocolErrorConnect if (@connect_headers[:"accept-version"] && !@connect_headers[:host])
+        raise Stomp::Error::ProtocolErrorConnect if (!@connect_headers[:"accept-version"] && @connect_headers[:host])
+        return unless (@connect_headers[:"accept-version"] && @connect_headers[:host]) # 1.0
         # Try 1.1 or greater
         okvers = []
-        avers = @connect_headers["accept-version"].split(",")
+        avers = @connect_headers[:"accept-version"].split(",")
         avers.each do |nver|
           if Stomp::SUPPORTED.index(nver)
             okvers << nver
           end
         end
         raise Stomp::Error::UnsupportedProtocolError if okvers == []
-        @connect_headers["accept-version"] = okvers.join(",") # This goes to server
+        @connect_headers[:"accept-version"] = okvers.join(",") # This goes to server
         # Heartbeats - pre connect
-        return unless @connect_headers["heart-beat"]
+        return unless @connect_headers[:"heart-beat"]
         _validate_hbheader()
       end
 
       def _post_connect
-        return unless (@connect_headers["accept-version"] && @connect_headers[:host])
+        return unless (@connect_headers[:"accept-version"] && @connect_headers[:host])
         return if @connection_frame.command == Stomp::CMD_ERROR
         @protocol = @connection_frame.headers["version"]
         # Should not happen, but check anyway
         raise Stomp::Error::UnsupportedProtocolError unless Stomp::SUPPORTED.index(@protocol)
         # Heartbeats
-        return unless @connect_headers["heart-beat"]
+        return unless @connect_headers[:"heart-beat"]
         _init_heartbeats()
       end
 
       def _validate_hbheader()
-        return if @connect_headers["heart-beat"] == "0,0" # Caller does not want heartbeats.  OK.
-        parts = @connect_headers["heart-beat"].split(",")
+        return if @connect_headers[:"heart-beat"] == "0,0" # Caller does not want heartbeats.  OK.
+        parts = @connect_headers[:"heart-beat"].split(",")
         if (parts.size != 2) || (parts[0] != parts[0].to_i.to_s) || (parts[1] != parts[1].to_i.to_s)
           raise Stomp::Error::InvalidHeartBeatHeaderError
         end
       end
 
       def _init_heartbeats()
-        return if @connect_headers["heart-beat"] == "0,0" # Caller does not want heartbeats.  OK.
+        return if @connect_headers[:"heart-beat"] == "0,0" # Caller does not want heartbeats.  OK.
         #
         @cx = @cy = @sx = @sy = 0, # Variable names as in spec
         #
@@ -667,7 +668,7 @@ module Stomp
         #
         return if @connection_frame.headers["heart-beat"] == "0,0" # Server does not want heartbeats
         #
-        parts = @connect_headers["heart-beat"].split(",")
+        parts = @connect_headers[:"heart-beat"].split(",")
         @cx = parts[0].to_i
         @cy = parts[1].to_i
         #

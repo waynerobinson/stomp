@@ -8,7 +8,7 @@ class TestClient < Test::Unit::TestCase
   include TestBase
   
   def setup
-    @client = Stomp::Client.new(user, passcode, host, port)
+    @client = get_client()
     # Multi_thread test data
     @max_threads = 20
     @max_msgs = 50

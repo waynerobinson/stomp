@@ -8,17 +8,15 @@ class TestStomp < Test::Unit::TestCase
   include TestBase
   
   def setup
+    @conn = get_connection()
   end
 
   def teardown
+    @conn.disconnect if @conn.open? # allow tests to disconnect
   end
   #
   def test_conn_1p_0000
-    ch = {}
-    assert_nothing_raised {
-      conn = Stomp::Connection.open(user, passcode, host, port, false, 5, ch)
-      conn.disconnect
-    }  
+    assert @conn.open?
   end
   #
   def test_conn_1p_0010
@@ -70,7 +68,8 @@ class TestStomp < Test::Unit::TestCase
     end
     assert_equal conn.protocol, Stomp::SPL_11
   end
-  # 
+  #
+
   def test_conn_1p_0050
     #
     cha = {:host => "localhost", "accept-version" => "1.1"}

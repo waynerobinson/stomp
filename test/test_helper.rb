@@ -43,6 +43,38 @@ module TestBase
     end
   end
 
+  def get_connection()
+    ch = get_conn_headers()
+    conn = Stomp::Connection.open(user, passcode, host, port, false, 5, ch)
+    conn
+  end
+
+  def get_client()
+    hash = { :hosts => [ 
+          {:login => user, :passcode => passcode, :host => host, :port => port},
+          ],
+          :connect_headers => get_conn_headers()
+        }
+
+    client = Stomp::Client.new(hash)
+    client
+  end
+
+  def get_conn_headers()
+    ch = {}
+    if ENV['STOMP_TEST11']
+      #
+      if Stomp::SUPPORTED.index(ENV['STOMP_TEST11'])
+        ch['accept-version'] = ENV['STOMP_TEST11']
+      else
+        ch['accept-version'] = Stomp::SPL_11
+      end
+      #
+      ch['host'] = ENV['STOMP_RABBIT'] ? "/" : host
+    end
+    ch
+  end
+
   # Test helper methods
 
   def make_destination

@@ -8,7 +8,7 @@ class TestStomp < Test::Unit::TestCase
   include TestBase
   
   def setup
-    @conn = Stomp::Connection.open(user, passcode, host, port)
+    @conn = get_connection()
     # Data for multi_thread tests
     @max_threads = 20
     @max_msgs = 100
