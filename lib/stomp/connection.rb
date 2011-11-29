@@ -589,6 +589,7 @@ module Stomp
       end
       
       def connect(used_socket)
+        @connect_headers = {} unless @connect_headers # Caller said nil/false
         headers = @connect_headers.clone
         headers[:login] = @login
         headers[:passcode] = @passcode

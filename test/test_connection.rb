@@ -323,6 +323,14 @@ class TestStomp < Test::Unit::TestCase
       @conn.subscribe dest
     end
   end
+  #
+  def test_nil_connparms
+    @conn.disconnect
+    #
+    assert_nothing_raised do
+      @conn = Stomp::Connection.open(user, passcode, host, port, false, 5, nil)
+    end
+  end
 
 end
 
