@@ -147,6 +147,70 @@ class TestStomp < Test::Unit::TestCase
       conn.disconnect
     end
   end if ENV['STOMP_HB11LONG']
+  #
+  def test_conn_1p_0110
+    #
+    cha = {:host => "localhost", "accept-version" => "1.1"}
+    cha[:host] = "/" if ENV['STOMP_RABBIT']
+    cha["heart-beat"] = "0,0" # No heartbeats
+    conn = nil
+    conn = Stomp::Connection.open(user, passcode, host, port, false, 5, cha)
+    good_data = [
+      "\x41\xc3\xb1\x42",
+      "\xc2\x80", # 2 byte characters
+      "\xc2\xbf",
+      "\xdf\x80",
+      "\xdf\xbf",
+      "\xe0\xa0\x80", # 3 byte characters
+      "\xe0\xbf\x80",
+      "\xe0\xa0\xbf",
+      "\xe0\xbf\xbf",
+      "\xf1\x80\x80\x80", # 4 byte characters
+      "\xf1\xbf\xbf\xbf",
+      "\xf2\x80\x80\x80",
+      "\xf2\xbf\xbf\xbf",
+      "\xf3\x80\x80\x80",
+      "\xf3\xbf\xbf\xbf",
+    ]
+    good_data.each do |string|
+      assert @conn.valid_utf8?(string), "good unicode specs 01: #{string}"
+    end
+    conn.disconnect
+  end
+
+  #
+  def test_conn_1p_0120
+    #
+    cha = {:host => "localhost", "accept-version" => "1.1"}
+    cha[:host] = "/" if ENV['STOMP_RABBIT']
+    cha["heart-beat"] = "0,0" # No heartbeats
+    conn = nil
+    conn = Stomp::Connection.open(user, passcode, host, port, false, 5, cha)
+    bad_data = [
+      "\x41\xc2\xc3\xb1\x42",
+      "\xed\xa0\x80", # UTF-16 surrogate halves
+      "\xed\xad\xbf",
+      "\xed\xae\x80",
+      "\xed\xaf\xbf",
+      "\xed\xb0\x80",
+      "\xed\xbe\x80",
+      "\xed\xbf\xbf",
+      "\xc0", # Single bytes
+      "\xc1",
+      "\xf5","\xf6","\xf7","\xf8","\xf9","\xfa","\xfb","\xfc",
+      "\xfd","\xfe","\xff",
+      "\xc0\x80", # Not shortest representation
+      "\xc1\x80",
+      "\xc0\x30",
+      "\xc1\x30",
+      "\xe0\x80\x80",
+      "\xf0\x80\x80\x80",
+    ]
+    bad_data.each do |string|
+      assert !@conn.valid_utf8?(string), "bad unicode specs 01: #{string}"
+    end
+    conn.disconnect
+  end
 
 end if ENV['STOMP_TEST11']
 

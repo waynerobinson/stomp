@@ -28,4 +28,7 @@ module Stomp
   # To be: No 1.1 yet
   SUPPORTED = [SPL_10, SPL_11]
 
+  # 1.9 Encoding Name
+  UTF8 = "UTF-8"
+
 end
