@@ -224,6 +224,7 @@ module Stomp
     # Begin a transaction, requires a name for the transaction
     def begin(name, headers = {})
       raise Stomp::Error::NoCurrentConnection if closed?
+      headers = headers.symbolize_keys
       headers[:transaction] = name
       transmit("BEGIN", headers)
     end
@@ -234,13 +235,15 @@ module Stomp
     # Accepts a transaction header ( :transaction => 'some_transaction_id' )
     def ack(message_id, headers = {})
       raise Stomp::Error::NoCurrentConnection if closed?
-      headers['message-id'] = message_id
+      headers = headers.symbolize_keys
+      headers[:'message-id'] = message_id
       transmit("ACK", headers)
     end
 
     # Commit a transaction by name
     def commit(name, headers = {})
       raise Stomp::Error::NoCurrentConnection if closed?
+      headers = headers.symbolize_keys
       headers[:transaction] = name
       transmit("COMMIT", headers)
     end
@@ -248,6 +251,7 @@ module Stomp
     # Abort a transaction by name
     def abort(name, headers = {})
       raise Stomp::Error::NoCurrentConnection if closed?
+      headers = headers.symbolize_keys
       headers[:transaction] = name
       transmit("ABORT", headers)
     end
@@ -255,6 +259,7 @@ module Stomp
     # Subscribe to a destination, must specify a name
     def subscribe(name, headers = {}, subId = nil)
       raise Stomp::Error::NoCurrentConnection if closed?
+      headers = headers.symbolize_keys
       headers[:destination] = name
       if @logger && @logger.respond_to?(:on_subscribe)            
         @logger.on_subscribe(log_params, headers)
@@ -273,6 +278,7 @@ module Stomp
     # Unsubscribe from a destination, must specify a name
     def unsubscribe(name, headers = {}, subId = nil)
       raise Stomp::Error::NoCurrentConnection if closed?
+      headers = headers.symbolize_keys
       headers[:destination] = name
       transmit("UNSUBSCRIBE", headers)
       if @reliable
@@ -287,6 +293,7 @@ module Stomp
     # Accepts a transaction header ( :transaction => 'some_transaction_id' )
     def publish(destination, message, headers = {})
       raise Stomp::Error::NoCurrentConnection if closed?
+      headers = headers.symbolize_keys
       headers[:destination] = destination
       if @logger && @logger.respond_to?(:on_publish)            
         @logger.on_publish(log_params, message, headers)
@@ -347,12 +354,12 @@ module Stomp
     # Close this connection
     def disconnect(headers = {})
       raise Stomp::Error::NoCurrentConnection if closed?
+      headers = headers.symbolize_keys
       if @protocol > Stomp::SPL_10
         @st.kill if @st # Kill ticker thread if any
         @rt.kill if @rt # Kill ticker thread if any
       end
       transmit("DISCONNECT", headers)
-      headers = headers.symbolize_keys
       @disconnect_receipt = receive if headers[:receipt]
       if @logger && @logger.respond_to?(:on_disconnect)
         @logger.on_disconnect(log_params)
@@ -640,7 +647,8 @@ module Stomp
       def _post_connect
         return unless (@connect_headers[:"accept-version"] && @connect_headers[:host])
         return if @connection_frame.command == Stomp::CMD_ERROR
-        @protocol = @connection_frame.headers["version"]
+        cfh = @connection_frame.headers.symbolize_keys
+        @protocol = cfh[:version]
         # Should not happen, but check anyway
         raise Stomp::Error::UnsupportedProtocolError unless Stomp::SUPPORTED.index(@protocol)
         # Heartbeats
@@ -667,13 +675,14 @@ module Stomp
         #
         @st = @rt = nil # Send/receive ticker thread
         #
-        return if @connection_frame.headers["heart-beat"] == "0,0" # Server does not want heartbeats
+        cfh = @connection_frame.headers.symbolize_keys
+        return if cfh[:"heart-beat"] == "0,0" # Server does not want heartbeats
         #
         parts = @connect_headers[:"heart-beat"].split(",")
         @cx = parts[0].to_i
         @cy = parts[1].to_i
         #
-        parts = @connection_frame.headers["heart-beat"].split(",")
+        parts = cfh[:"heart-beat"].split(",")
         @sx = parts[0].to_i
         @sy = parts[1].to_i
         # Catch odd situations like someone has used => heart-beat:000,00000
