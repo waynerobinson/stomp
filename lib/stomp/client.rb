@@ -145,7 +145,7 @@ module Stomp
     def subscribe(destination, headers = {})
       raise "No listener given" unless block_given?
       # use subscription id to correlate messages to subscription. As described in
-      # the SUBSCRIPTION section of the protocol: http://stomp.codehaus.org/Protocol.
+      # the SUBSCRIPTION section of the protocol: http://stomp.github.com/.
       # If no subscription id is provided, generate one.
       set_subscription_id_if_missing(destination, headers)
       if @listeners[headers[:id]]
@@ -250,11 +250,16 @@ module Stomp
       @connection.protocol
     end
 
+    # Convenience method
+    def valid_utf8?(s)
+      @connection.valid_utf8?(s)
+    end
+
     private
       # Set a subscription id in the headers hash if one does not already exist.
       # For simplicities sake, all subscriptions have a subscription ID.
       # setting an id in the SUBSCRIPTION header is described in the stomp protocol docs:
-      # http://stomp.codehaus.org/Protocol
+      # http://stomp.github.com/
       def set_subscription_id_if_missing(destination, headers)
         headers[:id] = headers[:id] ? headers[:id] : headers['id'] 
         if headers[:id] == nil

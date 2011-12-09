@@ -68,6 +68,19 @@ module Stomp
       end
     end
 
+    class SubscriptionRequiredError < RuntimeError
+      def message
+        "subscription header is required"
+      end
+    end
+
+
+    class UTF8ValidationError < RuntimeError
+      def message
+        "header is invalid UTF8"
+      end
+    end
+
   end # module Error
 end # module Stomp
 

@@ -226,7 +226,8 @@ module Stomp
       raise Stomp::Error::NoCurrentConnection if closed?
       headers = headers.symbolize_keys
       headers[:transaction] = name
-      transmit("BEGIN", headers)
+      _headerCheck(headers)
+      transmit(Stomp::CMD_BEGIN, headers)
     end
 
     # Acknowledge a message, used when a subscription has specified
@@ -237,7 +238,24 @@ module Stomp
       raise Stomp::Error::NoCurrentConnection if closed?
       headers = headers.symbolize_keys
       headers[:'message-id'] = message_id
-      transmit("ACK", headers)
+      if @protocol >= Stomp::SPL_11
+        raise Stomp::Error::SubscriptionRequiredError unless headers[:subscription]
+      end
+      _headerCheck(headers)
+      transmit(Stomp::CMD_ACK, headers)
+    end
+
+    # STOMP 1.1 NACK
+    def nack(message_id, headers = {})
+      raise Stomp::Error::NoCurrentConnection if closed?
+      raise Stomp::Error::UnsupportedProtocolError if @protocol == Stomp::SPL_10
+      headers = headers.symbolize_keys
+      headers[:'message-id'] = message_id
+      if @protocol >= Stomp::SPL_11
+        raise Stomp::Error::SubscriptionRequiredError unless headers[:subscription]
+      end
+      _headerCheck(headers)
+      transmit(Stomp::CMD_NACK, headers)
     end
 
     # Commit a transaction by name
@@ -245,7 +263,8 @@ module Stomp
       raise Stomp::Error::NoCurrentConnection if closed?
       headers = headers.symbolize_keys
       headers[:transaction] = name
-      transmit("COMMIT", headers)
+      _headerCheck(headers)
+      transmit(Stomp::CMD_COMMIT, headers)
     end
 
     # Abort a transaction by name
@@ -253,7 +272,8 @@ module Stomp
       raise Stomp::Error::NoCurrentConnection if closed?
       headers = headers.symbolize_keys
       headers[:transaction] = name
-      transmit("ABORT", headers)
+      _headerCheck(headers)
+      transmit(Stomp::CMD_ABORT, headers)
     end
 
     # Subscribe to a destination, must specify a name
@@ -261,6 +281,10 @@ module Stomp
       raise Stomp::Error::NoCurrentConnection if closed?
       headers = headers.symbolize_keys
       headers[:destination] = name
+      if @protocol >= Stomp::SPL_11
+        raise Stomp::Error::SubscriptionRequiredError if (headers[:id].nil? && subId.nil?)
+      end
+      _headerCheck(headers)
       if @logger && @logger.respond_to?(:on_subscribe)            
         @logger.on_subscribe(log_params, headers)
       end
@@ -272,7 +296,7 @@ module Stomp
         @subscriptions[subId] = headers
       end
 
-      transmit("SUBSCRIBE", headers)
+      transmit(Stomp::CMD_SUBSCRIBE, headers)
     end
 
     # Unsubscribe from a destination, must specify a name
@@ -280,7 +304,11 @@ module Stomp
       raise Stomp::Error::NoCurrentConnection if closed?
       headers = headers.symbolize_keys
       headers[:destination] = name
-      transmit("UNSUBSCRIBE", headers)
+      if @protocol >= Stomp::SPL_11
+        raise Stomp::Error::SubscriptionRequiredError if (headers[:id].nil? && subId.nil?)
+      end
+      _headerCheck(headers)
+      transmit(Stomp::CMD_UNSUBSCRIBE, headers)
       if @reliable
         subId = name if subId.nil?
         @subscriptions.delete(subId)
@@ -295,10 +323,11 @@ module Stomp
       raise Stomp::Error::NoCurrentConnection if closed?
       headers = headers.symbolize_keys
       headers[:destination] = destination
+      _headerCheck(headers)
       if @logger && @logger.respond_to?(:on_publish)            
         @logger.on_publish(log_params, message, headers)
       end
-      transmit("SEND", headers, message)
+      transmit(Stomp::CMD_SEND, headers, message)
     end
     
     def obj_send(*args)
@@ -355,11 +384,12 @@ module Stomp
     def disconnect(headers = {})
       raise Stomp::Error::NoCurrentConnection if closed?
       headers = headers.symbolize_keys
+      _headerCheck(headers)
       if @protocol > Stomp::SPL_10
         @st.kill if @st # Kill ticker thread if any
         @rt.kill if @rt # Kill ticker thread if any
       end
-      transmit("DISCONNECT", headers)
+      transmit(Stomp::CMD_DISCONNECT, headers)
       @disconnect_receipt = receive if headers[:receipt]
       if @logger && @logger.respond_to?(:on_disconnect)
         @logger.on_disconnect(log_params)
@@ -618,7 +648,7 @@ module Stomp
         @disconnect_receipt = nil
         @session = @connection_frame.headers["session"] if @connection_frame
         # replay any subscriptions.
-        @subscriptions.each { |k,v| _transmit(used_socket, "SUBSCRIBE", v) }
+        @subscriptions.each { |k,v| _transmit(used_socket, Stomp::CMD_SUBSCRIBE, v) }
       end
 
       def log_params
@@ -793,7 +823,7 @@ module Stomp
     #
     def _valid_utf8?(string)
       case RUBY_VERSION
-        when /1\.8\.6/
+        when /1\.8\.[56]/
           bytes = []
           0.upto(string.length-1) {|i|
             bytes << string[i]
@@ -998,6 +1028,14 @@ module Stomp
       #
       valid
     end # of _valid_utf8?
+
+    def _headerCheck(h)
+      return if @protocol == Stomp::SPL_10 # Do nothing for this environment
+      h.each_pair do |k,v|
+        raise Stomp::Error::UTF8ValidationError unless valid_utf8?(k)
+        raise Stomp::Error::UTF8ValidationError unless valid_utf8?(v)
+      end
+    end
 
   end # class
 
