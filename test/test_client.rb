@@ -25,9 +25,12 @@ class TestClient < Test::Unit::TestCase
     @client.subscribe(make_destination, {:ack => 'client'}) {|msg| received = msg}
     sleep 0.01 until received
     assert_equal message_text, received.body
-
     receipt = nil
-    @client.acknowledge(received) {|r| receipt = r}
+    ack_headers = {}
+    if @client.protocol > Stomp::SPL_10
+      ack_headers["subscription"] = received.headers["subscription"]
+    end
+    @client.acknowledge(received, ack_headers) {|r| receipt = r}
     sleep 0.01 until receipt
     assert_not_nil receipt.headers['receipt-id']
   end unless ENV['STOMP_RABBIT']

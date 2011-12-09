@@ -245,6 +245,11 @@ module Stomp
       @connection.set_logger(logger)
     end
 
+    # Convenience method
+    def protocol
+      @connection.protocol
+    end
+
     private
       # Set a subscription id in the headers hash if one does not already exist.
       # For simplicities sake, all subscriptions have a subscription ID.
