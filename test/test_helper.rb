@@ -75,6 +75,13 @@ module TestBase
     ch
   end
 
+  def conn_subscribe(dest, headers = {})
+    if @conn.protocol >= Stomp::SPL_11
+      headers[:id] = @conn.uuid() unless headers[:id]
+    end
+    @conn.subscribe dest, headers
+  end
+
   # Test helper methods
 
   def make_destination

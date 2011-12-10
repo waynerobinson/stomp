@@ -23,7 +23,7 @@ class TestStomp < Test::Unit::TestCase
   end
 
   def test_no_length
-    @conn.subscribe make_destination
+    conn_subscribe make_destination
     #
     @conn.publish make_destination, "test_stomp#test_no_length",
       { :suppress_content_length => true }
@@ -33,18 +33,22 @@ class TestStomp < Test::Unit::TestCase
     @conn.publish make_destination, "test_stomp#test_\000_length",
       { :suppress_content_length => true }
     msg2 = @conn.receive
-    assert_equal "test_stomp#test_", msg2.body
+    if @conn.protocol == Stomp::SPL_10
+      assert_equal "test_stomp#test_", msg2.body
+    else
+      assert_equal "test_stomp#test_\000_length", msg2.body
+    end
   end unless ENV['STOMP_RABBIT']
 
   def test_explicit_receive
-    @conn.subscribe make_destination
+    conn_subscribe make_destination
     @conn.publish make_destination, "test_stomp#test_explicit_receive"
     msg = @conn.receive
     assert_equal "test_stomp#test_explicit_receive", msg.body
   end
 
   def test_receipt
-    @conn.subscribe make_destination, :receipt => "abc"
+    conn_subscribe make_destination, :receipt => "abc"
     msg = @conn.receive
     assert_equal "abc", msg.headers['receipt-id']
   end
@@ -59,14 +63,25 @@ class TestStomp < Test::Unit::TestCase
   end
 
   def test_client_ack_with_symbol
-    @conn.subscribe make_destination, :ack => :client
+    if @conn.protocol == Stomp::SPL_10
+      @conn.subscribe make_destination, :ack => :client
+    else
+      sid = @conn.uuid()
+      @conn.subscribe make_destination, :ack => :client, :id => sid
+    end
     @conn.publish make_destination, "test_stomp#test_client_ack_with_symbol"
     msg = @conn.receive
-    @conn.ack msg.headers['message-id']
+    assert_nothing_raised {
+      if @conn.protocol == Stomp::SPL_10
+        @conn.ack msg.headers['message-id']
+      else
+        @conn.ack msg.headers['message-id'], :subscription => sid
+      end
+    }
   end
 
   def test_embedded_null
-    @conn.subscribe make_destination
+    conn_subscribe make_destination
     @conn.publish make_destination, "a\0"
     msg = @conn.receive
     assert_equal "a\0" , msg.body
@@ -104,7 +119,7 @@ class TestStomp < Test::Unit::TestCase
     end
     #
     assert_raise Stomp::Error::NoCurrentConnection do
-      @conn.subscribe("dummy_data")
+      conn_subscribe("dummy_data")
     end
     #
     assert_raise Stomp::Error::NoCurrentConnection do
@@ -133,14 +148,14 @@ class TestStomp < Test::Unit::TestCase
   end
 
   def test_response_is_instance_of_message_class
-    @conn.subscribe make_destination
+    conn_subscribe make_destination
     @conn.publish make_destination, "a\0"
     msg = @conn.receive
     assert_instance_of Stomp::Message , msg
   end
 
   def test_message_to_s
-    @conn.subscribe make_destination
+    conn_subscribe make_destination
     @conn.publish make_destination, "a\0"
     msg = @conn.receive
     assert_match /^<Stomp::Message headers=/ , msg.to_s
@@ -151,7 +166,7 @@ class TestStomp < Test::Unit::TestCase
   end
   
   def test_messages_with_multipleLine_ends
-    @conn.subscribe make_destination
+    conn_subscribe make_destination
     @conn.publish make_destination, "a\n\n"
     @conn.publish make_destination, "b\n\na\n\n"
     
@@ -163,7 +178,7 @@ class TestStomp < Test::Unit::TestCase
   end
 
   def test_publish_two_messages
-    @conn.subscribe make_destination
+    conn_subscribe make_destination
     @conn.publish make_destination, "a\0"
     @conn.publish make_destination, "b\0"
     msg_a = @conn.receive
@@ -181,7 +196,7 @@ class TestStomp < Test::Unit::TestCase
         end
     end
     #
-    @conn.subscribe( make_destination )
+    conn_subscribe( make_destination )
     message = Time.now.to_s
     @conn.publish(make_destination, message)
     sleep 1
@@ -201,7 +216,7 @@ class TestStomp < Test::Unit::TestCase
         end
     end
     #
-    @conn.subscribe( make_destination )
+    conn_subscribe( make_destination )
     message = Time.now.to_s
     @conn.publish(make_destination, message)
     sleep max_sleep+1
@@ -227,7 +242,7 @@ class TestStomp < Test::Unit::TestCase
       end
     end
     #
-    @conn.subscribe( dest )
+    conn_subscribe( dest )
     1.upto(@max_msgs) do |mnum|
       msg = Time.now.to_s + " #{mnum}"
       @conn.publish(dest, msg)
@@ -269,7 +284,7 @@ class TestStomp < Test::Unit::TestCase
       end
     end
     #
-    @conn.subscribe( dest )
+    conn_subscribe( dest )
     1.upto(@max_msgs) do |mnum|
       msg = Time.now.to_s + " #{mnum}"
       @conn.publish(dest, msg)
@@ -292,13 +307,13 @@ class TestStomp < Test::Unit::TestCase
     assert_nothing_raised {
       @conn.publish dest, nil
     }
-    @conn.subscribe dest
+    conn_subscribe dest
     msg = @conn.receive
     assert_equal "", msg.body    
   end
 
   def test_transaction
-    @conn.subscribe make_destination
+    conn_subscribe make_destination
 
     @conn.begin "txA"
     @conn.publish make_destination, "txn message", 'transaction' => "txA"
@@ -317,13 +332,13 @@ class TestStomp < Test::Unit::TestCase
     @conn.disconnect # not reliable
     @conn = Stomp::Connection.open(user, passcode, host, port, true) # reliable
     dest = make_destination
-    @conn.subscribe dest
+    conn_subscribe dest
     #
     assert_raise Stomp::Error::DuplicateSubscription do
-      @conn.subscribe dest
+      conn_subscribe dest
     end
   end
-  #
+
   def test_nil_connparms
     @conn.disconnect
     #
