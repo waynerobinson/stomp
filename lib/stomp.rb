@@ -22,6 +22,7 @@ require 'stomp/message'
 require 'stomp/version'
 require 'stomp/errors'
 require 'stomp/constants'
+require 'stomp/codec'
 
 module Stomp
 end

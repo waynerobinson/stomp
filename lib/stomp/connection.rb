@@ -385,7 +385,7 @@ module Stomp
       raise Stomp::Error::NoCurrentConnection if closed?
       headers = headers.symbolize_keys
       _headerCheck(headers)
-      if @protocol > Stomp::SPL_10
+      if @protocol >= Stomp::SPL_11
         @st.kill if @st # Kill ticker thread if any
         @rt.kill if @rt # Kill ticker thread if any
       end
@@ -473,7 +473,7 @@ module Stomp
           begin
             last_char = read_socket.getc
             return nil if last_char.nil?
-            if @protocol > Stomp::SPL_10
+            if @protocol >= Stomp::SPL_11
               plc = parse_char(last_char)
               if plc == "\n" # Server Heartbeat
                 @lr = Time.now.to_f if @hbr
@@ -508,12 +508,17 @@ module Stomp
               message_body << char while (char = parse_char(read_socket.getc)) != "\0"
             end
 
-            if @protocol > Stomp::SPL_10
+            if @protocol >= Stomp::SPL_11
               @lr = Time.now.to_f if @hbr
             end
 
             # Adds the excluded \n and \0 and tries to create a new message with it
-            Message.new(message_header + "\n" + message_body + "\0")
+            msg = Message.new(message_header + "\n" + message_body + "\0")
+            #
+            if @protocol >= Stomp::SPL_11 && msg.command != Stomp::CMD_CONNECTED
+              msg.headers = _decodeHeaders(msg.headers)
+            end
+            msg
           end
         end
       end
@@ -545,6 +550,9 @@ module Stomp
       end
 
       def _transmit(used_socket, command, headers = {}, body = '')
+        if @protocol >= Stomp::SPL_11 && command != Stomp::CMD_CONNECT
+          headers = _encodeHeaders(headers)
+        end
         @transmit_semaphore.synchronize do
           # Handle nil body
           body = '' if body.nil?
@@ -568,7 +576,7 @@ module Stomp
           used_socket.write body
           used_socket.write "\0"
 
-          if @protocol > Stomp::SPL_10
+          if @protocol >= Stomp::SPL_11
             @ls = Time.now.to_f if @hbs
           end
 
@@ -1035,6 +1043,24 @@ module Stomp
         raise Stomp::Error::UTF8ValidationError unless valid_utf8?(k)
         raise Stomp::Error::UTF8ValidationError unless valid_utf8?(v)
       end
+    end
+
+    #
+    def _encodeHeaders(h)
+      eh = {}
+      h.each_pair do |k,v|
+        eh[Stomp::HeaderCodec::encode(k)] = Stomp::HeaderCodec::encode(v)
+      end
+      eh
+    end
+
+    #
+    def _decodeHeaders(h)
+      dh = {}
+      h.each_pair do |k,v|
+        dh[Stomp::HeaderCodec::decode(k)] = Stomp::HeaderCodec::decode(v)
+      end
+      dh
     end
 
   end # class
