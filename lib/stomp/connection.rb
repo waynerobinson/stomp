@@ -1060,8 +1060,8 @@ module Stomp
     def _headerCheck(h)
       return if @protocol == Stomp::SPL_10 # Do nothing for this environment
       h.each_pair do |k,v|
-        raise Stomp::Error::UTF8ValidationError unless valid_utf8?(k)
-        raise Stomp::Error::UTF8ValidationError unless valid_utf8?(v)
+        raise Stomp::Error::UTF8ValidationError unless valid_utf8?(k.to_s)
+        raise Stomp::Error::UTF8ValidationError unless valid_utf8?(v.to_s)
       end
     end
 
@@ -1069,7 +1069,7 @@ module Stomp
     def _encodeHeaders(h)
       eh = {}
       h.each_pair do |k,v|
-        eh[Stomp::HeaderCodec::encode(k)] = Stomp::HeaderCodec::encode(v)
+        eh[Stomp::HeaderCodec::encode(k.to_s)] = Stomp::HeaderCodec::encode(v.to_s)
       end
       eh
     end
