@@ -255,6 +255,16 @@ module Stomp
       @connection.valid_utf8?(s)
     end
 
+    # Convenience method for clients
+    def sha1(data)
+      @connection.sha1(data)
+    end
+
+    # Convenience method for clients
+    def uuid()
+      @connection.uuid()
+    end
+
     private
       # Set a subscription id in the headers hash if one does not already exist.
       # For simplicities sake, all subscriptions have a subscription ID.

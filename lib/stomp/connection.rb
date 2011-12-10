@@ -3,6 +3,7 @@
 require 'socket'
 require 'timeout'
 require 'io/wait'
+require 'digest/sha1'
 
 module Stomp
 
@@ -461,6 +462,25 @@ module Stomp
           rv = s.encoding.name != Stomp::UTF8 ? false : s.valid_encoding?
       end
       rv
+    end
+
+    # Convenience method for clients, return a SHA1 digest for arbitrary data
+    def sha1(data)
+      Digest::SHA1.hexdigest(data)
+    end
+
+    # Convenience method for clients, return a type 4 UUID.
+    def uuid()
+      b = []
+      0.upto(15) do |i|
+        b << rand(255)
+      end
+	    b[6] = (b[6] & 0x0F) | 0x40
+	    b[8] = (b[8] & 0xbf) | 0x80
+      #             0  1  2  3   4   5  6  7   8  9  10 11 12 13 14 15
+	    rs = sprintf("%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x%02x%02x", 
+        b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11], b[12], b[13], b[14], b[15])
+      rs
     end
 
     private
