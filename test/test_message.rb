@@ -17,7 +17,7 @@ class TestMessageKcode < Test::Unit::TestCase
   #
   def setup
 		$KCODE = 'U' if RUBY_VERSION =~ /1\.8/
-    @conn = Stomp::Connection.open(user, passcode, host, port)
+    @conn = get_connection()
     # Message body data
 		@messages = [
 			"normal text message",
@@ -35,7 +35,12 @@ class TestMessageKcode < Test::Unit::TestCase
   def test_kcode_001
 		#
 		dest = make_destination
-    @conn.subscribe dest
+    if @conn.protocol == Stomp::SPL_10
+      @conn.subscribe dest
+    else
+      sh = {}
+      @conn.subscribe dest, sh, @conn.uuid()
+    end
 		@messages.each do |abody|
 		  @conn.publish dest, abody
 			msg = @conn.receive
@@ -51,7 +56,12 @@ class TestMessageKcode < Test::Unit::TestCase
 		"\000".upto("\377") {|abyte| abody << abyte } 
 		#
 		dest = make_destination
-    @conn.subscribe dest
+    if @conn.protocol == Stomp::SPL_10
+      @conn.subscribe dest
+    else
+      sh = {}
+      @conn.subscribe dest, sh, @conn.uuid()
+    end
 	  @conn.publish dest, abody
 		msg = @conn.receive
 		assert_instance_of Stomp::Message , msg, "type check for #{abody}"
@@ -62,7 +72,12 @@ class TestMessageKcode < Test::Unit::TestCase
   def test_kcode_003
 		#
 		dest = make_destination
-    @conn.subscribe dest
+    if @conn.protocol == Stomp::SPL_10
+      @conn.subscribe dest
+    else
+      sh = {:id => @conn.uuid()}
+      @conn.subscribe dest, sh
+    end
 		#
 		"\000".upto("\377") do |abody|
 			@conn.publish dest, abody
