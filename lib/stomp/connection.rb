@@ -284,6 +284,7 @@ module Stomp
       headers[:destination] = name
       if @protocol >= Stomp::SPL_11
         raise Stomp::Error::SubscriptionRequiredError if (headers[:id].nil? && subId.nil?)
+        headers[:id] = subId if headers[:id].nil?
       end
       _headerCheck(headers)
       if @logger && @logger.respond_to?(:on_subscribe)            
