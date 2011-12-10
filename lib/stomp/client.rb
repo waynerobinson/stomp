@@ -246,7 +246,7 @@ module Stomp
     end
 
     # Convenience method
-    def protocol
+    def protocol()
       @connection.protocol
     end
 

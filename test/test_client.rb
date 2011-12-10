@@ -55,7 +55,7 @@ class TestClient < Test::Unit::TestCase
 
     # was never acked so should be resent to next client
 
-    @client = Stomp::Client.new(user, passcode, host, port)
+    @client = get_client()
     received2 = nil
     @client.subscribe(make_destination) {|msg| received2 = msg}
     sleep 0.01 until received2
@@ -132,27 +132,51 @@ class TestClient < Test::Unit::TestCase
 
     @client.begin 'tx1'
     message = nil
-    @client.subscribe(make_destination, :ack => 'client') {|m| message = m}
+    sid = nil
+    if @client.protocol() == Stomp::SPL_10
+      @client.subscribe(make_destination, :ack => 'client') {|m| message = m}
+    else
+      sid = @client.uuid()
+      @client.subscribe(make_destination, :ack => 'client', :id => sid) {|m| message = m}
+    end
     sleep 0.01 until message
     assert_equal message_text, message.body
-    @client.acknowledge message, :transaction => 'tx1'
-    message = nil
-    @client.abort 'tx1'
+    assert_nothing_raised {
+      if @client.protocol() == Stomp::SPL_10
+        @client.acknowledge message, :transaction => 'tx1'
+      else
+        @client.acknowledge message, :transaction => 'tx1', :subscription => sid
+      end
+      message = nil
+      @client.abort 'tx1'
+    }
 
     # lets recreate the connection
     teardown
     setup
-    @client.subscribe(make_destination, :ack => 'client') {|m| message = m}
-
+    sid = nil
+    assert_nothing_raised {
+      if @client.protocol() == Stomp::SPL_10
+        @client.subscribe(make_destination, :ack => 'client') {|m| message = m}
+      else
+        sid = @client.uuid()
+        @client.subscribe(make_destination, :ack => 'client', :id => sid) {|m| message = m}
+      end
+    }
     Timeout::timeout(4) do
       sleep 0.01 until message
     end
     assert_not_nil message
     assert_equal message_text, message.body
-
+    assert_nothing_raised {
     @client.begin 'tx2'
-    @client.acknowledge message, :transaction => 'tx2'
-    @client.commit 'tx2'
+      if @client.protocol() == Stomp::SPL_10
+        @client.acknowledge message, :transaction => 'tx2'
+      else
+        @client.acknowledge message, :transaction => 'tx2', :subscription => sid
+      end
+      @client.commit 'tx2'
+    }
   end
 
   def test_raise_on_multiple_subscriptions_to_same_make_destination
@@ -247,12 +271,26 @@ class TestClient < Test::Unit::TestCase
 
     @client.begin 'tx1'
     message = nil
-    @client.subscribe(make_destination, :ack => 'client') { |m| message = m }
+    sid = nil
+    assert_nothing_raised {
+      if @client.protocol() == Stomp::SPL_10
+        @client.subscribe(make_destination, :ack => 'client') { |m| message = m }
+      else
+        sid = @client.uuid()
+        @client.subscribe(make_destination, :ack => 'client', :id => sid) { |m| message = m }
+      end
+    }
 
     sleep 0.1 while message.nil?
 
     assert_equal message_text, message.body
-    @client.acknowledge message, :transaction => 'tx1'
+    assert_nothing_raised {
+      if @client.protocol() == Stomp::SPL_10
+        @client.acknowledge message, :transaction => 'tx1'
+      else
+        @client.acknowledge message, :transaction => 'tx1', :subscription => sid
+      end
+    }
     message = nil
     @client.abort 'tx1'
 
@@ -261,9 +299,15 @@ class TestClient < Test::Unit::TestCase
     assert_not_nil message
     assert_equal message_text, message.body
 
-    @client.begin 'tx2'
-    @client.acknowledge message, :transaction => 'tx2'
-    @client.commit 'tx2'
+    assert_nothing_raised {
+      @client.begin 'tx2'
+      if @client.protocol() == Stomp::SPL_10
+        @client.acknowledge message, :transaction => 'tx2'
+      else
+        @client.acknowledge message, :transaction => 'tx2', :subscription => sid
+      end
+      @client.commit 'tx2'
+    }
   end
 
   def test_connection_frame
@@ -274,9 +318,15 @@ class TestClient < Test::Unit::TestCase
     message = nil
     dest = make_destination
     to_send = message_text
-    client = Stomp::Client.new(user, passcode, host, port, true)
+    client = get_client()
+    sid = nil
     assert_nothing_raised {
-      client.subscribe(dest, :ack => 'client') { |m| message = m }
+      if @client.protocol() == Stomp::SPL_10
+        client.subscribe(dest, :ack => 'client') { |m| message = m }
+      else
+        sid = client.uuid()
+        client.subscribe(dest, :ack => 'client', :id => sid) { |m| message = m }
+      end
       @client.publish dest, to_send
       Timeout::timeout(4) do
         sleep 0.01 until message
@@ -284,14 +334,23 @@ class TestClient < Test::Unit::TestCase
     }
     assert_equal to_send, message.body, "first body check"
     assert_nothing_raised {
-      client.unsubscribe dest # was throwing exception on unsub at one point
+      if @client.protocol() == Stomp::SPL_10
+        client.unsubscribe dest
+      else
+        client.unsubscribe dest, :subscription => sid
+      end
       client.close
     }
     #  Same message should remain on the queue.  Receive it again with ack=>auto.
     message_copy = nil
-    client = Stomp::Client.new(user, passcode, host, port, true)
+    client = get_client()
     assert_nothing_raised {
-      client.subscribe(dest, :ack => 'auto') { |m| message_copy = m }
+      if @client.protocol() == Stomp::SPL_10
+        client.subscribe(dest, :ack => 'auto') { |m| message_copy = m }
+      else
+        sid = client.uuid()
+        client.subscribe(dest, :ack => 'auto', :id => sid) { |m| message_copy = m }
+      end
       Timeout::timeout(4) do
         sleep 0.01 until message_copy
       end
@@ -305,7 +364,11 @@ class TestClient < Test::Unit::TestCase
     dest = make_destination
     Thread.new(@client) do |acli|
       assert_nothing_raised {
-        acli.subscribe(dest) { |m| msg = m }
+        if acli.protocol() == Stomp::SPL_10
+          acli.subscribe(dest) { |m| msg = m }
+        else
+          acli.subscribe(dest, :id => acli.uuid()) { |m| msg = m }
+        end
         Timeout::timeout(4) do
           sleep 0.01 until msg
         end
@@ -326,14 +389,26 @@ class TestClient < Test::Unit::TestCase
       # Threads within threads .....
       Thread.new(@client) do |acli|
         assert_nothing_raised {
-          acli.subscribe(dest) { |m| 
-            msg = m
-            lock.synchronize do
-              msg_ctr += 1
-            end
-            # Simulate message processing
-            sleep 0.05
-          }
+          # this is ugly .....
+          if acli.protocol() == Stomp::SPL_10
+            acli.subscribe(dest) { |m| 
+              msg = m
+              lock.synchronize do
+                msg_ctr += 1
+              end
+              # Simulate message processing
+              sleep 0.05
+            }
+          else
+            acli.subscribe(dest, :id => acli.uuid()) { |m| 
+              msg = m
+              lock.synchronize do
+                msg_ctr += 1
+              end
+              # Simulate message processing
+              sleep 0.05
+            }
+          end
         }
       end
     end
