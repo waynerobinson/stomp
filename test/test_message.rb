@@ -12,7 +12,7 @@ $:.unshift(File.dirname(__FILE__))
 #
 require 'test_helper'
 #
-class TestMessageKcode < Test::Unit::TestCase
+class TestMessage < Test::Unit::TestCase
   include TestBase
   #
   def setup

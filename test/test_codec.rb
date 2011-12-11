@@ -4,7 +4,7 @@ $:.unshift(File.dirname(__FILE__))
 
 require 'test_helper'
 
-class TestStomp < Test::Unit::TestCase
+class TestCodec < Test::Unit::TestCase
   include TestBase
   
   def setup
