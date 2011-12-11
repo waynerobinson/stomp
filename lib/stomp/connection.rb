@@ -237,6 +237,7 @@ module Stomp
     # Accepts a transaction header ( :transaction => 'some_transaction_id' )
     def ack(message_id, headers = {})
       raise Stomp::Error::NoCurrentConnection if closed?
+      raise Stomp::Error::MessageIDRequiredError if message_id.nil? || message_id == ""
       headers = headers.symbolize_keys
       headers[:'message-id'] = message_id
       if @protocol >= Stomp::SPL_11
@@ -246,15 +247,14 @@ module Stomp
       transmit(Stomp::CMD_ACK, headers)
     end
 
-    # STOMP 1.1 NACK
+    # STOMP 1.1+ NACK
     def nack(message_id, headers = {})
       raise Stomp::Error::NoCurrentConnection if closed?
       raise Stomp::Error::UnsupportedProtocolError if @protocol == Stomp::SPL_10
+      raise Stomp::Error::MessageIDRequiredError if message_id.nil? || message_id == ""
       headers = headers.symbolize_keys
       headers[:'message-id'] = message_id
-      if @protocol >= Stomp::SPL_11
-        raise Stomp::Error::SubscriptionRequiredError unless headers[:subscription]
-      end
+      raise Stomp::Error::SubscriptionRequiredError unless headers[:subscription]
       _headerCheck(headers)
       transmit(Stomp::CMD_NACK, headers)
     end
@@ -301,18 +301,18 @@ module Stomp
       transmit(Stomp::CMD_SUBSCRIBE, headers)
     end
 
-    # Unsubscribe from a destination, must specify a name
-    def unsubscribe(name, headers = {}, subId = nil)
+    # Unsubscribe from a destination, which must be specified
+    def unsubscribe(dest, headers = {}, subId = nil)
       raise Stomp::Error::NoCurrentConnection if closed?
       headers = headers.symbolize_keys
-      headers[:destination] = name
+      headers[:destination] = dest
       if @protocol >= Stomp::SPL_11
         raise Stomp::Error::SubscriptionRequiredError if (headers[:id].nil? && subId.nil?)
       end
       _headerCheck(headers)
       transmit(Stomp::CMD_UNSUBSCRIBE, headers)
       if @reliable
-        subId = name if subId.nil?
+        subId = dest if subId.nil?
         @subscriptions.delete(subId)
       end
     end

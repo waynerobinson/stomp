@@ -70,14 +70,19 @@ module Stomp
 
     class SubscriptionRequiredError < RuntimeError
       def message
-        "subscription header is required"
+        "a valid subscription header is required"
       end
     end
-
 
     class UTF8ValidationError < RuntimeError
       def message
         "header is invalid UTF8"
+      end
+    end
+
+    class MessageIDRequiredError < RuntimeError
+      def message
+        "a valid message id is required"
       end
     end
 

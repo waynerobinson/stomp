@@ -182,7 +182,12 @@ module Stomp
       end
       @connection.ack message.headers['message-id'], headers
     end
-    
+
+    # Stomp 1.1+ NACK
+    def nack(message_id, headers = {})
+      @connection.nack message_id, headers
+    end
+
     # Unreceive a message, sending it back to its queue or to the DLQ
     #
     def unreceive(message, options = {})

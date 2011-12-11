@@ -347,5 +347,33 @@ class TestStomp < Test::Unit::TestCase
     end
   end
 
+  def test_nack11p_0010
+    if @conn.protocol == Stomp::SPL_10
+      assert_raise Stomp::Error::UnsupportedProtocolError do
+        @conn.nack "dummy msg-id"
+      end
+    else
+      sid = @conn.uuid()
+      dest = make_destination
+      @conn.subscribe dest, :ack => :client, :id => sid
+      smsg = "test_stomp#test_nack01: #{Time.now.to_f}"
+      @conn.publish make_destination, smsg
+      msg = @conn.receive
+      assert_equal smsg, msg.body
+      assert_nothing_raised {
+        @conn.nack msg.headers["message-id"], :subscription => sid
+        sleep 0.05 # Give racy brokers a chance to handle the last nack before unsubscribe
+        @conn.unsubscribe dest, :id => sid
+      }
+      # phase 2
+      teardown()
+      setup()
+      sid = @conn.uuid()
+      @conn.subscribe dest, :ack => :auto, :id => sid
+      msg2 = @conn.receive
+      assert_equal smsg, msg2.body
+    end
+  end
+
 end
 

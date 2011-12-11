@@ -314,41 +314,35 @@ class TestClient < Test::Unit::TestCase
     to_send = message_text
     client = get_client()
     sid = nil
-    assert_nothing_raised {
-      if @client.protocol() == Stomp::SPL_10
-        client.subscribe(dest, :ack => 'client') { |m| message = m }
-      else
-        sid = client.uuid()
-        client.subscribe(dest, :ack => 'client', :id => sid) { |m| message = m }
-      end
-      @client.publish dest, to_send
-      Timeout::timeout(4) do
-        sleep 0.01 until message
-      end
-    }
+    if @client.protocol() == Stomp::SPL_10
+      client.subscribe(dest, :ack => 'client') { |m| message = m }
+    else
+      sid = client.uuid()
+      client.subscribe(dest, :ack => 'client', :id => sid) { |m| message = m }
+    end
+    @client.publish dest, to_send
+    Timeout::timeout(4) do
+      sleep 0.01 until message
+    end
     assert_equal to_send, message.body, "first body check"
-    assert_nothing_raised {
-      if @client.protocol() == Stomp::SPL_10
-        client.unsubscribe dest
-      else
-        client.unsubscribe dest, :subscription => sid
-      end
-      client.close
-    }
+    if @client.protocol() == Stomp::SPL_10
+      client.unsubscribe dest
+    else
+      client.unsubscribe dest, :subscription => sid
+    end
+    client.close
     #  Same message should remain on the queue.  Receive it again with ack=>auto.
     message_copy = nil
     client = get_client()
-    assert_nothing_raised {
-      if @client.protocol() == Stomp::SPL_10
-        client.subscribe(dest, :ack => 'auto') { |m| message_copy = m }
-      else
-        sid = client.uuid()
-        client.subscribe(dest, :ack => 'auto', :id => sid) { |m| message_copy = m }
-      end
-      Timeout::timeout(4) do
-        sleep 0.01 until message_copy
-      end
-    }
+    if @client.protocol() == Stomp::SPL_10
+      client.subscribe(dest, :ack => 'auto') { |m| message_copy = m }
+    else
+      sid = client.uuid()
+      client.subscribe(dest, :ack => 'auto', :id => sid) { |m| message_copy = m }
+    end
+    Timeout::timeout(4) do
+      sleep 0.01 until message_copy
+    end
     assert_equal to_send, message_copy.body, "second body check"
     assert_equal message.headers['message-id'], message_copy.headers['message-id'], "header check" unless ENV['STOMP_RABBIT']
   end
