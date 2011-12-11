@@ -272,25 +272,21 @@ class TestClient < Test::Unit::TestCase
     @client.begin 'tx1'
     message = nil
     sid = nil
-    assert_nothing_raised {
-      if @client.protocol() == Stomp::SPL_10
-        @client.subscribe(make_destination, :ack => 'client') { |m| message = m }
-      else
-        sid = @client.uuid()
-        @client.subscribe(make_destination, :ack => 'client', :id => sid) { |m| message = m }
-      end
-    }
+    if @client.protocol() == Stomp::SPL_10
+      @client.subscribe(make_destination, :ack => 'client') { |m| message = m }
+    else
+      sid = @client.uuid()
+      @client.subscribe(make_destination, :ack => 'client', :id => sid) { |m| message = m }
+    end
 
     sleep 0.1 while message.nil?
 
     assert_equal message_text, message.body
-    assert_nothing_raised {
-      if @client.protocol() == Stomp::SPL_10
-        @client.acknowledge message, :transaction => 'tx1'
-      else
-        @client.acknowledge message, :transaction => 'tx1', :subscription => sid
-      end
-    }
+    if @client.protocol() == Stomp::SPL_10
+      @client.acknowledge message, :transaction => 'tx1'
+    else
+      @client.acknowledge message, :transaction => 'tx1', :subscription => sid
+    end
     message = nil
     @client.abort 'tx1'
 
@@ -299,15 +295,13 @@ class TestClient < Test::Unit::TestCase
     assert_not_nil message
     assert_equal message_text, message.body
 
-    assert_nothing_raised {
-      @client.begin 'tx2'
-      if @client.protocol() == Stomp::SPL_10
-        @client.acknowledge message, :transaction => 'tx2'
-      else
-        @client.acknowledge message, :transaction => 'tx2', :subscription => sid
-      end
-      @client.commit 'tx2'
-    }
+    @client.begin 'tx2'
+    if @client.protocol() == Stomp::SPL_10
+      @client.acknowledge message, :transaction => 'tx2'
+    else
+      @client.acknowledge message, :transaction => 'tx2', :subscription => sid
+    end
+    @client.commit 'tx2'
   end
 
   def test_connection_frame
