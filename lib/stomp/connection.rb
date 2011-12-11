@@ -534,7 +534,7 @@ module Stomp
             end
 
             # Adds the excluded \n and \0 and tries to create a new message with it
-            msg = Message.new(message_header + "\n" + message_body + "\0")
+            msg = Message.new(message_header + "\n" + message_body + "\0", @protocol >= Stomp::SPL_11)
             #
             if @protocol >= Stomp::SPL_11 && msg.command != Stomp::CMD_CONNECTED
               msg.headers = _decodeHeaders(msg.headers)
@@ -589,10 +589,17 @@ module Stomp
           # For more information refer to http://juretta.com/log/2009/05/24/activemq-jms-stomp/
           # Lets send this header in the message, so it can maintain state when using unreceive
           headers['content-length'] = "#{body_length_bytes}" unless headers[:suppress_content_length]
-          
+          headers['content-type'] = "text/plain; charset=UTF-8" unless headers['content-type']
           used_socket.puts command  
-          headers.each {|k,v| used_socket.puts "#{k}:#{v}" }
-          used_socket.puts "content-type: text/plain; charset=UTF-8"
+          headers.each do |k,v|
+            if v.is_a?(Array)
+              v.each do |e|
+                used_socket.puts "#{k}:#{e}"
+              end
+            else
+              used_socket.puts "#{k}:#{v}"
+            end
+          end
           used_socket.puts
           used_socket.write body
           used_socket.write "\0"
@@ -1060,13 +1067,23 @@ module Stomp
 
     def _headerCheck(h)
       return if @protocol == Stomp::SPL_10 # Do nothing for this environment
+      #
       h.each_pair do |k,v|
+        # Keys here are symbolized
         ks = k.to_s
-        ks.force_encoding(Stomp::UTF8) if RUBY_VERSION >= "1.9"
+        ks.force_encoding(Stomp::UTF8) if ks.respond_to?(:force_encoding)
         raise Stomp::Error::UTF8ValidationError unless valid_utf8?(ks)
-        vs = v.to_s
-        vs.force_encoding(Stomp::UTF8) if RUBY_VERSION >= "1.9"
-        raise Stomp::Error::UTF8ValidationError unless valid_utf8?(vs)
+        #
+        if v.is_a?(Array)
+          v.each do |e|
+            e.force_encoding(Stomp::UTF8) if e.respond_to?(:force_encoding)
+            raise Stomp::Error::UTF8ValidationError unless valid_utf8?(e)
+          end
+        else
+          vs = v.to_s # Values are usually Strings, but could be TrueClass or Symbol
+          vs.force_encoding(Stomp::UTF8) if vs.respond_to?(:force_encoding)
+          raise Stomp::Error::UTF8ValidationError unless valid_utf8?(vs)
+        end
       end
     end
 
@@ -1074,11 +1091,18 @@ module Stomp
     def _encodeHeaders(h)
       eh = {}
       h.each_pair do |k,v|
+        # Keys are symbolized
         ks = k.to_s
-        ks.force_encoding(Stomp::UTF8) if RUBY_VERSION >= "1.9"
-        vs = v.to_s
-        vs.force_encoding(Stomp::UTF8) if RUBY_VERSION >= "1.9"
-        eh[Stomp::HeaderCodec::encode(ks)] = Stomp::HeaderCodec::encode(v.to_s)
+        if v.is_a?(Array)
+          kenc = Stomp::HeaderCodec::encode(ks)
+          eh[kenc] = []
+          v.each do |e|
+            eh[kenc] << Stomp::HeaderCodec::encode(e)
+          end
+        else
+          vs = v.to_s
+          eh[Stomp::HeaderCodec::encode(ks)] = Stomp::HeaderCodec::encode(vs)
+        end
       end
       eh
     end
@@ -1087,7 +1111,17 @@ module Stomp
     def _decodeHeaders(h)
       dh = {}
       h.each_pair do |k,v|
-        dh[Stomp::HeaderCodec::decode(k)] = Stomp::HeaderCodec::decode(v)
+        # Keys here are NOT! symbolized
+        if v.is_a?(Array)
+          kdec = Stomp::HeaderCodec::decode(k)
+          dh[kdec] = []
+          v.each do |e|
+            dh[kdec] << Stomp::HeaderCodec::decode(e)
+          end
+        else
+          vs = v.to_s
+          dh[Stomp::HeaderCodec::decode(k)] = Stomp::HeaderCodec::decode(vs)
+        end
       end
       dh
     end

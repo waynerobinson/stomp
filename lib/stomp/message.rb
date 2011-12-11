@@ -8,8 +8,8 @@ module Stomp
 
 		@@allowed_commands = [ 'CONNECTED', 'MESSAGE', 'RECEIPT', 'ERROR' ]
 
-    def initialize(frame)
-			# p frame
+    def initialize(frame, protocol11p = false)
+			# p [ "00", frame, frame.encoding ]
       # Set default empty values
       self.command = ''
       self.headers = {}
@@ -36,11 +36,38 @@ module Stomp
 			work_body = frame[headers_index+2..lastnull_index-1]
 			raise Stomp::Error::InvalidFormat, 'nil body' unless work_body
       # Set the frame values
+      if protocol11p
+        work_command.force_encoding(Stomp::UTF8) if work_command.respond_to?(:force_encoding)
+      end
       self.command = work_command
       work_headers.split("\n").map do |value|
         parsed_value = value.match /^([\w|-]*):(.*)$/
 				raise Stomp::Error::InvalidFormat, 'parsed header value' unless parsed_value
-        self.headers[parsed_value[1].strip] = parsed_value[2].strip if parsed_value
+        #
+        pk = parsed_value[1]
+        pv = parsed_value[2]
+        #
+        if protocol11p
+          pk.force_encoding(Stomp::UTF8) if pk.respond_to?(:force_encoding)
+          pv.force_encoding(Stomp::UTF8) if pv.respond_to?(:force_encoding)
+          # Stomp 1.1+ - Servers may put multiple values for a single key on the wire.
+          # If so, we support reading those, and passing them to the user.
+          if self.headers[pk]
+            if self.headers[pk].is_a?(Array) # The 3rd and any subsequent ones for this key
+              self.headers[pk] << pv
+            else
+              # The 2nd one for this key
+              tv = self.headers[pk] + ""
+              self.headers[pk] = []
+              self.headers[pk] << tv << pv
+            end
+          else
+            self.headers[pk] = pv # The 1st one for this key
+          end
+        else
+          # Stomp 1.0
+          self.headers[pk.strip] = pv.strip unless self.headers[pk.strip] # Only receive the 1st one
+        end
       end
 
       body_length = -1

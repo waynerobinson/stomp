@@ -32,7 +32,7 @@ class TestMessageKcode < Test::Unit::TestCase
   end
 
 	# Various message bodies, including the failing test case reported
-  def test_kcode_001
+  def test_0010_kcode
 		#
 		dest = make_destination
     if @conn.protocol == Stomp::SPL_10
@@ -50,7 +50,7 @@ class TestMessageKcode < Test::Unit::TestCase
   end
 
 	# All possible byte values
-  def test_kcode_002
+  def test_0020_kcode
 		#
 		abody = ""
 		"\000".upto("\377") {|abyte| abody << abyte } 
@@ -69,7 +69,7 @@ class TestMessageKcode < Test::Unit::TestCase
   end
 
 	# A single byte at a time
-  def test_kcode_003
+  def test_0030_kcode
 		#
 		dest = make_destination
     if @conn.protocol == Stomp::SPL_10
@@ -88,49 +88,76 @@ class TestMessageKcode < Test::Unit::TestCase
   end
 
 	#
-	def test_kcode_004
+	def test_0040_msg_create
 		#
 		assert_raise(Stomp::Error::InvalidFormat) {
-			aframe = Stomp::Message.new("junk")
+			aframe = Stomp::Message.new("junk", false)
 		}
 		#
 		assert_raise(Stomp::Error::InvalidFormat) {
-			aframe = Stomp::Message.new("command\njunk")
+			aframe = Stomp::Message.new("command\njunk", false)
 		}
 		#
 		assert_raise(Stomp::Error::InvalidFormat) {
-			aframe = Stomp::Message.new("command\nheaders\n\njunk")
+			aframe = Stomp::Message.new("command\nheaders\n\njunk", false)
 		}
 		#
 		assert_raise(Stomp::Error::InvalidServerCommand) {
-			aframe = Stomp::Message.new("junkcommand\nheaders\n\njunk\0\n\n")
+			aframe = Stomp::Message.new("junkcommand\nheaders\n\njunk\0\n\n", false)
 		}
 		#
 		assert_raise(Stomp::Error::InvalidFormat) {
-			aframe = Stomp::Message.new("ERROR\nbadheaders\n\njunk\0\n\n")
+			aframe = Stomp::Message.new("ERROR\nbadheaders\n\njunk\0\n\n", false)
 		}
 		#
 		assert_nothing_raised {
-			aframe = Stomp::Message.new("CONNECTED\nh1:val1\n\njunk\0\n")
+			aframe = Stomp::Message.new("CONNECTED\nh1:val1\n\njunk\0\n", false)
 		}
 		#
 		assert_nothing_raised {
-			aframe = Stomp::Message.new("MESSAGE\nh1:val1\n\njunk\0\n")
+			aframe = Stomp::Message.new("MESSAGE\nh1:val1\n\njunk\0\n", false)
 		}
 		#
 		assert_nothing_raised {
-			aframe = Stomp::Message.new("MESSAGE\nh2:val2\n\n\0")
+			aframe = Stomp::Message.new("MESSAGE\nh2:val2\n\n\0", false)
 		}
 		#
 		assert_nothing_raised {
-			aframe = Stomp::Message.new("RECEIPT\nh1:val1\n\njunk\0\n")
+			aframe = Stomp::Message.new("RECEIPT\nh1:val1\n\njunk\0\n", false)
 		}
 		#
 		assert_nothing_raised {
-			aframe = Stomp::Message.new("ERROR\nh1:val1\n\njunk\0\n")
+			aframe = Stomp::Message.new("ERROR\nh1:val1\n\njunk\0\n", false)
 		}
 
 	end
+
+	# Multiple headers with the same key
+	def test_0050_mh_msg_create
+    aframe = bframe = nil
+		assert_nothing_raised {
+      amsg = "MESSAGE\n" +
+        "h1:val1\n" + 
+        "h2:val3\n" + 
+        "h2:val2\n" + 
+        "h2:val1\n" + 
+        "h3:val1\n" + 
+        "\n" +
+        "payload" +
+        "\0\n"
+			aframe = Stomp::Message.new(amsg, false)
+			bframe = Stomp::Message.new(amsg, true)
+		}
+    #
+    assert aframe.headers["h2"].is_a?(String), "Expected a String"
+    assert_equal "val3", aframe.headers["h2"], "Expected 1st value"
+    #
+    assert bframe.headers["h2"].is_a?(Array), "Expected an Array"
+    assert_equal 3, bframe.headers["h2"].length, "Expected 3 values"
+    assert_equal "val3", bframe.headers["h2"][0], "Expected val3"
+    assert_equal "val2", bframe.headers["h2"][1], "Expected val2"
+    assert_equal "val1", bframe.headers["h2"][2], "Expected val1"
+  end
 
 end
 
