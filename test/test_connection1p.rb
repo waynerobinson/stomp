@@ -173,7 +173,7 @@ class TestStomp < Test::Unit::TestCase
       "\xf3\xbf\xbf\xbf",
     ]
     good_data.each do |string|
-      assert @conn.valid_utf8?(string), "good unicode specs 01: #{string}"
+      assert conn.valid_utf8?(string), "good unicode specs 01: #{string}"
     end
     conn.disconnect
   end
@@ -207,9 +207,35 @@ class TestStomp < Test::Unit::TestCase
       "\xf0\x80\x80\x80",
     ]
     bad_data.each do |string|
-      assert !@conn.valid_utf8?(string), "bad unicode specs 01: #{string}"
+      assert !conn.valid_utf8?(string), "bad unicode specs 01: #{string}"
     end
     conn.disconnect
+  end
+
+  # Repeated headers test. Currently:
+  # - Apollo emits repeated headers for a 1.1 connection only
+  # - RabbitMQ does not emit repeated headers under any circumstances
+  def test_conn_1p_0120
+    dest = make_destination
+    msg = "payload: #{Time.now.to_f}"
+    shdrs = { "key1" => "val1", "key2" => "val2",
+      "key3" => ["kv3", "kv2", "kv1"] }
+    assert_nothing_raised {
+      @conn.publish dest, msg, shdrs
+    }
+    #
+    sid = @conn.uuid()
+    @conn.subscribe dest, :id => sid
+    #
+    received = @conn.receive
+    assert_equal msg, received.body
+    if @conn.protocol != Stomp::SPL_10
+      assert_equal shdrs["key3"], received.headers["key3"] unless ENV['STOMP_RABBIT']
+    else
+      assert_equal "kv3", received.headers["key3"]
+    end
+    #
+    @conn.unsubscribe dest, :id => sid
   end
 
 end if ENV['STOMP_TEST11']
