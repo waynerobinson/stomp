@@ -249,6 +249,7 @@ class TestStomp < Test::Unit::TestCase
     end
     #
     max_sleep = (RUBY_VERSION =~ /1\.8/) ? 30 : 5
+    max_sleep = 30 if RUBY_ENGINE =~ /mingw/
     sleep_incr = 0.10
     total_slept = 0
     while true
@@ -291,6 +292,7 @@ class TestStomp < Test::Unit::TestCase
     end
     #
     max_sleep = (RUBY_VERSION =~ /1\.8\.6/) ? 30 : 5
+    max_sleep = 30 if RUBY_ENGINE =~ /mingw/
     sleep_incr = 0.10
     total_slept = 0
     while true
