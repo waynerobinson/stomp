@@ -1061,8 +1061,12 @@ module Stomp
     def _headerCheck(h)
       return if @protocol == Stomp::SPL_10 # Do nothing for this environment
       h.each_pair do |k,v|
-        raise Stomp::Error::UTF8ValidationError unless valid_utf8?(k.to_s)
-        raise Stomp::Error::UTF8ValidationError unless valid_utf8?(v.to_s)
+        ks = k.to_s
+        ks.force_encoding(Stomp::UTF8) if RUBY_VERSION >= "1.9"
+        raise Stomp::Error::UTF8ValidationError unless valid_utf8?(ks)
+        vs = v.to_s
+        vs.force_encoding(Stomp::UTF8) if RUBY_VERSION >= "1.9"
+        raise Stomp::Error::UTF8ValidationError unless valid_utf8?(vs)
       end
     end
 
@@ -1070,7 +1074,11 @@ module Stomp
     def _encodeHeaders(h)
       eh = {}
       h.each_pair do |k,v|
-        eh[Stomp::HeaderCodec::encode(k.to_s)] = Stomp::HeaderCodec::encode(v.to_s)
+        ks = k.to_s
+        ks.force_encoding(Stomp::UTF8) if RUBY_VERSION >= "1.9"
+        vs = v.to_s
+        vs.force_encoding(Stomp::UTF8) if RUBY_VERSION >= "1.9"
+        eh[Stomp::HeaderCodec::encode(ks)] = Stomp::HeaderCodec::encode(v.to_s)
       end
       eh
     end
