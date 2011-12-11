@@ -206,7 +206,7 @@ class TestStomp < Test::Unit::TestCase
 
   def test_thread_poll_one
     received = nil
-    max_sleep = (RUBY_VERSION =~ /1\.8\.6/) ? 5 : 1
+    max_sleep = (RUBY_VERSION =~ /1\.8/) ? 10 : 1
     Thread.new(@conn) do |amq|
         while true
           received = amq.poll
@@ -248,7 +248,7 @@ class TestStomp < Test::Unit::TestCase
       @conn.publish(dest, msg)
     end
     #
-    max_sleep = (RUBY_VERSION =~ /1\.8\.6/) ? 30 : 5
+    max_sleep = (RUBY_VERSION =~ /1\.8/) ? 30 : 5
     sleep_incr = 0.10
     total_slept = 0
     while true
