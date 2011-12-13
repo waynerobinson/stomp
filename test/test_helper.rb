@@ -5,6 +5,7 @@ $:.unshift(File.join(File.dirname(__FILE__), "..", "lib"))
 require 'test/unit'
 require 'timeout'
 require 'stomp'
+require 'tlogger'
 
 begin
   dummy = RUBY_ENGINE

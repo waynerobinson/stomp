@@ -690,7 +690,8 @@ module Stomp
       end
 
       def log_params
-        lparms = @parameters.clone
+        lparms = @parameters.clone if @parameters
+        lparms = {} unless lparms
         lparms[:cur_host] = @host
         lparms[:cur_port] = @port
         lparms[:cur_login] = @login
@@ -798,8 +799,14 @@ module Stomp
           while true do
             sleep sleeptime
             curt = Time.now.to_f
+            if @logger && @logger.respond_to?(:on_hbfire)
+              @logger.on_hbfire(log_params, "send_fire", curt)
+            end
             delta = curt - @ls
             if delta > (@sti - (@sti/5.0)) / 1000000.0 # Be tolerant (minus)
+              if @logger && @logger.respond_to?(:on_hbfire)
+                @logger.on_hbfire(log_params, "send_heartbeat", curt)
+              end
               # Send a heartbeat
               @transmit_semaphore.synchronize do
                 begin
@@ -827,8 +834,14 @@ module Stomp
           while true do
             sleep sleeptime
             curt = Time.now.to_f
+            if @logger && @logger.respond_to?(:on_hbfire)
+              @logger.on_hbfire(log_params, "receive_fire", curt)
+            end
             delta = curt - @lr
             if delta > ((@rti + (@rti/5.0)) / 1000000.0) # Be tolerant (plus)
+              if @logger && @logger.respond_to?(:on_hbfire)
+                @logger.on_hbfire(log_params, "receive_heartbeat", curt)
+              end
               # Client code could be off doing something else (that is, no reading of
               # the socket has been requested by the caller).  Try to  handle that case.
               lock = @read_semaphore.try_lock

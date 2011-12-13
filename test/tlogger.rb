@@ -2,36 +2,13 @@
 
 =begin
 
-Example STOMP call back logger class.
-
-Optional callback methods:
-
-    on_connecting: connection starting
-    on_connected: successful connect
-    on_connectfail: unsuccessful connect (will usually be retried)
-    on_disconnect: successful disconnect
-
-    on_miscerr: on miscellaneous xmit/recv errors
-
-    on_publish: publish called
-    on_subscribe: subscribe called
-    on_receive: receive called and successful
-
-All methods are optional, at the user's requirements.
-
-If a method is not provided, it is not called (of course.)
-
-IMPORTANT NOTE:  call back logging methods *MUST* not raise exceptions, 
-otherwise the underlying STOMP connection will fail in mysterious ways.
-
-Callback parameters: are a copy of the @parameters instance variable for
-the Stomp::Connection.
+Callback logger for tests.
 
 =end
 
 require 'logger'	# use the standard Ruby logger .....
 
-class Slogger
+class Tlogger
   #
   def initialize(init_parms = nil)
     @log = Logger::new(STDOUT)		# User preference

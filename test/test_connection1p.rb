@@ -111,9 +111,12 @@ class TestConnection1P < Test::Unit::TestCase
     cha[:host] = "/" if ENV['STOMP_RABBIT']
     cha["heart-beat"] = "5000,0" # Valid heart beat headers, send only
     conn = nil
+    logger = Tlogger.new
     assert_nothing_raised do
       conn = Stomp::Connection.open(user, passcode, host, port, false, 5, cha)
+      conn.set_logger(logger)
       sleep 65
+      conn.set_logger(nil)
       conn.disconnect
     end
   end if ENV['STOMP_HB11LONG']
@@ -125,10 +128,13 @@ class TestConnection1P < Test::Unit::TestCase
     cha[:host] = "/" if ENV['STOMP_RABBIT']
     cha["heart-beat"] = "0,10000" # Valid heart beat headers, receive only
     conn = nil
+    logger = Tlogger.new
     assert_nothing_raised do
       conn = Stomp::Connection.open(user, passcode, host, port, false, 5, cha)
 #      m = conn.receive # This will hang forever .....
+      conn.set_logger(logger)
       sleep 65
+      conn.set_logger(nil)
       conn.disconnect
     end
   end if ENV['STOMP_HB11LONG']
@@ -140,10 +146,13 @@ class TestConnection1P < Test::Unit::TestCase
     cha[:host] = "/" if ENV['STOMP_RABBIT']
     cha["heart-beat"] = "5000,10000" # Valid heart beat headers, send and receive
     conn = nil
+    logger = Tlogger.new
     assert_nothing_raised do
       conn = Stomp::Connection.open(user, passcode, host, port, false, 5, cha)
 #      m = conn.receive # This will hang forever .....
+      conn.set_logger(logger)
       sleep 65
+      conn.set_logger(nil)
       conn.disconnect
     end
   end if ENV['STOMP_HB11LONG']
