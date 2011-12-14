@@ -10,8 +10,8 @@ else
 end
 include Stomp11Common
 #
-# Stomp 1.1 Publish Example
-# =========================
+# Stomp 1.1 Receive Example 1
+# ===========================
 #
 # Purpose: to demonstrate receiving messages using Stomp 1.1.
 #

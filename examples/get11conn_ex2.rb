@@ -10,8 +10,8 @@ else
 end
 include Stomp11Common
 #
-# Stomp 1.1 Publish Example
-# =========================
+# Stomp 1.1 Receive Example 2
+# ===========================
 #
 # Purpose: to demonstrate receiving messages using Stomp 1.1, and using
 # 'ack => client'.
@@ -49,7 +49,7 @@ conn.subscribe qname, {'id' => uuid, 'ack' => 'client'} #
     puts "Rescue: #{sre}, #{sre.message}"
   end
   #
-  # Try a valid ACK
+  # Try a valid 1.1 ACK
   #
   conn.ack msgid, {'subscription' => uuid}
   puts "ACK - msgid: #{msgid}, subscription: #{uuid}"

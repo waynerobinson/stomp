@@ -10,9 +10,10 @@ else
 end
 include Stomp11Common
 #
-# Stomp 1.1 Client Pitter/Getter Example 1
+# Stomp 1.1 Client Putter/Getter Example 1
 # ========================================
 #
+# This is much like sending and receiving with a Stomp::Connection.
 #
 client_hdrs = {"accept-version" => "1.1",    # Demand a 1.1 connection (use a CSV list if you will consider multiple versions)
       "host" => virt_host,                 # The 1.1 vhost (could be different than connection host)
@@ -28,6 +29,26 @@ client = Stomp::Client.new(client_hash)
 puts "Connection complete"
 #
 raise "Unexpected protocol level" if client.protocol() != Stomp::SPL_11
+#
+qname = "/queue/client.nodea.nodeb.nodec"
+data = "message payload: #{Time.now.to_f}"
+headers = {}
+# Send it
+client.publish qname, data
+# Receive 
+uuid = client.uuid() # uuid for Stomp::Client is a public method
+message = nil
+# Clients must pass a receive block.  This is business as usual, required for 1.0.
+# For 1.1, a unique subscription id is required.
+client.subscribe(qname, {'id' => uuid}) {|m| 
+  message = m
+}
+sleep 0.1 until message # Wait for completion
+# Unsubscribe, with the unique id
+client.unsubscribe qname,  {'id' => uuid}
+# Sanity checks for this example ....
+raise "Unexpected data" if data != message.body
+raise "Bad subscription header" if uuid != message.headers['subscription']
 #
 client.close   # Business as usual, just like 1.0
 puts "Disclientect complete"
