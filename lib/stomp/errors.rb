@@ -46,7 +46,7 @@ module Stomp
     
     class DuplicateSubscription < RuntimeError
       def message
-        "duplicate subscription disallowed"
+        "duplicate subscriptions are disallowed"
       end
     end
     
@@ -64,13 +64,13 @@ module Stomp
     
     class InvalidHeartBeatHeaderError < RuntimeError
       def message
-        "heart-beat header is malformed"
+        "heart-beat header value is malformed"
       end
     end
 
     class SubscriptionRequiredError < RuntimeError
       def message
-        "a valid subscription header is required"
+        "a valid subscription id header is required"
       end
     end
 
@@ -82,7 +82,7 @@ module Stomp
 
     class MessageIDRequiredError < RuntimeError
       def message
-        "a valid message id is required"
+        "a valid message id is required for ACK/NACK"
       end
     end
 
