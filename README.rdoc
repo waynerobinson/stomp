@@ -10,6 +10,9 @@ An implementation of the Stomp protocol for Ruby. See:
 
 * [STOMP 1.0 and 1.1] (http://stomp.github.com/index.html)
 
+===New
+
+Support of Stomp protocol level 1.1 is announced as of gem version 1.2.0.
 
 ===Example Usage
 
@@ -105,4 +108,8 @@ The following people have contributed to Stomp:
 * Tom May
 * Lucas Hills
 * Chris Needham
+* R.I. Pienaar
+* tworker
+
+
 

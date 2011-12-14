@@ -5,12 +5,12 @@
 
 Gem::Specification.new do |s|
   s.name = "stomp"
-  s.version = "1.1.11"
+  s.version = "1.2.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Brian McCallister", "Marius Mathiesen", "Thiago Morello", "Guy M. Allard"]
-  s.date = "2011-12-12"
-  s.description = "Ruby client for the Stomp messaging protocol"
+  s.date = "2011-12-14"
+  s.description = "Ruby client for the Stomp messaging protocol.  Note that this gem is no longer supported on rubyforge."
   s.email = ["brianm@apache.org", "marius@stones.com", "morellon@gmail.com", "allard.guy.m@gmail.com"]
   s.executables = ["catstomp", "stompcat"]
   s.extra_rdoc_files = [
@@ -24,10 +24,20 @@ Gem::Specification.new do |s|
     "Rakefile",
     "bin/catstomp",
     "bin/stompcat",
+    "examples/client11_ex1.rb",
+    "examples/client11_putget1.rb",
+    "examples/conn11_ex1.rb",
+    "examples/conn11_ex2.rb",
+    "examples/conn11_hb1.rb",
     "examples/consumer.rb",
+    "examples/get11conn_ex1.rb",
+    "examples/get11conn_ex2.rb",
     "examples/logexamp.rb",
     "examples/publisher.rb",
+    "examples/put11conn_ex1.rb",
+    "examples/putget11_rh1.rb",
     "examples/slogger.rb",
+    "examples/stomp11_common.rb",
     "examples/topic_consumer.rb",
     "examples/topic_publisher.rb",
     "lib/stomp.rb",
@@ -50,9 +60,10 @@ Gem::Specification.new do |s|
     "test/test_connection.rb",
     "test/test_connection1p.rb",
     "test/test_helper.rb",
-    "test/test_message.rb"
+    "test/test_message.rb",
+    "test/tlogger.rb"
   ]
-  s.homepage = "https://rubygems.org/gems/stomp"
+  s.homepage = "https://github.com/morellon/stomp"
   s.require_paths = ["lib"]
   s.rubygems_version = "1.8.11"
   s.summary = "Ruby client for the Stomp messaging protocol"

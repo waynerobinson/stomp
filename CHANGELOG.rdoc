@@ -1,5 +1,7 @@
-== 1.1.11 yyyy-dd-mm (TBD)
+== 1.2.0 2011-14-12
 
+* Stomp 1.1 protocol support.  A significant change.  Please test existing 1.0 code well.  See the examples directory for 1.1 examples.
+* Accept :reliable in a Stomp::Client connection hash
 * Add connect timeout with hashed parameters
 * Do not allow calls after close/disconnect
 * Enhance supported logger callbacks
