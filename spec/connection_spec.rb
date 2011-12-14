@@ -81,6 +81,17 @@ describe Stomp::Connection do
         connection = Stomp::Connection.new(hash)
         connection.instance_variable_get(:@reliable).should be_false
       end
+      
+      it "should be true if reliable is set to true" do
+        hash = @parameters.merge({:reliable => true })
+        connection = Stomp::Connection.new(hash)
+        connection.instance_variable_get(:@reliable).should be_true
+      end
+      
+      it "should be true if reliable is not set" do
+        connection = Stomp::Connection.new(@parameters)
+        connection.instance_variable_get(:@reliable).should be_true
+      end
     end
     
     context "when dealing with content-length header" do
