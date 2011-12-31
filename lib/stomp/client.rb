@@ -211,11 +211,6 @@ module Stomp
       __send__(*args)
     end
     
-    def send(*args)
-      warn("This method is deprecated and will be removed on the next release. Use 'publish' instead")
-      publish(*args)
-    end
-    
     def connection_frame
       @connection.connection_frame
     end

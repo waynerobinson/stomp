@@ -338,11 +338,6 @@ module Stomp
       __send__(*args)
     end
     
-    def send(*args)
-      warn("This method is deprecated and will be removed on the next release. Use 'publish' instead")
-      publish(*args)
-    end
-    
     # Send a message back to the source or to the dead letter queue
     #
     # Accepts a dead letter queue option ( :dead_letter_queue => "/queue/DLQ" )
