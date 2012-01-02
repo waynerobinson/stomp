@@ -247,5 +247,13 @@ class TestConnection1P < Test::Unit::TestCase
     @conn.unsubscribe dest, :id => sid
   end
 
+  def test_conn_1p_0120
+    dest = make_destination
+    sid = @conn.uuid()
+    sid.freeze
+    assert_nothing_raised {
+      @conn.subscribe dest, :id => sid
+    }
+  end
 end if ENV['STOMP_TEST11']
 

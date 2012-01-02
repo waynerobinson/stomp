@@ -1090,7 +1090,8 @@ module Stomp
             raise Stomp::Error::UTF8ValidationError unless valid_utf8?(e)
           end
         else
-          vs = v.to_s # Values are usually Strings, but could be TrueClass or Symbol
+          vs = v.to_s + "" # Values are usually Strings, but could be TrueClass or Symbol
+          # The + "" forces an 'unfreeze' if necessary
           vs.force_encoding(Stomp::UTF8) if vs.respond_to?(:force_encoding)
           raise Stomp::Error::UTF8ValidationError unless valid_utf8?(vs)
         end
