@@ -620,19 +620,35 @@ module Stomp
       def open_ssl_socket
         require 'openssl' unless defined?(OpenSSL)
         ctx = OpenSSL::SSL::SSLContext.new
+        ctx.verify_mode = OpenSSL::SSL::VERIFY_NONE # Assume for now
 
-        # For client certificate authentication:
-        # key_path = ENV["STOMP_KEY_PATH"] || "~/stomp_keys"
-        # ctx.cert = OpenSSL::X509::Certificate.new("#{key_path}/client.cer")
-        # ctx.key = OpenSSL::PKey::RSA.new("#{key_path}/client.keystore")
+        #
+        # Here @ssl is either:
+        # * true - and no authentication either way is required
+        # * an instance of Stomp::SSLParams
+        # Control would not be here if @ssl == false or @ssl.nil?.
+        #
+        if @ssl != true # SSLParams
 
-        # For server certificate authentication:
-        # truststores = OpenSSL::X509::Store.new
-        # truststores.add_file("#{key_path}/client.ts")
-        # ctx.verify_mode = OpenSSL::SSL::VERIFY_PEER
-        # ctx.cert_store = truststores
+          # Server authentication parameters if required
+          if @ssl.ts_file
+            ctx.verify_mode = OpenSSL::SSL::VERIFY_PEER
+            truststores = OpenSSL::X509::Store.new
+            truststores.add_file(@ssl.ts_file)
+            ctx.cert_store = truststores
+          end
 
-        ctx.verify_mode = OpenSSL::SSL::VERIFY_NONE  
+          # Client authentication parameters
+          # Both must be present or not, can not be a mix
+          raise Stomp::Error::SSLClientParamsError if @ssl.cert_file.nil? && !@ssl.key_file.nil?
+          raise Stomp::Error::SSLClientParamsError if !@ssl.cert_file.nil? && @ssl.key_file.nil?
+          if @ssl.cert_file # Any check will do here
+            ctx.cert = OpenSSL::X509::Certificate.new(File.open(@ssl.cert_file))
+            ctx.key  = OpenSSL::PKey::RSA.new(File.open(@ssl.key_file))
+          end
+        end
+
+        #
       	ssl = nil
       	Timeout::timeout(@connect_timeout, Stomp::Error::SocketOpenTimeout) do
         	ssl = OpenSSL::SSL::SSLSocket.new(open_tcp_socket, ctx)

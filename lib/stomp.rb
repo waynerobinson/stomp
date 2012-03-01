@@ -23,6 +23,7 @@ require 'stomp/version'
 require 'stomp/errors'
 require 'stomp/constants'
 require 'stomp/codec'
+require 'stomp/sslparams'
 
 module Stomp
 end

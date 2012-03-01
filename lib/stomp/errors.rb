@@ -86,6 +86,12 @@ module Stomp
       end
     end
 
+    class SSLClientParamsError < RuntimeError
+      def message
+        "certificate and key files are both required"
+      end
+    end
+
   end # module Error
 end # module Stomp
 

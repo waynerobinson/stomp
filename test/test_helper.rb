@@ -29,6 +29,10 @@ module TestBase
   def port
     (ENV['STOMP_PORT'] || 61613).to_i
   end
+  # Get SSL port
+  def ssl_port
+    (ENV['STOMP_SSLPORT'] || 61612).to_i
+  end
   # Helper for minitest on 1.9
   def caller_method_name
     parse_caller(caller(2).first).last
@@ -47,6 +51,17 @@ module TestBase
   def get_connection()
     ch = get_conn_headers()
     conn = Stomp::Connection.open(user, passcode, host, port, false, 5, ch)
+    conn
+  end
+
+  def get_ssl_connection()
+    ch = get_conn_headers()
+    hash = { :hosts => [ 
+      {:login => user, :passcode => passcode, :host => host, :port => ssl_port, :ssl => true},
+      ],
+      :connect_headers => ch
+    }
+    conn = Stomp::Connection.new(hash)
     conn
   end
 
