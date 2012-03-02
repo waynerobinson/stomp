@@ -485,31 +485,16 @@ module Stomp
 
       def _receive( read_socket )
         @read_semaphore.synchronize do
-          # Throw away leading newlines, which are perhaps trailing
-          # newlines from the preceding message, or alterantely a 1.1+ server
-          # heartbeat.
-          begin
-            last_char = read_socket.getc
-            return nil if last_char.nil?
-            if @protocol >= Stomp::SPL_11
-              plc = parse_char(last_char)
-              if plc == "\n" # Server Heartbeat
-                @lr = Time.now.to_f if @hbr
-              end
-            end
-          end until parse_char(last_char) != "\n"
-          read_socket.ungetc(last_char)
-
+          line = read_socket.gets
+          return nil if line.nil?
           # If the reading hangs for more than X seconds, abort the parsing process.
           # X defaults to 5.  Override allowed in connection hash parameters.
           Timeout::timeout(@parse_timeout, Stomp::Error::PacketParsingTimeout) do
             # Reads the beginning of the message until it runs into a empty line
             message_header = ''
-            line = ''
             begin
-              message_header << line
+              message_header += line
               line = read_socket.gets
-              return nil if line.nil?
             end until line =~ /^\s?\n$/
 
             # Checks if it includes content_length header
@@ -523,13 +508,34 @@ module Stomp
               raise Stomp::Error::InvalidMessageLength unless parse_char(read_socket.getc) == "\0"
             # Else reads, the rest of the message until the first \0
             else
-              message_body << char while (char = parse_char(read_socket.getc)) != "\0"
+              message_body += char while (char = parse_char(read_socket.getc)) != "\0"
             end
+
+            # If the buffer isn't empty, reads trailing new lines.
+            #
+            # Note: experiments with JRuby seem to show that .ready? never
+            # returns true.  This means that this code to drain trailing new
+            # lines never runs using JRuby.
+            #
+            # Note 2: the draining of new lines mmust be done _after_ a message
+            # is read.  Do _not_ leave them on the wire and attempt to drain them
+            # at the start of the next read.  Attempting to do that breaks the 
+            # asynchronous nature of the 'poll' method.
+            while read_socket.ready?
+              last_char = read_socket.getc
+              break unless last_char
+              if parse_char(last_char) != "\n"
+                read_socket.ungetc(last_char)
+                break
+              end
+            end
+            # And so, a JRuby hack.  Remove any new lines at the start of the 
+            # next buffer.
+            message_header.gsub!(/^\n?/, "")
 
             if @protocol >= Stomp::SPL_11
               @lr = Time.now.to_f if @hbr
             end
-
             # Adds the excluded \n and \0 and tries to create a new message with it
             msg = Message.new(message_header + "\n" + message_body + "\0", @protocol >= Stomp::SPL_11)
             #

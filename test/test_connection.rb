@@ -22,6 +22,13 @@ class TestConnection < Test::Unit::TestCase
     assert_not_nil @conn
   end
 
+  def test_poll_async
+    @conn.subscribe("/queue/do.not.put.messages.on.this.queue")
+    # If the test 'hangs' here, Connection#poll is broken.
+    m = @conn.poll
+    assert m.nil?
+  end
+
   def test_no_length
     conn_subscribe make_destination
     #
