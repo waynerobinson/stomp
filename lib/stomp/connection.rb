@@ -663,6 +663,10 @@ module Stomp
           ! @rbuffer.empty? || @io.ready?
         end
         ssl.connect
+        if @ssl != true
+          @ssl.verify_result = ssl.verify_result # Make available to client
+          @ssl.peer_cert = ssl.peer_cert
+        end
         ssl
       end
 

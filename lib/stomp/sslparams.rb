@@ -7,12 +7,18 @@ module Stomp
   # Parameters for STOMP ssl connections.
   #
   class SSLParams
-    # The trust store
+    # The trust store file.  Normally the certificate of the CA that signed
+    # the server's certificate.
     attr_accessor :ts_file
-    # The client certificate
+    # The client certificate file.
     attr_accessor :cert_file
-    # The client key
+    # The client private key file.
     attr_accessor :key_file
+    # SSL Connect Verify Result.  The result of the handshake.
+    attr_accessor :verify_result
+    # The certificate of the connection peer (the server), received during
+    # the handshake.
+    attr_accessor :peer_cert
     #
     def initialize(opts={})
 
