@@ -6,9 +6,9 @@ require "stomp"
 #
 # SSL Use Case 4
 #
-ssl_opts = Stomp::SSLParams.new(:key_file => "/home/gmallard/hext/misc.code/ruby-misc/sslsamps/client.key",
-  :cert_file => "/home/gmallard/hext/misc.code/ruby-misc/sslsamps/client.crt",
-  :ts_file => "/home/gmallard/hext/misc.code/ruby-misc/sslsamps/TestCA.crt")
+ssl_opts = Stomp::SSLParams.new(:key_file => "/home/gmallard/sslwork/client.key",
+  :cert_file => "/home/gmallard/sslwork/client.crt",
+  :ts_files => "/home/gmallard/sslwork/TestCA.crt")
 #
 hash = { :hosts => [ 
       {:login => 'guest', :passcode => 'guest', :host => 'localhost', :port => 61612, :ssl => ssl_opts},

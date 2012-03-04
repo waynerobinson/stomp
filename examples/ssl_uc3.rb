@@ -6,7 +6,10 @@ require "stomp"
 #
 # SSL Use Case 3
 #
-ssl_opts = Stomp::SSLParams.new(:ts_file => "/home/gmallard/hext/misc.code/ruby-misc/sslsamps/TestCA.crt")
+ts_flist = []
+ts_flist << "/home/gmallard/sslwork/TestCA.crt"
+ts_flist << "/home/gmallard/hext/misc.code/ruby-misc/sslsamps/TestCA.crt"
+ssl_opts = Stomp::SSLParams.new(:ts_files => ts_flist.join(","))
 #
 hash = { :hosts => [ 
       {:login => 'guest', :passcode => 'guest', :host => 'localhost', :port => 61612, :ssl => ssl_opts},

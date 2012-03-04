@@ -637,10 +637,14 @@ module Stomp
         if @ssl != true # SSLParams
 
           # Server authentication parameters if required
-          if @ssl.ts_file
+          if @ssl.ts_files
             ctx.verify_mode = OpenSSL::SSL::VERIFY_PEER
             truststores = OpenSSL::X509::Store.new
-            truststores.add_file(@ssl.ts_file)
+            fl = @ssl.ts_files.split(",")
+            fl.each do |fn|
+              # Add next cert file listed
+              truststores.add_file(fn)
+            end
             ctx.cert_store = truststores
           end
 

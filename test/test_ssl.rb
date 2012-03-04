@@ -22,7 +22,7 @@ class TestSSL < Test::Unit::TestCase
   #
   def test_ssl_0010
     ssl_params = Stomp::SSLParams.new
-    assert ssl_params.ts_file.nil?
+    assert ssl_params.ts_files.nil?
     assert ssl_params.cert_file.nil?
     assert ssl_params.key_file.nil?
   end
@@ -39,10 +39,10 @@ class TestSSL < Test::Unit::TestCase
       ssl_parms = Stomp::SSLParams.new(:cert_file => "dummy1", :key_file => "dummy2")
     }
     assert_nothing_raised {
-      ssl_parms = Stomp::SSLParams.new(:ts_file => "dummyts1")
+      ssl_parms = Stomp::SSLParams.new(:ts_files => "dummyts1")
     }
     assert_nothing_raised {
-      ssl_parms = Stomp::SSLParams.new(:ts_file => "dummyts1", :cert_file => "dummy1", :key_file => "dummy2")
+      ssl_parms = Stomp::SSLParams.new(:ts_files => "dummyts1", :cert_file => "dummy1", :key_file => "dummy2")
     }
   end
 

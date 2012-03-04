@@ -7,9 +7,9 @@ module Stomp
   # Parameters for STOMP ssl connections.
   #
   class SSLParams
-    # The trust store file.  Normally the certificate of the CA that signed
-    # the server's certificate.
-    attr_accessor :ts_file
+    # The trust store files.  Normally the certificate of the CA that signed
+    # the server's certificate.  One file name, or a CSV list of file names.
+    attr_accessor :ts_files
     # The client certificate file.
     attr_accessor :cert_file
     # The client private key file.
@@ -23,7 +23,8 @@ module Stomp
     def initialize(opts={})
 
       # Server authentication parameters
-      @ts_file = opts[:ts_file]   # A trust store file, normally a CA's cert
+      @ts_files = opts[:ts_files]   # A trust store file, normally a CA's cert
+      # or a CSV list of cert file names
 
       # Client authentication parameters
       @cert_file = opts[:cert_file]         # Client cert
