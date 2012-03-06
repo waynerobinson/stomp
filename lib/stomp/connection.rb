@@ -668,7 +668,12 @@ module Stomp
         end
         ssl.connect
         if @ssl != true
-          @ssl.verify_result = ssl.verify_result # Make available to client
+          # Pass back results if possible
+          if RUBY_VERSION =~ /1\.8\.[56]/
+            @ssl.verify_result = "N/A for Ruby #{RUBY_VERSION}"
+          else
+            @ssl.verify_result = ssl.verify_result
+          end
           @ssl.peer_cert = ssl.peer_cert
         end
         ssl
