@@ -19,6 +19,9 @@ module Stomp
     # The certificate of the connection peer (the server), received during
     # the handshake.
     attr_accessor :peer_cert
+    # Optional list of SSL ciphers to be used.  In the format documented for
+    # Ruby's OpenSSL.
+    attr_accessor :ciphers
     #
     def initialize(opts={})
 
@@ -32,6 +35,8 @@ module Stomp
       #
       raise Stomp::Error::SSLClientParamsError if @cert_file.nil? && !@key_file.nil?
       raise Stomp::Error::SSLClientParamsError if !@cert_file.nil? && @key_file.nil?
+      #
+      @ciphers = opts[:ciphers]
     end
   end # of class SSLParams
 

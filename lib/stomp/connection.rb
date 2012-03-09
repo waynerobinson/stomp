@@ -629,14 +629,14 @@ module Stomp
         require 'openssl' unless defined?(OpenSSL)
         ctx = OpenSSL::SSL::SSLContext.new
         ctx.verify_mode = OpenSSL::SSL::VERIFY_NONE # Assume for now
-
-        #
-        # Here @ssl is either:
-        # * true - and no authentication either way is required
-        # * an instance of Stomp::SSLParams
-        # Control would not be here if @ssl == false or @ssl.nil?.
-        #
-        if @ssl != true # SSLParams
+        if @ssl == true
+          ctx.ciphers = Stomp::DEFAULT_CIPHERS
+        else
+          #
+          # Here @ssl is:
+          # * an instance of Stomp::SSLParams
+          # Control would not be here if @ssl == false or @ssl.nil?.
+          #
 
           # Server authentication parameters if required
           if @ssl.ts_files
@@ -657,6 +657,13 @@ module Stomp
           if @ssl.cert_file # Any check will do here
             ctx.cert = OpenSSL::X509::Certificate.new(File.open(@ssl.cert_file))
             ctx.key  = OpenSSL::PKey::RSA.new(File.open(@ssl.key_file))
+          end
+
+          # Cipher list
+          if @ssl.ciphers
+            ctx.ciphers = @ssl.ciphers
+          else
+            ctx.ciphers = Stomp::DEFAULT_CIPHERS
           end
         end
 

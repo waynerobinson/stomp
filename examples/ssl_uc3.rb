@@ -7,8 +7,7 @@ require "stomp"
 # SSL Use Case 3
 #
 ts_flist = []
-ts_flist << "/home/gmallard/sslwork/TestCA.crt"
-ts_flist << "/home/gmallard/hext/misc.code/ruby-misc/sslsamps/TestCA.crt"
+ts_flist << "/home/gmallard/sslwork/twocas_tj/serverCA/ServerTJCA.crt"
 ssl_opts = Stomp::SSLParams.new(:ts_files => ts_flist.join(","))
 #
 hash = { :hosts => [ 
