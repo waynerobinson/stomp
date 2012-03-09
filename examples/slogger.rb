@@ -158,6 +158,22 @@ class Slogger
     end
   end
 
+  def on_ssl_connecting(parms)
+    begin
+      @log.debug "SSL Connecting Parms #{info(parms)}"
+    rescue
+      @log.debug "SSL Connecting oops"
+    end
+  end
+
+  def on_ssl_connected(parms)
+    begin
+      @log.debug "SSL Connected Parms #{info(parms)}"
+    rescue
+      @log.debug "SSL Connected oops"
+    end
+  end
+
   private
 
   def info(parms)
@@ -172,7 +188,7 @@ class Slogger
     # parms[:cur_parseto]
     # parms[:cur_conattempts]
     #
-    "Host: #{parms[:cur_host]}, Port: #{parms[:cur_port]}, Login: Port: #{parms[:cur_login]}, Passcode: #{parms[:cur_passcode]}" 
+    "Host: #{parms[:cur_host]}, Port: #{parms[:cur_port]}, Login: Port: #{parms[:cur_login]}, Passcode: #{parms[:cur_passcode]}, ssl: #{parms[:cur_ssl]}"
   end
 end # of class
 

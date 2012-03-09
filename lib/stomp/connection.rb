@@ -668,7 +668,10 @@ module Stomp
         end
 
         #
-      	ssl = nil
+        ssl = nil
+        if @logger && @logger.respond_to?(:on_ssl_connecting)
+          @logger.on_ssl_connecting(log_params)
+        end
 
       	Timeout::timeout(@connect_timeout, Stomp::Error::SocketOpenTimeout) do
         	ssl = OpenSSL::SSL::SSLSocket.new(open_tcp_socket, ctx)
@@ -685,6 +688,9 @@ module Stomp
             @ssl.verify_result = ssl.verify_result
           end
           @ssl.peer_cert = ssl.peer_cert
+        end
+        if @logger && @logger.respond_to?(:on_ssl_connected)
+          @logger.on_ssl_connected(log_params)
         end
         ssl
       end
