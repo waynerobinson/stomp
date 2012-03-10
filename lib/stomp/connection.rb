@@ -629,14 +629,30 @@ module Stomp
         require 'openssl' unless defined?(OpenSSL)
         ctx = OpenSSL::SSL::SSLContext.new
         ctx.verify_mode = OpenSSL::SSL::VERIFY_NONE # Assume for now
-        if @ssl == true
-          ctx.ciphers = Stomp::DEFAULT_CIPHERS
-        else
+        #
+        # Note: if a client uses :ssl => true this results in the gem using
+        # the _default_ Ruby ciphers list.  This is _known_ to fail in later
+        # Ruby releases.  The gem provides a default cipher list that may
+        # function in these cases.  To use this connect with:
+        # * :ssl => Stomp::SSLParams.new
+        # * :ssl => Stomp::SSLParams.new(..., :ciphers => Stomp::DEFAULT_CIPHERS)
+        #
+        # If connecting with an SSLParams instance, and the _default_ Ruby
+        # ciphers list is required, use:
+        # * :ssl => Stomp::SSLParams.new(..., :use_ruby_ciphers => true)
+        #
+        # If a custom ciphers list is required, connect with:
+        # * :ssl => Stomp::SSLParams.new(..., :ciphers => custom_ciphers_list)
+        #
+        if @ssl != true
           #
           # Here @ssl is:
           # * an instance of Stomp::SSLParams
           # Control would not be here if @ssl == false or @ssl.nil?.
           #
+
+          # Back reference the SSLContext
+          @ssl.ctx = ctx
 
           # Server authentication parameters if required
           if @ssl.ts_files
@@ -651,7 +667,7 @@ module Stomp
           end
 
           # Client authentication parameters
-          # Both must be present or not, can not be a mix
+          # Both cert file and key file must be present or not, it can not be a mix
           raise Stomp::Error::SSLClientParamsError if @ssl.cert_file.nil? && !@ssl.key_file.nil?
           raise Stomp::Error::SSLClientParamsError if !@ssl.cert_file.nil? && @ssl.key_file.nil?
           if @ssl.cert_file # Any check will do here
@@ -660,10 +676,12 @@ module Stomp
           end
 
           # Cipher list
-          if @ssl.ciphers
-            ctx.ciphers = @ssl.ciphers
-          else
-            ctx.ciphers = Stomp::DEFAULT_CIPHERS
+          if !@ssl.use_ruby_ciphers # No Ruby ciphers (the default)
+            if @ssl.ciphers # User ciphers list?
+              ctx.ciphers = @ssl.ciphers # Accept user supplied ciphers
+            else
+              ctx.ciphers = Stomp::DEFAULT_CIPHERS # Just use Stomp defaults
+            end
           end
         end
 

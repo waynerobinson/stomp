@@ -22,6 +22,10 @@ module Stomp
     # Optional list of SSL ciphers to be used.  In the format documented for
     # Ruby's OpenSSL.
     attr_accessor :ciphers
+    # Abcolute command to use Ruby default ciphers
+    attr_reader :use_ruby_ciphers
+    # Back reference to the OpenSSL::SSL::SSLContext instance, gem sets before connect
+    attr_accessor :ctx # Set by the gem during connect, before the callbacks
     #
     def initialize(opts={})
 
@@ -37,6 +41,8 @@ module Stomp
       raise Stomp::Error::SSLClientParamsError if !@cert_file.nil? && @key_file.nil?
       #
       @ciphers = opts[:ciphers]
+      @use_ruby_ciphers = opts[:use_ruby_ciphers] ? opts[:use_ruby_ciphers] : false
+      #
     end
   end # of class SSLParams
 
