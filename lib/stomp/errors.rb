@@ -92,6 +92,12 @@ module Stomp
       end
     end
 
+    class StompServerError < RuntimeError
+      def message
+        "Connected, header read is nil, is this really a Stomp Server?"
+      end
+    end
+
   end # module Error
 end # module Stomp
 

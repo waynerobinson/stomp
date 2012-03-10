@@ -87,6 +87,7 @@ module Stomp
         @parse_timeout = 5		# To override, use hashed parameters
         @connect_timeout = 0	# To override, use hashed parameters
         @logger = nil     		# To override, use hashed parameters
+        warn "login looks like a URL, do you have the correct parameters?" if @login =~ /:\/\//
       end
 
       # Use Mutexes:  only one lock per each thread
@@ -492,6 +493,7 @@ module Stomp
             begin
               message_header += line
               line = read_socket.gets
+              raise Stomp::Error::StompServerError if line.nil?
             end until line =~ /^\s?\n$/
 
             # Checks if it includes content_length header
