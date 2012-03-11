@@ -98,6 +98,24 @@ module Stomp
       end
     end
 
+    class SSLNoKeyFileError < RuntimeError
+      def message
+        "client key file does not exist"
+      end
+    end
+
+    class SSLNoCertFileError < RuntimeError
+      def message
+        "client cert file does not exist"
+      end
+    end
+
+    class SSLNoTruststoreFileError < RuntimeError
+      def message
+        "a client truststore file does not exist"
+      end
+    end
+
   end # module Error
 end # module Stomp
 

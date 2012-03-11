@@ -663,6 +663,7 @@ module Stomp
             fl = @ssl.ts_files.split(",")
             fl.each do |fn|
               # Add next cert file listed
+              raise Stomp::Error::SSLNoTruststoreFileError if !File::exists?(fn)
               truststores.add_file(fn)
             end
             ctx.cert_store = truststores
@@ -673,7 +674,9 @@ module Stomp
           raise Stomp::Error::SSLClientParamsError if @ssl.cert_file.nil? && !@ssl.key_file.nil?
           raise Stomp::Error::SSLClientParamsError if !@ssl.cert_file.nil? && @ssl.key_file.nil?
           if @ssl.cert_file # Any check will do here
+            raise Stomp::Error::SSLNoCertFileError if !File::exists?(@ssl.cert_file)
             ctx.cert = OpenSSL::X509::Certificate.new(File.open(@ssl.cert_file))
+            raise Stomp::Error::SSLNoKeyFileError if !File::exists?(@ssl.key_file)
             ctx.key  = OpenSSL::PKey::RSA.new(File.open(@ssl.key_file))
           end
 
