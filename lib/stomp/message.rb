@@ -6,7 +6,7 @@ module Stomp
   class Message
     attr_accessor :command, :headers, :body, :original
 
-		@@allowed_commands = [ 'CONNECTED', 'MESSAGE', 'RECEIPT', 'ERROR' ]
+		@@allowed_commands = [ Stomp::CMD_CONNECTED, Stomp::CMD_MESSAGE, Stomp::CMD_RECEIPT, Stomp::CMD_ERROR ]
 
     def initialize(frame, protocol11p = false)
 			# p [ "00", frame, frame.encoding ]

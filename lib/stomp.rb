@@ -15,13 +15,13 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+require 'stomp/constants' # Constants first
 require 'stomp/ext/hash'
 require 'stomp/connection'
 require 'stomp/client'
 require 'stomp/message'
 require 'stomp/version'
 require 'stomp/errors'
-require 'stomp/constants'
 require 'stomp/codec'
 require 'stomp/sslparams'
 
