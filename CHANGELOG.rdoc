@@ -1,10 +1,11 @@
-== 1.2.1 yyyy-dd-mm
+== 1.2.1 2012-13-03
 
 * Robust SSL certificate support.  See examples and: https://github.com/morellon/stomp/wiki/extended-ssl-overview
 * Really remove the deprecated #send methods
 * Fix exception in Stomp 1.1 code when headers are frozen
-* Revert 245e734a0. See ce8335fb2f for details.
+* Revert 245e734a0. See ce8335fb2f for details. Fixes broken Connection#poll.
 * Add reconnection attempts to callback logging.
+* Add SSL specific connection information to callback logging.
 
 == 1.2.0 2011-14-12
 
