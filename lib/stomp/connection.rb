@@ -500,14 +500,14 @@ module Stomp
             content_length = message_header.match /content-length\s?:\s?(\d+)\s?\n/
             message_body = ''
 
-            # If it does, reads the specified amount of bytes
-            char = ''
+            # If content_length is present, read the specified amount of bytes
             if content_length
               message_body = read_socket.read content_length[1].to_i
               raise Stomp::Error::InvalidMessageLength unless parse_char(read_socket.getc) == "\0"
-            # Else reads, the rest of the message until the first \0
+            # Else read the rest of the message until the first \0
             else
-              message_body += char while (char = parse_char(read_socket.getc)) != "\0"
+              message_body = read_socket.readline("\0")
+              message_body.chop!
             end
 
             # If the buffer isn't empty, reads trailing new lines.
