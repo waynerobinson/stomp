@@ -629,93 +629,103 @@ module Stomp
 
       def open_ssl_socket
         require 'openssl' unless defined?(OpenSSL)
-        ctx = OpenSSL::SSL::SSLContext.new
-        ctx.verify_mode = OpenSSL::SSL::VERIFY_NONE # Assume for now
-        #
-        # Note: if a client uses :ssl => true this results in the gem using
-        # the _default_ Ruby ciphers list.  This is _known_ to fail in later
-        # Ruby releases.  The gem provides a default cipher list that may
-        # function in these cases.  To use this connect with:
-        # * :ssl => Stomp::SSLParams.new
-        # * :ssl => Stomp::SSLParams.new(..., :ciphers => Stomp::DEFAULT_CIPHERS)
-        #
-        # If connecting with an SSLParams instance, and the _default_ Ruby
-        # ciphers list is required, use:
-        # * :ssl => Stomp::SSLParams.new(..., :use_ruby_ciphers => true)
-        #
-        # If a custom ciphers list is required, connect with:
-        # * :ssl => Stomp::SSLParams.new(..., :ciphers => custom_ciphers_list)
-        #
-        if @ssl != true
+        begin # Any raised SSL exceptions
+          ctx = OpenSSL::SSL::SSLContext.new
+          ctx.verify_mode = OpenSSL::SSL::VERIFY_NONE # Assume for now
           #
-          # Here @ssl is:
-          # * an instance of Stomp::SSLParams
-          # Control would not be here if @ssl == false or @ssl.nil?.
+          # Note: if a client uses :ssl => true this results in the gem using
+          # the _default_ Ruby ciphers list.  This is _known_ to fail in later
+          # Ruby releases.  The gem provides a default cipher list that may
+          # function in these cases.  To use this connect with:
+          # * :ssl => Stomp::SSLParams.new
+          # * :ssl => Stomp::SSLParams.new(..., :ciphers => Stomp::DEFAULT_CIPHERS)
           #
+          # If connecting with an SSLParams instance, and the _default_ Ruby
+          # ciphers list is required, use:
+          # * :ssl => Stomp::SSLParams.new(..., :use_ruby_ciphers => true)
+          #
+          # If a custom ciphers list is required, connect with:
+          # * :ssl => Stomp::SSLParams.new(..., :ciphers => custom_ciphers_list)
+          #
+          if @ssl != true
+            #
+            # Here @ssl is:
+            # * an instance of Stomp::SSLParams
+            # Control would not be here if @ssl == false or @ssl.nil?.
+            #
 
-          # Back reference the SSLContext
-          @ssl.ctx = ctx
+            # Back reference the SSLContext
+            @ssl.ctx = ctx
 
-          # Server authentication parameters if required
-          if @ssl.ts_files
-            ctx.verify_mode = OpenSSL::SSL::VERIFY_PEER
-            truststores = OpenSSL::X509::Store.new
-            fl = @ssl.ts_files.split(",")
-            fl.each do |fn|
-              # Add next cert file listed
-              raise Stomp::Error::SSLNoTruststoreFileError if !File::exists?(fn)
-              truststores.add_file(fn)
+            # Server authentication parameters if required
+            if @ssl.ts_files
+              ctx.verify_mode = OpenSSL::SSL::VERIFY_PEER
+              truststores = OpenSSL::X509::Store.new
+              fl = @ssl.ts_files.split(",")
+              fl.each do |fn|
+                # Add next cert file listed
+                raise Stomp::Error::SSLNoTruststoreFileError if !File::exists?(fn)
+                truststores.add_file(fn)
+              end
+              ctx.cert_store = truststores
             end
-            ctx.cert_store = truststores
+
+            # Client authentication parameters
+            # Both cert file and key file must be present or not, it can not be a mix
+            raise Stomp::Error::SSLClientParamsError if @ssl.cert_file.nil? && !@ssl.key_file.nil?
+            raise Stomp::Error::SSLClientParamsError if !@ssl.cert_file.nil? && @ssl.key_file.nil?
+            if @ssl.cert_file # Any check will do here
+              raise Stomp::Error::SSLNoCertFileError if !File::exists?(@ssl.cert_file)
+              ctx.cert = OpenSSL::X509::Certificate.new(File.open(@ssl.cert_file))
+              raise Stomp::Error::SSLNoKeyFileError if !File::exists?(@ssl.key_file)
+              ctx.key  = OpenSSL::PKey::RSA.new(File.open(@ssl.key_file))
+            end
+
+            # Cipher list
+            if !@ssl.use_ruby_ciphers # No Ruby ciphers (the default)
+              if @ssl.ciphers # User ciphers list?
+                ctx.ciphers = @ssl.ciphers # Accept user supplied ciphers
+              else
+                ctx.ciphers = Stomp::DEFAULT_CIPHERS # Just use Stomp defaults
+              end
+            end
           end
 
-          # Client authentication parameters
-          # Both cert file and key file must be present or not, it can not be a mix
-          raise Stomp::Error::SSLClientParamsError if @ssl.cert_file.nil? && !@ssl.key_file.nil?
-          raise Stomp::Error::SSLClientParamsError if !@ssl.cert_file.nil? && @ssl.key_file.nil?
-          if @ssl.cert_file # Any check will do here
-            raise Stomp::Error::SSLNoCertFileError if !File::exists?(@ssl.cert_file)
-            ctx.cert = OpenSSL::X509::Certificate.new(File.open(@ssl.cert_file))
-            raise Stomp::Error::SSLNoKeyFileError if !File::exists?(@ssl.key_file)
-            ctx.key  = OpenSSL::PKey::RSA.new(File.open(@ssl.key_file))
+          #
+          ssl = nil
+          if @logger && @logger.respond_to?(:on_ssl_connecting)
+            @logger.on_ssl_connecting(log_params)
           end
 
-          # Cipher list
-          if !@ssl.use_ruby_ciphers # No Ruby ciphers (the default)
-            if @ssl.ciphers # User ciphers list?
-              ctx.ciphers = @ssl.ciphers # Accept user supplied ciphers
+        	Timeout::timeout(@connect_timeout, Stomp::Error::SocketOpenTimeout) do
+          	ssl = OpenSSL::SSL::SSLSocket.new(open_tcp_socket, ctx)
+        	end
+          def ssl.ready?
+            ! @rbuffer.empty? || @io.ready?
+          end
+          ssl.connect
+          if @ssl != true
+            # Pass back results if possible
+            if RUBY_VERSION =~ /1\.8\.[56]/
+              @ssl.verify_result = "N/A for Ruby #{RUBY_VERSION}"
             else
-              ctx.ciphers = Stomp::DEFAULT_CIPHERS # Just use Stomp defaults
+              @ssl.verify_result = ssl.verify_result
             end
+            @ssl.peer_cert = ssl.peer_cert
           end
-        end
-
-        #
-        ssl = nil
-        if @logger && @logger.respond_to?(:on_ssl_connecting)
-          @logger.on_ssl_connecting(log_params)
-        end
-
-      	Timeout::timeout(@connect_timeout, Stomp::Error::SocketOpenTimeout) do
-        	ssl = OpenSSL::SSL::SSLSocket.new(open_tcp_socket, ctx)
-      	end
-        def ssl.ready?
-          ! @rbuffer.empty? || @io.ready?
-        end
-        ssl.connect
-        if @ssl != true
-          # Pass back results if possible
-          if RUBY_VERSION =~ /1\.8\.[56]/
-            @ssl.verify_result = "N/A for Ruby #{RUBY_VERSION}"
-          else
-            @ssl.verify_result = ssl.verify_result
+          if @logger && @logger.respond_to?(:on_ssl_connected)
+            @logger.on_ssl_connected(log_params)
           end
-          @ssl.peer_cert = ssl.peer_cert
+          ssl
+        rescue Exception => ex
+          if @logger && @logger.respond_to?(:on_ssl_connectfail)
+            lp = log_params.clone
+            lp[:ssl_exception] = ex
+            @logger.on_ssl_connectfail(lp)
+          end
+          #
+          raise # Reraise
         end
-        if @logger && @logger.respond_to?(:on_ssl_connected)
-          @logger.on_ssl_connected(log_params)
-        end
-        ssl
       end
 
       def close_socket

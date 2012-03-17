@@ -174,6 +174,15 @@ class Slogger
     end
   end
 
+  def on_ssl_connectfail(parms)
+    begin
+      @log.debug "SSL Connect Fail Parms #{info(parms)}"
+      @log.debug "SSL Connect Fail Excception #{parms[:ssl_exception]}, #{parms[:ssl_exception].message}"
+    rescue
+      @log.debug "SSL Connect Fail oops"
+    end
+  end
+
   private
 
   def info(parms)
@@ -187,6 +196,9 @@ class Slogger
     # parms[:cur_recondelay]
     # parms[:cur_parseto]
     # parms[:cur_conattempts]
+    #
+    # For the on_ssl_connectfail callback these are also available:
+    # parms[:ssl_exception]
     #
     "Host: #{parms[:cur_host]}, Port: #{parms[:cur_port]}, Login: Port: #{parms[:cur_login]}, Passcode: #{parms[:cur_passcode]}, ssl: #{parms[:cur_ssl]}"
   end
