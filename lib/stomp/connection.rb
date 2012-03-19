@@ -141,8 +141,14 @@ module Stomp
             @failure = $!
             used_socket = nil
             raise unless @reliable
+            raise if @failure.class.to_s.index("Stomp::Error::LoggerConnectionError")
             if @logger && @logger.respond_to?(:on_connectfail)
-              @logger.on_connectfail(log_params)
+              # on_connectfail may raise
+              begin
+                @logger.on_connectfail(log_params)
+              rescue Exception => aex
+                raise if aex.class.to_s.index("Stomp::Error::LoggerConnectionError")
+              end
             else
               $stderr.print "connect to #{@host} failed: #{$!} will retry(##{@connection_attempts}) in #{@reconnect_delay}\n"
             end

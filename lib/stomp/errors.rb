@@ -116,6 +116,9 @@ module Stomp
       end
     end
 
+    class LoggerConnectionError < RuntimeError
+    end
+
   end # module Error
 end # module Stomp
 
