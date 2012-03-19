@@ -104,15 +104,33 @@ module Stomp
       end
     end
 
+    class SSLUnreadableKeyFileError < RuntimeError
+      def message
+        "client key file can not be read"
+      end
+    end
+
     class SSLNoCertFileError < RuntimeError
       def message
         "client cert file does not exist"
       end
     end
 
+    class SSLUnreadableCertFileError < RuntimeError
+      def message
+        "client cert file can not be read"
+      end
+    end
+
     class SSLNoTruststoreFileError < RuntimeError
       def message
         "a client truststore file does not exist"
+      end
+    end
+
+    class SSLUnreadableTruststoreFileError < RuntimeError
+      def message
+        "a client truststore file can not be read"
       end
     end
 

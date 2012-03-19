@@ -141,13 +141,13 @@ module Stomp
             @failure = $!
             used_socket = nil
             raise unless @reliable
-            raise if @failure.class.to_s.index("Stomp::Error::LoggerConnectionError")
+            raise if @failure.is_a?(Stomp::Error::LoggerConnectionError)
             if @logger && @logger.respond_to?(:on_connectfail)
               # on_connectfail may raise
               begin
                 @logger.on_connectfail(log_params)
               rescue Exception => aex
-                raise if aex.class.to_s.index("Stomp::Error::LoggerConnectionError")
+                raise if aex.is_a?(Stomp::Error::LoggerConnectionError)
               end
             else
               $stderr.print "connect to #{@host} failed: #{$!} will retry(##{@connection_attempts}) in #{@reconnect_delay}\n"
@@ -671,6 +671,7 @@ module Stomp
               fl.each do |fn|
                 # Add next cert file listed
                 raise Stomp::Error::SSLNoTruststoreFileError if !File::exists?(fn)
+                raise Stomp::Error::SSLUnreadableTruststoreFileError if !File::readable?(fn)
                 truststores.add_file(fn)
               end
               ctx.cert_store = truststores
@@ -682,8 +683,10 @@ module Stomp
             raise Stomp::Error::SSLClientParamsError if !@ssl.cert_file.nil? && @ssl.key_file.nil?
             if @ssl.cert_file # Any check will do here
               raise Stomp::Error::SSLNoCertFileError if !File::exists?(@ssl.cert_file)
+              raise Stomp::Error::SSLUnreadableCertFileError if !File::readable?(@ssl.cert_file)
               ctx.cert = OpenSSL::X509::Certificate.new(File.open(@ssl.cert_file))
               raise Stomp::Error::SSLNoKeyFileError if !File::exists?(@ssl.key_file)
+              raise Stomp::Error::SSLUnreadableKeyFileError if !File::readable?(@ssl.key_file)
               ctx.key  = OpenSSL::PKey::RSA.new(File.open(@ssl.key_file))
             end
 
