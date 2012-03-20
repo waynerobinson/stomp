@@ -56,8 +56,9 @@ module TestBase
 
   def get_ssl_connection()
     ch = get_conn_headers()
+    ssl_params = Stomp::SSLParams.new # S/B safe for all Ruby versions tested
     hash = { :hosts => [ 
-      {:login => user, :passcode => passcode, :host => host, :port => ssl_port, :ssl => true},
+      {:login => user, :passcode => passcode, :host => host, :port => ssl_port, :ssl => ssl_params},
       ],
       :connect_headers => ch
     }

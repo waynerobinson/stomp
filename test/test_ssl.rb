@@ -25,16 +25,11 @@ class TestSSL < Test::Unit::TestCase
     assert ssl_params.ts_files.nil?
     assert ssl_params.cert_file.nil?
     assert ssl_params.key_file.nil?
+    assert ssl_params.fsck.nil?
   end
 
   #
-  def test_ssl_0020
-    assert_raise(Stomp::Error::SSLClientParamsError) {
-      ssl_parms = Stomp::SSLParams.new(:cert_file => "dummy1")
-    }
-    assert_raise(Stomp::Error::SSLClientParamsError) {
-      ssl_parms = Stomp::SSLParams.new(:key_file => "dummy2")
-    }
+  def test_ssl_0020_noraise
     assert_nothing_raised {
       ssl_parms = Stomp::SSLParams.new(:cert_file => "dummy1", :key_file => "dummy2")
     }
@@ -42,7 +37,35 @@ class TestSSL < Test::Unit::TestCase
       ssl_parms = Stomp::SSLParams.new(:ts_files => "dummyts1")
     }
     assert_nothing_raised {
-      ssl_parms = Stomp::SSLParams.new(:ts_files => "dummyts1", :cert_file => "dummy1", :key_file => "dummy2")
+      ssl_parms = Stomp::SSLParams.new(:ts_files => "dummyts1", 
+        :cert_file => "dummy1", :key_file => "dummy2")
+    }
+  end
+  #
+  def test_ssl_0030_raise
+    assert_raise(Stomp::Error::SSLClientParamsError) {
+      ssl_parms = Stomp::SSLParams.new(:cert_file => "dummy1")
+    }
+    assert_raise(Stomp::Error::SSLClientParamsError) {
+      ssl_parms = Stomp::SSLParams.new(:key_file => "dummy2")
+    }
+  end
+
+  #
+  def test_ssl_0040_fsck
+    assert_raise(Stomp::Error::SSLNoCertFileError) {
+      ssl_parms = Stomp::SSLParams.new(:cert_file => "dummy1", 
+        :key_file => "dummy2", :fsck => true)
+    }
+    unless RUBY_VERSION =~ /cygwin/ || RUBY_VERSION =~ /msys/
+      assert_raise(Stomp::Error::SSLNoKeyFileError) {
+        ssl_parms = Stomp::SSLParams.new(:cert_file => "/etc/passwd",
+          :key_file => "dummy2", :fsck => true)
+      }
+    end
+    assert_raise(Stomp::Error::SSLNoTruststoreFileError) {
+      ssl_parms = Stomp::SSLParams.new(:ts_files => "/tmp/not-likely-here.txt", 
+        :fsck => true)
     }
   end
 
