@@ -12,7 +12,7 @@ class TestSSL < Test::Unit::TestCase
   end
 
   def teardown
-    @conn.disconnect if @conn.open? # allow tests to disconnect
+    @conn.disconnect if @conn && @conn.open? # allow tests to disconnect
   end
   #
   def test_ssl_0000
@@ -20,7 +20,7 @@ class TestSSL < Test::Unit::TestCase
   end
 
   #
-  def test_ssl_0010
+  def test_ssl_0010_parms
     ssl_params = Stomp::SSLParams.new
     assert ssl_params.ts_files.nil?
     assert ssl_params.cert_file.nil?
@@ -57,12 +57,10 @@ class TestSSL < Test::Unit::TestCase
       ssl_parms = Stomp::SSLParams.new(:cert_file => "dummy1", 
         :key_file => "dummy2", :fsck => true)
     }
-    unless RUBY_VERSION =~ /cygwin/ || RUBY_VERSION =~ /msys/
-      assert_raise(Stomp::Error::SSLNoKeyFileError) {
-        ssl_parms = Stomp::SSLParams.new(:cert_file => "/etc/passwd",
-          :key_file => "dummy2", :fsck => true)
-      }
-    end
+    assert_raise(Stomp::Error::SSLNoKeyFileError) {
+      ssl_parms = Stomp::SSLParams.new(:cert_file => __FILE__,
+        :key_file => "dummy2", :fsck => true)
+    }
     assert_raise(Stomp::Error::SSLNoTruststoreFileError) {
       ssl_parms = Stomp::SSLParams.new(:ts_files => "/tmp/not-likely-here.txt", 
         :fsck => true)
