@@ -25,7 +25,7 @@ module Stomp
 	SPL_10 = "1.0"
 	SPL_11 = "1.1"
 
-  # To be: No 1.1 yet
+  # Stomp 1.0 and 1.1
   SUPPORTED = [SPL_10, SPL_11]
 
   # 1.9 Encoding Name

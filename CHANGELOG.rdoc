@@ -1,3 +1,13 @@
+== 1.2.2 2012-24-03
+
+* Major performance improvement for read of messages without content-length header
+* Correct Stomp 1.1 failing test
+* Update sample code to reflect removal of 'send'
+* Add on_ssl_connectfail callback and allow clients to signal quit from the callback
+* Ensure that SSL certificates and SSL related files exist and are readable
+* Allow SSL file checks before connect using SSLParams.new(:fsck => true, ...)
+* Correct a test for Windows compatibility
+
 == 1.2.1 2012-13-03
 
 * Robust SSL certificate support.  See examples and: https://github.com/morellon/stomp/wiki/extended-ssl-overview

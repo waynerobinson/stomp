@@ -61,8 +61,8 @@ Rake::RDocTask.new do |rdoc|
   rdoc.rdoc_dir = "doc"
   rdoc.title = "Stomp"
   rdoc.options += %w[ --line-numbers --inline-source --charset utf-8 ]
-  rdoc.rdoc_files.include("README.rdoc", "CHANGELOG.rdoc")
-  rdoc.rdoc_files.include("lib/**/*.rb")
+  rdoc.rdoc_files.include("README.rdoc", "CHANGELOG.rdoc", "lib/**/*.rb", "examples/**/*.rb",
+    "test/**/*.rb")
 end
 
 Rake::TestTask.new do |t|

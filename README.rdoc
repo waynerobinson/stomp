@@ -1,8 +1,7 @@
 ==README
 
-* (http://gitorious.org/projects/stomp/)
 * (https://github.com/morellon/stomp/)
-* (http://stomp.rubyforge.org/)
+* (http://gitorious.org/projects/stomp/)
 
 ===Overview
 
@@ -12,13 +11,17 @@ An implementation of the Stomp protocol for Ruby. See:
 
 ===New
 
-Support of Stomp protocol level 1.1 is announced as of gem version 1.2.0.
+* Gem version 1.2.2.  Performance and more SSL enhancements.
+* Full support of SSL certificates is announced as of gem version 1.2.1.
+* Support of Stomp protocol level 1.1 is announced as of gem version 1.2.0.
+
+See the change log for details.
 
 ===Example Usage
 
     client = Stomp::Client.new("test", "user", "localhost", 61613)
-    client.send("/my/queue", "hello world!")
-    client.subscribe("/my/queue") do |msg|
+    client.send("/queue/mine", "hello world!")
+    client.subscribe("/queue/mine") do |msg|
       p msg
     end
 
@@ -26,11 +29,11 @@ Support of Stomp protocol level 1.1 is announced as of gem version 1.2.0.
 
     options = "initialReconnectDelay=5000&randomize=false&useExponentialBackOff=false"
     
-    #remotehost1 uses SSL, remotehost2 doesn't
+    # remotehost1 uses SSL, remotehost2 doesn't
     client = Stomp::Client.new("failover:(stomp+ssl://login1:passcode1@remotehost1:61612,stomp://login2:passcode2@remotehost2:61613)?#{options}")
     
-    client.publish("/my/queue", "hello world!")
-    client.subscribe("/my/queue") do |msg|
+    client.publish("/queue/mine", "hello world!")
+    client.subscribe("/queue/mine") do |msg|
       p msg
     end
 
@@ -63,26 +66,16 @@ Support of Stomp protocol level 1.1 is announced as of gem version 1.2.0.
     connection = Stomp::Connection.new(hash)
     
 
-===Contact info 
+===Hstorical Information
 
 Up until March 2009 the project was maintained and primarily developed by Brian McCallister. 
 
-The project is now maintained by Johan Sørensen <johan@johansorensen.com> and others.
-
-===Source Code
+===Source Code and Project URLs
 
   https://github.com/morellon/stomp/
   http://gitorious.org/projects/stomp/
-  http://github.com/js/stomp/
 
-===Project urls
-
-Project Home :
-
-  http://gitorious.org/projects/stomp/
-  http://rubyforge.org/projects/stomp/
-
-Stomp Protocol Info :
+===Stomp Protocol Information :
 
   http://stomp.github.com/index.html
 
@@ -110,6 +103,16 @@ The following people have contributed to Stomp:
 * Chris Needham
 * R.I. Pienaar
 * tworker
+* James Pearson
 
+= Announcements
+
+In the next version of the gem, the dates in CHANGELOG.rdoc will be changed from:
+
+* yyyy-dd-mm
+
+to:
+
+* ISO8601 format (yyyymmdd)
 
 
