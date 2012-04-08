@@ -170,7 +170,6 @@ module Stomp
 
     def refine_params(params)
       params = params.uncamelize_and_symbolize_keys
-
       default_params = {
         :connect_headers => {},
         :reliable => true,
@@ -184,11 +183,15 @@ module Stomp
         :backup => false,
         :connect_timeout => 0,
         # Parse Timeout
-        :parse_timeout => 5
+        :parse_timeout => 5,
+        :dmh => false,
       }
 
-      default_params.merge(params)
-
+      res_params = default_params.merge(params)
+      if res_params[:dmh]
+        res_params = _expand_hosts(res_params)
+      end
+      return res_params
     end
 
     def change_host
@@ -486,6 +489,30 @@ module Stomp
     end
 
     private
+
+      def _expand_hosts(hash)
+        new_hash = hash.clone
+        new_hash[:hosts_cloned] = hash[:hosts].clone
+        new_hash[:hosts] = []
+        #
+        hash[:hosts].each do |host_parms|
+          ai = Socket.getaddrinfo(host_parms[:host], nil, nil, Socket::SOCK_STREAM)
+          next if ai.nil? || ai.size == 0
+          info6 = ai.detect {|info| info[4] == Socket::AF_INET6}
+          info4 = ai.detect {|info| info[4] == Socket::AF_INET}
+          if info6
+            new_hostp = host_parms.clone
+            new_hostp[:host] = info6[3]
+            new_hash[:hosts] << new_hostp
+          end
+          if info4
+            new_hostp = host_parms.clone
+            new_hostp[:host] = info4[3]
+            new_hash[:hosts] << new_hostp
+          end
+        end
+        return new_hash
+      end
 
       def _receive( read_socket )
         @read_semaphore.synchronize do
