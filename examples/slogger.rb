@@ -175,7 +175,7 @@ class Slogger
   def on_ssl_connectfail(parms)
     begin
       @log.debug "SSL Connect Fail Parms #{info(parms)}"
-      @log.debug "SSL Connect Fail Excception #{parms[:ssl_exception]}, #{parms[:ssl_exception].message}"
+      @log.debug "SSL Connect Fail Exception #{parms[:ssl_exception]}, #{parms[:ssl_exception].message}"
     rescue
       @log.debug "SSL Connect Fail oops"
     end
