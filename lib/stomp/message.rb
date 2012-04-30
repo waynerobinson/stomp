@@ -41,7 +41,7 @@ module Stomp
       end
       self.command = work_command
       work_headers.split("\n").map do |value|
-        parsed_value = value.match /^([\w|-]*):(.*)$/
+        parsed_value = value.match /^([\r|\w|-]*):(.*)$/
 				raise Stomp::Error::InvalidFormat, 'parsed header value' unless parsed_value
         #
         pk = parsed_value[1]
