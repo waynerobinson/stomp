@@ -3,11 +3,12 @@
 #
 require "rubygems"
 require "stomp"
-
 #
-# If you use SSLParams, and need the _default_ Ruby ciphers, this is how. 
+# If you use SSLParams, and need the _default_ Ruby ciphers, this is how.
 #
-ssl_opts = Stomp::SSLParams.new(:use_ruby_ciphers => true)
+# NOTE: JRuby users may find that this is a *required* action. YMMV.
+#
+ssl_opts = Stomp::SSLParams.new(:use_ruby_ciphers => true) # Plus other parameters as needed
 #
 # SSL Use Case: Using default Stomp ciphers
 #
@@ -17,7 +18,7 @@ hash = { :hosts => [
       ]
     }
 #
-puts "Connect starts, SSL Use Case X"
+puts "Connect starts, SSL , Use Default Ruby Ciphers"
 c = Stomp::Connection.new(hash)
 puts "Connect completed"
 #

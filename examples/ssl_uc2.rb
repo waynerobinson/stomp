@@ -4,7 +4,19 @@
 require "rubygems"
 require "stomp"
 #
-# SSL Use Case 2
+# SSL Use Case 2 - server does *not* authenticate client, client *does* authenticate server
+#
+# Subcase 2.A - Message broker configuration does *not* require client authentication
+#
+# - Expect connection success
+# - Expect a verify result of 20 becuase the client did not authenticate the
+#   server's certificate.
+#
+# Subcase 2.B - Message broker configuration *does* require client authentication
+#
+# - Expect connection success if the server can authenticate the client certificate
+# - Expect a verify result of 20 because the client did not authenticate the
+#   server's certificate.
 #
 ssl_opts = Stomp::SSLParams.new(:key_file => "/home/gmallard/sslwork/twocas_tj/clientCA/ClientTJ.key",
   :cert_file => "/home/gmallard/sslwork/twocas_tj/clientCA/ClientTJ.crt")
@@ -12,19 +24,14 @@ ssl_opts = Stomp::SSLParams.new(:key_file => "/home/gmallard/sslwork/twocas_tj/c
 #
 hash = { :hosts => [ 
       {:login => 'guest', :passcode => 'guest', :host => 'localhost', :port => 61612, :ssl => ssl_opts},
-      ]
+      ],
+    :reliable => false, # YMMV, to test this in a sane manner
     }
 #
 puts "Connect starts, SSL Use Case 2"
 c = Stomp::Connection.new(hash)
 puts "Connect completed"
-#
-# Expect a verify_result == 20
-#
-# This means: the client did not verify the peer's certificate, but the 
-# handshake succeeds, and the connection is allowed.
-#
 puts "SSL Verify Result: #{ssl_opts.verify_result}"
-puts "SSL Peer Certificate:\n#{ssl_opts.peer_cert}"
+# puts "SSL Peer Certificate:\n#{ssl_opts.peer_cert}"
 c.disconnect
 
