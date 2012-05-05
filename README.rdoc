@@ -1,7 +1,6 @@
 ==README
 
 * (https://github.com/morellon/stomp/)
-* (http://gitorious.org/projects/stomp/)
 
 ===Overview
 
@@ -73,7 +72,6 @@ Up until March 2009 the project was maintained and primarily developed by Brian 
 ===Source Code and Project URLs
 
   https://github.com/morellon/stomp/
-  http://gitorious.org/projects/stomp/
 
 ===Stomp Protocol Information :
 
