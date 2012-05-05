@@ -20,7 +20,8 @@ describe Stomp::Connection do
       :backup => false,
       :connect_timeout => 0,
       :parse_timeout => 5,
-      :connect_headers => {}
+      :connect_headers => {},
+      :dmh => false,
     }
         
     #POG:
@@ -298,7 +299,8 @@ describe Stomp::Connection do
           :backup => false,
           :connect_timeout => 0,
           :parse_timeout => 5,
-          :connect_headers => {}
+          :connect_headers => {},
+          :dmh => false,
         }
         
         used_hash =  {
@@ -330,7 +332,8 @@ describe Stomp::Connection do
           :parse_timeout => 20,
           :connect_headers => {:lerolero => "ronaldo"},
           :dead_letter_queue => "queue/Error",
-          :max_redeliveries => 10
+          :max_redeliveries => 10,
+          :dmh => false,
         }
         
         @connection = Stomp::Connection.new(used_hash)
