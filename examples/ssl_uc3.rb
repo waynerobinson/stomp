@@ -1,5 +1,5 @@
 #
-# Reference: https://github.com/morellon/stomp/wiki/extended-ssl-overview
+# Reference: https://github.com/stompgem/stomp/wiki/extended-ssl-overview
 #
 require "rubygems"
 require "stomp"

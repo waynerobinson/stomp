@@ -10,7 +10,7 @@
 
 == 1.2.1 20120313
 
-* Robust SSL certificate support.  See examples and: https://github.com/morellon/stomp/wiki/extended-ssl-overview
+* Robust SSL certificate support.  See examples and: https://github.com/stompgem/stomp/wiki/extended-ssl-overview
 * Really remove the deprecated #send methods
 * Fix exception in Stomp 1.1 code when headers are frozen
 * Revert 245e734a0. See ce8335fb2f for details. Fixes broken Connection#poll.
