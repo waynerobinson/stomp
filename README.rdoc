@@ -1,6 +1,6 @@
 ==README
 
-* (https://github.com/morellon/stomp/)
+* (https://github.com/stompgem/stomp/)
 
 ===Overview
 
@@ -71,7 +71,7 @@ Up until March 2009 the project was maintained and primarily developed by Brian 
 
 ===Source Code and Project URLs
 
-  https://github.com/morellon/stomp/
+  https://github.com/stompgem/stomp/
 
 ===Stomp Protocol Information :
 
@@ -86,7 +86,7 @@ The following people have contributed to Stomp:
 * jstrachan 
 * Marius Mathiesen <marius.mathiesen@gmail.com>
 * Johan S√∏rensen <johan@johansorensen.com>
-* Thiago Morello <morellon@gmail.com>
+* Thiago Morello <stompgem@gmail.com>
 * Guy M. Allard
 * kookster
 * Tony Garnock-Jones <tonyg@lshift.net>

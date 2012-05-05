@@ -33,7 +33,7 @@ begin
     gem.description = %Q{Ruby client for the Stomp messaging protocol.  Note that this gem is no longer supported on rubyforge.}
     gem.email = ["brianm@apache.org", 'marius@stones.com', 'morellon@gmail.com',
        'allard.guy.m@gmail.com' ]
-    gem.homepage = "https://github.com/morellon/stomp"
+    gem.homepage = "https://github.com/stompgem/stomp"
     gem.authors = ["Brian McCallister", 'Marius Mathiesen', 'Thiago Morello',
         'Guy M. Allard']
     gem.add_development_dependency "rspec", '>= 2.3'
