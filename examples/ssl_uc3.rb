@@ -9,16 +9,18 @@ require "stomp"
 # Subcase 3.A - Message broker configuration does *not* require client authentication
 #
 # - Expect connection success
-# - Expect a verify result of 0 becuase the client did authenticate the
+# - Expect a verify result of 20 becuase the client did not authenticate the
 #   server's certificate.
 #
 # Subcase 3.B - Message broker configuration *does* require client authentication
 #
-# - Expect connection failure (broker must be sent a valid client certificate)
+# - Expect connection success if the server can authenticate the client certificate
+# - Expect a verify result of 20 because the client did not authenticate the
+#   server's certificate.
 #
-ts_flist = []
-ts_flist << "/home/gmallard/sslwork/twocas_tj/serverCA/ServerTJCA.crt"
-ssl_opts = Stomp::SSLParams.new(:ts_files => ts_flist.join(","))
+ssl_opts = Stomp::SSLParams.new(:key_file => "/home/gmallard/sslwork/twocas_tj/clientCA/ClientTJ.key",
+  :cert_file => "/home/gmallard/sslwork/twocas_tj/clientCA/ClientTJ.crt")
+
 #
 hash = { :hosts => [ 
       {:login => 'guest', :passcode => 'guest', :host => 'localhost', :port => 61612, :ssl => ssl_opts},
