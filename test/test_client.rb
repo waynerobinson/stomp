@@ -18,6 +18,12 @@ class TestClient < Test::Unit::TestCase
     @client.close if @client.open? # allow tests to close
   end
 
+  def test_poll_async
+    # If the test 'hangs' here, Connection#poll is broken.
+    m = @client.poll
+    assert m.nil?
+  end
+
   def test_ack_api_works
     @client.publish make_destination, message_text, {:suppress_content_length => true}
 

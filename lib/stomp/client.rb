@@ -265,6 +265,12 @@ module Stomp
       @connection.uuid()
     end
 
+    # Poll for asynchronous messages issued by broker.
+    # Return nil of no message available, else the message
+    def poll
+      @connection.poll
+    end
+
     private
       # Set a subscription id in the headers hash if one does not already exist.
       # For simplicities sake, all subscriptions have a subscription ID.
