@@ -384,5 +384,35 @@ class TestConnection < Test::Unit::TestCase
     end
   end
 
+  # Test to illustrate Issue #44.  Prior to a fix for #44, these tests would
+  # fail only when connecting to a pure STOMP 1.0 server that does not 
+  # return a 'version' header at all.
+  def test_conn10_simple
+    @conn.disconnect
+    #
+    hash = { :hosts => [ 
+      {:login => user, :passcode => passcode, :host => host, :port => port, :ssl => false},
+      ],
+      :connect_headers => {"accept-version" => "1.0", "host" => host},
+      :reliable => false,
+    }
+    c = nil
+    assert_nothing_raised {
+      c = Stomp::Connection.new(hash)
+    }
+    c.disconnect if c
+    #
+    hash = { :hosts => [ 
+      {:login => user, :passcode => passcode, :host => host, :port => port, :ssl => false},
+      ],
+      :connect_headers => {"accept-version" => "3.14159,1.0,12.0", "host" => host},
+      :reliable => false,
+    }
+    c = nil
+    assert_nothing_raised {
+      c = Stomp::Connection.new(hash)
+    }
+    c.disconnect if c
+  end
 end
 

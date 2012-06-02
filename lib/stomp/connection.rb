@@ -842,10 +842,16 @@ module Stomp
       def _post_connect
         return unless (@connect_headers[:"accept-version"] && @connect_headers[:host])
         return if @connection_frame.command == Stomp::CMD_ERROR
+        # We are CONNECTed
         cfh = @connection_frame.headers.symbolize_keys
         @protocol = cfh[:version]
-        # Should not happen, but check anyway
-        raise Stomp::Error::UnsupportedProtocolError unless Stomp::SUPPORTED.index(@protocol)
+        if @protocol
+          # Should not happen, but check anyway
+          raise Stomp::Error::UnsupportedProtocolError unless Stomp::SUPPORTED.index(@protocol)
+        else # CONNECTed to a 1.0 server that does not return *any* 1.1 type headers
+          @protocol = Stomp::SPL_10 # reset
+          return
+        end 
         # Heartbeats
         return unless @connect_headers[:"heart-beat"]
         _init_heartbeats()
