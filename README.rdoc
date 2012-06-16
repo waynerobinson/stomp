@@ -10,6 +10,7 @@ An implementation of the Stomp protocol for Ruby. See:
 
 ===New
 
+* Gem version 1.2.3.  Miscellaneous fixes, see changelog for details.
 * Gem version 1.2.2.  Performance and more SSL enhancements.
 * Full support of SSL certificates is announced as of gem version 1.2.1.
 * Support of Stomp protocol level 1.1 is announced as of gem version 1.2.0.
@@ -45,6 +46,7 @@ See the change log for details.
         
       ],
       # These are the default parameters, don't need to be set
+      :reliable => true, # true for hash login
       :initial_reconnect_delay => 0.01,
       :max_reconnect_delay => 30.0,
       :use_exponential_back_off => true,
@@ -81,7 +83,7 @@ Up until March 2009 the project was maintained and primarily developed by Brian 
 
 The following people have contributed to Stomp:
 
-* Brian McCaliister
+* Brian McCallister
 * Glenn Rempe <glenn@rempe.us>
 * jstrachan 
 * Marius Mathiesen <marius.mathiesen@gmail.com>
@@ -102,15 +104,6 @@ The following people have contributed to Stomp:
 * R.I. Pienaar
 * tworker
 * James Pearson
-
-= Announcements
-
-In the next version of the gem, the dates in CHANGELOG.rdoc will be changed from:
-
-* yyyy-dd-mm
-
-to:
-
-* ISO8601 format (yyyymmdd)
-
+* Craig
+* Tommy Bishop
 

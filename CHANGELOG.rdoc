@@ -1,3 +1,15 @@
+== 1.2.3 20120616
+
+* Fix UnsupportedProtocol on connect to a 1.0 broker
+* Add Client#poll method
+* Add help to stompcat and catstomp
+* Allow password to be set for private SSL key
+* Update comments to reflect new repository URL
+* Reformat changelog dates to ISO8601
+* Fix SSL connection failures using JRuby
+* Use symbols, not strings for all header keys
+* Add IPV6 to IPV4 failover for dual homed systems when requested
+
 == 1.2.2 20120324
 
 * Major performance improvement for read of messages without content-length header
