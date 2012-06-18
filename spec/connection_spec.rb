@@ -33,7 +33,7 @@ describe Stomp::Connection do
     # clone() does a shallow copy, we want a deep one so we can garantee the hosts order
     normal_parameters = Marshal::load(Marshal::dump(@parameters))
 
-    @tcp_socket = mock(:tcp_socket, :close => nil, :puts => nil, :write => nil, :setsockopt => nil)
+    @tcp_socket = mock(:tcp_socket, :close => nil, :puts => nil, :write => nil, :setsockopt => nil, :flush => true)
     TCPSocket.stub!(:open).and_return @tcp_socket
     @connection = Stomp::Connection.new(normal_parameters)
   end
@@ -233,7 +233,7 @@ describe Stomp::Connection do
       
       before(:each) do
         ssl_parameters = {:hosts => [{:login => "login2", :passcode => "passcode2", :host => "remotehost", :ssl => true}]}
-        @ssl_socket = mock(:ssl_socket, :puts => nil, :write => nil, :setsockopt => nil)
+        @ssl_socket = mock(:ssl_socket, :puts => nil, :write => nil, :setsockopt => nil, :flush => true)
         
         TCPSocket.should_receive(:open).and_return @tcp_socket
         OpenSSL::SSL::SSLSocket.should_receive(:new).and_return(@ssl_socket)
