@@ -1,3 +1,5 @@
+# -*- encoding: utf-8 -*-
+
 #
 # The current require dance for different Ruby versions.
 # Change this to suit your requirements.
@@ -26,7 +28,7 @@ raise "Unexpected protocol level" if conn.protocol != Stomp::SPL_11
 # * for subscribe, the 'id' header is now _required_
 # * for unsubscribe, the 'id' header is now _required_
 #
-# The 'id' header specifies a 'subscription id' that must be unique for
+# The 'id' header specifies a 'subscription id' that _must_ be unique for
 # the current session.
 #
 qname = "/queue/nodea.nodeb.nodec"

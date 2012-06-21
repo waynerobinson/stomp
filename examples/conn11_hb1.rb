@@ -1,3 +1,5 @@
+# -*- encoding: utf-8 -*-
+
 #
 # The current require dance for different Ruby versions.
 # Change this to suit your requirements.
@@ -26,12 +28,12 @@ conn_hdrs = {"accept-version" => "1.1",    # 1.1
     }
 # Create a logger for demonstration purposes
 logger = Slogger.new
-# Connect
+# Connect - a paramaterized request.
 conn = Stomp::Connection.new(login, passcode, host, port,   # Normal connect parms
-  false,      # Not reliable, the default
-  5,          # Connect redelay, the default
-  conn_hdrs)  # The 1.1 connection parameters
-puts "Connection complete"
+  false,      # Not reliable, the default for a paramaterized connection
+  5,          # Connect redelay, the default for a paramaterized connection
+  conn_hdrs)  # The 1.1 connection parameters / headers
+puts "Connection connect complete"
 #
 raise "Unexpected protocol level" if conn.protocol != Stomp::SPL_11
 #
@@ -40,7 +42,7 @@ sleep 65
 conn.set_logger(nil)    # No logging
 #
 conn.disconnect   # Get out
-puts "Disconnect complete"
+puts "Connection disconnect complete"
 
 
 

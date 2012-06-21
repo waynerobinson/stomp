@@ -1,3 +1,5 @@
+# -*- encoding: utf-8 -*-
+
 require 'rubygems'
 require 'stomp'
 require 'logger'  # for the 'local' logger
@@ -6,7 +8,7 @@ $:.unshift(File.dirname(__FILE__))
 #
 require 'slogger'
 #
-# A STOMP client program which uses the callback logging facility.
+# A STOMP::Connection program which uses the callback logging facility.
 #
 llog =        Logger::new(STDOUT)
 llog.level =  Logger::DEBUG
@@ -14,7 +16,6 @@ llog.debug "LE Starting"
 
 # //////////////////////////////////////////////////////////////////////////////
 mylog = Slogger::new  # The client provided STOMP callback logger
-# -*- encoding: utf-8 -*-
 
 # //////////////////////////////////////////////////////////////////////////////
 user =      ENV['STOMP_USER'] ? ENV['STOMP_USER'] : 'guest'

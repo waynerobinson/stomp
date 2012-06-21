@@ -1,3 +1,5 @@
+# -*- encoding: utf-8 -*-
+
 #
 # Common Stomp 1.1 code.
 #

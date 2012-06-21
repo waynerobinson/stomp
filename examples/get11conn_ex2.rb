@@ -1,3 +1,5 @@
+# -*- encoding: utf-8 -*-
+
 #
 # The current require dance for different Ruby versions.
 # Change this to suit your requirements.

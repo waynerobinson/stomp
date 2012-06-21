@@ -1,3 +1,5 @@
+# -*- encoding: utf-8 -*-
+
 #
 # Reference: https://github.com/stompgem/stomp/wiki/extended-ssl-overview
 #

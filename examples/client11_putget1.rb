@@ -1,3 +1,5 @@
+# -*- encoding: utf-8 -*-
+
 #
 # The current require dance for different Ruby versions.
 # Change this to suit your requirements.
@@ -26,7 +28,7 @@ client_hash = { :hosts => [
     }
 #
 client = Stomp::Client.new(client_hash)
-puts "Connection complete"
+puts "Client Connect complete"
 #
 raise "Unexpected protocol level" if client.protocol() != Stomp::SPL_11
 #
@@ -51,7 +53,7 @@ raise "Unexpected data" if data != message.body
 raise "Bad subscription header" if uuid != message.headers['subscription']
 #
 client.close   # Business as usual, just like 1.0
-puts "Disclientect complete"
+puts "Client close complete"
 
 
 

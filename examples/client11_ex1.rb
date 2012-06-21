@@ -1,3 +1,5 @@
+# -*- encoding: utf-8 -*-
+
 #
 # The current require dance for different Ruby versions.
 # Change this to suit your requirements.
@@ -13,11 +15,11 @@ include Stomp11Common
 # Stomp 1.1 Client Example 1
 # ==============================
 #
-# Purpose: to demonstrate a clientect and disclientect sequence using Stomp 1.1
-# with the Stomp#client intreface.
+# Purpose: to demonstrate a connect and disconnect sequence using Stomp 1.1
+# with the Stomp#Client interface.
 #
-# Note: Stomp#client does not provide a positional set of parameters that
-# contain a 'clientect_headers' parameter.  To use the Stomp#client interface
+# Note: Stomp#Client does not provide a positional set of parameters that
+# contain a 'connect_headers' parameter.  To use the Stomp#Client interface
 # you _must_ use a 'hashed' set of parameters.
 #
 # Create connection headers
@@ -26,8 +28,8 @@ include Stomp11Common
 # The two headers used here are _required_ by the specification.
 #
 client_hdrs = {"accept-version" => "1.1",    # Demand a 1.1 connection (use a CSV list if you will consider multiple versions)
-      "host" => virt_host,                 # The 1.1 vhost (could be different than connection host)
-    }                                      # No heartbeats here:  there will be none for this connection
+      "host" => virt_host,                   # The 1.1 vhost (could be different than connection host)
+    }                                        # No heartbeats here:  there will be none for this connection
 #
 # Create the connect hash.
 # ========================
@@ -42,7 +44,7 @@ client_hash = { :hosts => [
 # ================
 #
 client = Stomp::Client.new(client_hash)
-puts "Connection complete"
+puts "Client Connect complete"
 #
 # Let's just do some sanity checks, and look around.
 #
@@ -72,7 +74,7 @@ puts "Server requested heartbeats - \t#{client.connection_frame().headers['heart
 # =============
 #
 client.close   # Business as usual, just like 1.0
-puts "Disclientect complete"
+puts "Client close complete"
 
 
 

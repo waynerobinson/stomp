@@ -1,3 +1,5 @@
+# -*- encoding: utf-8 -*-
+
 #
 # The current require dance for different Ruby versions.
 # Change this to suit your requirements.
@@ -15,7 +17,7 @@ include Stomp11Common
 #
 # Purpose: to demonstrate a connect and disconnect sequence using Stomp 1.1.
 #
-# Note: this example assumes that you have at least the 1.1.11 gem release 
+# Note: this example assumes that you have at least the 1.2.0 gem release 
 # installed.
 #
 # When you:
@@ -45,8 +47,9 @@ include Stomp11Common
 #
 # * heartbeat request
 #
-# Using the stomp gem, you specify this data in the "connect_headers" Hash
-# parameter.
+# Using the stomp gem, you can specify this data in the "connect_headers" Hash
+# parameter or a paramaterized connection request.  This example uses a 
+# parameterized request.
 #
 # So .........
 #
@@ -63,10 +66,10 @@ conn_hdrs = {"accept-version" => "1.1",    # Demand a 1.1 connection (use a CSV 
 # ================
 #
 conn = Stomp::Connection.new(login, passcode, host, port,   # Normal connect parms
-  false,      # Not reliable, the default
+  false,      # Not reliable, the default for a parameter connection
   5,          # Connect redelay, the default
   conn_hdrs)  # The 1.1 connection parameters
-puts "Connection complete"
+puts "Connection connect complete"
 #
 # Let's just do some sanity checks, and look around.
 #
@@ -95,7 +98,7 @@ puts "Server requested heartbeats - \t#{conn.connection_frame.headers['heart-bea
 # ==================
 #
 conn.disconnect   # Business as usual, just like 1.0
-puts "Disconnect complete"
+puts "Connection disconnect complete"
 
 
 

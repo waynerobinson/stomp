@@ -1,3 +1,5 @@
+# -*- encoding: utf-8 -*-
+
 #
 # The current require dance for different Ruby versions.
 # Change this to suit your requirements.
@@ -33,6 +35,7 @@ conn_hdrs = {"accept-version" => "1.1",    # Demand a 1.1 connection (use a CSV 
 conn_hash = { :hosts => [ 
       {:login => login, :passcode => passcode, :host => host, :port => port},
       ],
+      :reliable => false, # Override default
       :connect_headers => conn_hdrs,
     }
 #
