@@ -531,7 +531,17 @@ module Stomp
 
       def _receive( read_socket )
         @read_semaphore.synchronize do
-          line = read_socket.gets
+          line = ''
+          if @protocol == Stomp::SPL_10 || (@protocol >= Stomp::SPL_11 && !@hbr)
+            line = read_socket.gets # The old way
+          else # We are >= 1.1 and receiving heartbeats.
+            while true
+              line = read_socket.gets # Data from wire
+              break unless line == "\n"
+              line = ''
+              @lr = Time.now.to_f
+            end
+          end
           return nil if line.nil?
           # If the reading hangs for more than X seconds, abort the parsing process.
           # X defaults to 5.  Override allowed in connection hash parameters.
