@@ -265,6 +265,16 @@ module Stomp
       @connection.uuid()
     end
 
+    # Retrieve heartbeat send interval
+    def hbsend_interval
+      @connection.hbsend_interval
+    end
+
+    # Retrieve heartbeat receive interval
+    def hbrecv_interval
+      @connection.hbrecv_interval
+    end
+
     # Poll for asynchronous messages issued by broker.
     # Return nil of no message available, else the message
     def poll

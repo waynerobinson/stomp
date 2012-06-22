@@ -491,6 +491,18 @@ module Stomp
       rs
     end
 
+    # Retrieve heartbeat send interval
+    def hbsend_interval
+      return 0 unless @hbsend_interval
+      @hbsend_interval / 1000.0 # ms
+    end
+
+    # Retrieve heartbeat receive interval
+    def hbrecv_interval
+      return 0 unless @hbrecv_interval
+      @hbrecv_interval / 1000.0 # ms
+    end
+
     private
 
       def _expand_hosts(hash)
@@ -874,7 +886,7 @@ module Stomp
         #
         @cx = @cy = @sx = @sy = 0, # Variable names as in spec
         #
-        @sti = @rti = 0.0 # Send/Receive ticker interval.
+        @hbsend_interval = @hbrecv_interval = 0.0 # Send/Receive ticker interval.
         #
         @ls = @lr = -1.0 # Last send/receive time (from Time.now.to_f)
         #
@@ -903,7 +915,7 @@ module Stomp
         # If sending
         if @hbs
           sm = @cx >= @sy ? @cx : @sy # ticker interval, ms
-          @sti = 1000.0 * sm # ticker interval, μs
+          @hbsend_interval = 1000.0 * sm # ticker interval, μs
           @ls = Time.now.to_f # best guess at start
           _start_send_ticker
         end
@@ -911,7 +923,7 @@ module Stomp
         # If receiving
         if @hbr
           rm = @sx >= @cy ? @sx : @cy # ticker interval, ms
-          @rti = 1000.0 * rm # ticker interval, μs
+          @hbrecv_interval = 1000.0 * rm # ticker interval, μs
           @lr = Time.now.to_f # best guess at start
           _start_receive_ticker
         end
@@ -919,7 +931,7 @@ module Stomp
       end
 
       def _start_send_ticker
-        sleeptime = @sti / 1000000.0 # Sleep time secs
+        sleeptime = @hbsend_interval / 1000000.0 # Sleep time secs
         @st = Thread.new {
           while true do
             sleep sleeptime
@@ -928,7 +940,7 @@ module Stomp
               @logger.on_hbfire(log_params, "send_fire", curt)
             end
             delta = curt - @ls
-            if delta > (@sti - (@sti/5.0)) / 1000000.0 # Be tolerant (minus)
+            if delta > (@hbsend_interval - (@hbsend_interval/5.0)) / 1000000.0 # Be tolerant (minus)
               if @logger && @logger.respond_to?(:on_hbfire)
                 @logger.on_hbfire(log_params, "send_heartbeat", curt)
               end
@@ -941,7 +953,7 @@ module Stomp
                 rescue Exception => sendex
                   @hb_sent = false # Set the warning flag
                   if @logger && @logger.respond_to?(:on_hbwrite_fail)
-                    @logger.on_hbwrite_fail(log_params, {"ticker_interval" => @sti,
+                    @logger.on_hbwrite_fail(log_params, {"ticker_interval" => @hbsend_interval,
                       "exception" => sendex})
                   end
                   raise # Re-raise.  What else could be done here?
@@ -954,7 +966,7 @@ module Stomp
       end
 
       def _start_receive_ticker
-        sleeptime = @rti / 1000000.0 # Sleep time secs
+        sleeptime = @hbrecv_interval / 1000000.0 # Sleep time secs
         @rt = Thread.new {
           while true do
             sleep sleeptime
@@ -963,7 +975,7 @@ module Stomp
               @logger.on_hbfire(log_params, "receive_fire", curt)
             end
             delta = curt - @lr
-            if delta > ((@rti + (@rti/5.0)) / 1000000.0) # Be tolerant (plus)
+            if delta > ((@hbrecv_interval + (@hbrecv_interval/5.0)) / 1000000.0) # Be tolerant (plus)
               if @logger && @logger.respond_to?(:on_hbfire)
                 @logger.on_hbfire(log_params, "receive_heartbeat", curt)
               end
@@ -983,7 +995,7 @@ module Stomp
                 # Shrug.  Have not received one.  Just set warning flag.
                 @hb_received = false
                 if @logger && @logger.respond_to?(:on_hbread_fail)
-                  @logger.on_hbread_fail(log_params, {"ticker_interval" => @rti})
+                  @logger.on_hbread_fail(log_params, {"ticker_interval" => @hbrecv_interval})
                 end
               end
             else
