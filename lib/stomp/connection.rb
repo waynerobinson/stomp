@@ -503,6 +503,18 @@ module Stomp
       @hbrecv_interval / 1000.0 # ms
     end
 
+    # Retrieve heartbeat send count
+    def hbsend_count
+      return 0 unless @hbsend_count
+      @hbsend_count
+    end
+
+    # Retrieve heartbeat receive count
+    def hbrecv_count
+      return 0 unless @hbrecv_count
+      @hbrecv_count
+    end
+
     private
 
       def _expand_hosts(hash)
@@ -898,6 +910,8 @@ module Stomp
         #
         @hbsend_interval = @hbrecv_interval = 0.0 # Send/Receive ticker interval.
         #
+        @hbsend_count = @hbrecv_count = 0 # Send/Receive ticker counts.
+        #
         @ls = @lr = -1.0 # Last send/receive time (from Time.now.to_f)
         #
         @st = @rt = nil # Send/receive ticker thread
@@ -960,6 +974,7 @@ module Stomp
                   @socket.puts
                   @ls = curt # Update last send
                   @hb_sent = true # Reset if necessary
+                  @hbsend_count += 1
                 rescue Exception => sendex
                   @hb_sent = false # Set the warning flag
                   if @logger && @logger.respond_to?(:on_hbwrite_fail)
@@ -1001,6 +1016,7 @@ module Stomp
                   @socket.ungetc(last_char)
                 end
                 @read_semaphore.unlock
+                @hbrecv_count += 1
               else
                 # Shrug.  Have not received one.  Just set warning flag.
                 @hb_received = false

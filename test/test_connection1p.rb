@@ -102,6 +102,8 @@ class TestConnection1P < Test::Unit::TestCase
       conn = Stomp::Connection.open(user, passcode, host, port, false, 5, cha)
       conn.disconnect
     end
+    assert conn.hbsend_interval > 0
+    assert conn.hbrecv_interval > 0
   end
 
   #
@@ -119,6 +121,7 @@ class TestConnection1P < Test::Unit::TestCase
       conn.set_logger(nil)
       conn.disconnect
     end
+    hb_asserts_send(conn)
   end if ENV['STOMP_HB11LONG']
 
   #
@@ -137,6 +140,7 @@ class TestConnection1P < Test::Unit::TestCase
       conn.set_logger(nil)
       conn.disconnect
     end
+    hb_asserts_recv(conn)
   end if ENV['STOMP_HB11LONG']
 
   #
@@ -155,6 +159,7 @@ class TestConnection1P < Test::Unit::TestCase
       conn.set_logger(nil)
       conn.disconnect
     end
+    hb_asserts_both(conn)
   end if ENV['STOMP_HB11LONG']
   #
   def test_conn_1p_0110
@@ -255,5 +260,29 @@ class TestConnection1P < Test::Unit::TestCase
       @conn.subscribe dest, :id => sid
     }
   end
+
+private
+
+  def hb_asserts_both(conn)
+    assert conn.hbsend_interval > 0
+    assert conn.hbrecv_interval > 0
+    assert conn.hbsend_count > 0
+    assert conn.hbrecv_count > 0
+  end
+
+  def hb_asserts_send(conn)
+    assert conn.hbsend_interval > 0
+    assert conn.hbrecv_interval == 0
+    assert conn.hbsend_count > 0
+    assert conn.hbrecv_count == 0
+  end
+
+  def hb_asserts_recv(conn)
+    assert conn.hbsend_interval == 0
+    assert conn.hbrecv_interval > 0
+    assert conn.hbsend_count == 0
+    assert conn.hbrecv_count > 0
+  end
+
 end if ENV['STOMP_TEST11']
 

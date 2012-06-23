@@ -275,6 +275,16 @@ module Stomp
       @connection.hbrecv_interval
     end
 
+    # Retrieve heartbeat send count
+    def hbsend_count
+      @connection.hbsend_count
+    end
+
+    # Retrieve heartbeat receive count
+    def hbrecv_count
+      @connection.hbrecv_count
+    end
+
     # Poll for asynchronous messages issued by broker.
     # Return nil of no message available, else the message
     def poll
