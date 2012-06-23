@@ -69,7 +69,7 @@ class TestClient < Test::Unit::TestCase
     assert_equal message_text, received2.body
     assert_equal received.body, received2.body
     assert_equal received.headers['message-id'], received2.headers['message-id'] unless ENV['STOMP_RABBIT']
-  end
+  end unless RUBY_ENGINE =~ /jruby/
 
   def test_receipts
     receipt = false
@@ -104,7 +104,7 @@ class TestClient < Test::Unit::TestCase
     assert_raise(RuntimeError) do
       @client.subscribe make_destination
     end
-  end
+  end unless RUBY_ENGINE =~ /jruby/
 
   def test_transactional_publish
     @client.begin 'tx1'
@@ -131,7 +131,7 @@ class TestClient < Test::Unit::TestCase
     @client.subscribe(make_destination) {|m| message = m}
     sleep 0.01 until message
     assert_equal "second_message", message.body
-  end
+  end unless RUBY_ENGINE =~ /jruby/
 
   def test_transaction_ack_rollback_with_new_client
     @client.publish make_destination, message_text
@@ -312,7 +312,7 @@ class TestClient < Test::Unit::TestCase
 
   def test_connection_frame
   	assert_not_nil @client.connection_frame
-  end
+  end unless RUBY_ENGINE =~ /jruby/
 
   def test_unsubscribe
     message = nil
@@ -372,7 +372,7 @@ class TestClient < Test::Unit::TestCase
     @client.publish(dest, message_text)
     sleep 1
     assert_not_nil msg
-  end
+  end unless RUBY_ENGINE =~ /jruby/
 
   def test_thread_multi_subscribe
     #
