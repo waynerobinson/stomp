@@ -21,7 +21,7 @@ describe Stomp::Connection do
       :connect_timeout => 0,
       :parse_timeout => 5,
       :connect_headers => {},
-      :dmh => false,
+      :dmh => false
     }
         
     #POG:
@@ -36,6 +36,39 @@ describe Stomp::Connection do
     @tcp_socket = mock(:tcp_socket, :close => nil, :puts => nil, :write => nil, :setsockopt => nil, :flush => true)
     TCPSocket.stub!(:open).and_return @tcp_socket
     @connection = Stomp::Connection.new(normal_parameters)
+  end
+
+  describe "autoflush" do
+    let(:parameter_hash) {
+      {
+        "hosts" => [
+          {:login => "login2", :passcode => "passcode2", :host => "remotehost", :port => 61617, :ssl => false},
+          {:login => "login1", :passcode => "passcode1", :host => "localhost", :port => 61616, :ssl => false}
+        ],
+        "reliable" => true,
+        "initialReconnectDelay" => 0.01,
+        "maxReconnectDelay" => 30.0,
+        "useExponentialBackOff" => true,
+        "backOffMultiplier" => 2,
+        "maxReconnectAttempts" => 0,
+        "randomize" => false,
+        "backup" => false,
+        "connect_timeout" => 0,
+        "parse_timeout" => 5,
+      }
+    }
+
+    it "should call flush on the socket when autoflush is true" do
+      @tcp_socket.should_receive(:flush)
+      @connection = Stomp::Connection.new(parameter_hash.merge("autoflush" => true))
+      @connection.publish "/queue", "message", :suppress_content_length => false
+    end
+
+    it "should not call flush on the socket when autoflush is false" do
+      @tcp_socket.should_not_receive(:flush)
+      @connection = Stomp::Connection.new(parameter_hash)
+      @connection.publish "/queue", "message", :suppress_content_length => false
+    end    
   end
   
   describe "(created using a hash)" do
@@ -54,7 +87,7 @@ describe Stomp::Connection do
         "randomize" => false,
         "backup" => false,
         "connect_timeout" => 0,
-        "parse_timeout" => 5,
+        "parse_timeout" => 5
       }
       
       @connection = Stomp::Connection.new(used_hash)
