@@ -111,7 +111,7 @@ class TestConnection1P < Test::Unit::TestCase
     #
     cha = {:host => "localhost", "accept-version" => "1.1"}
     cha[:host] = "/" if ENV['STOMP_RABBIT']
-    cha["heart-beat"] = "5000,0" # Valid heart beat headers, send only
+    cha["heart-beat"] = "10000,0" # Valid heart beat headers, send only
     conn = nil
     logger = Tlogger.new
     assert_nothing_raised do
@@ -129,7 +129,7 @@ class TestConnection1P < Test::Unit::TestCase
     #
     cha = {:host => "localhost", "accept-version" => "1.1"}
     cha[:host] = "/" if ENV['STOMP_RABBIT']
-    cha["heart-beat"] = "0,10000" # Valid heart beat headers, receive only
+    cha["heart-beat"] = "0,6000" # Valid heart beat headers, receive only
     conn = nil
     logger = Tlogger.new
     assert_nothing_raised do
@@ -161,6 +161,7 @@ class TestConnection1P < Test::Unit::TestCase
     end
     hb_asserts_both(conn)
   end if ENV['STOMP_HB11LONG']
+
   #
   def test_conn_1p_0110
     #
@@ -260,6 +261,63 @@ class TestConnection1P < Test::Unit::TestCase
       @conn.subscribe dest, :id => sid
     }
   end
+
+  #
+  def test_conn_1p_0130
+    #
+    cha = {:host => "localhost", "accept-version" => "1.1"}
+    cha[:host] = "/" if ENV['STOMP_RABBIT']
+    cha["heart-beat"] = "10000,6000" # Valid heart beat headers, send and receive
+    conn = nil
+    logger = Tlogger.new
+    assert_nothing_raised do
+      conn = Stomp::Connection.open(user, passcode, host, port, false, 5, cha)
+#      m = conn.receive # This will hang forever .....
+      conn.set_logger(logger)
+      sleep 65
+      conn.set_logger(nil)
+      conn.disconnect
+    end
+    hb_asserts_both(conn)
+  end if ENV['STOMP_HB11LONG']
+
+  #
+  def test_conn_1p_0130
+    #
+    cha = {:host => "localhost", "accept-version" => "1.1"}
+    cha[:host] = "/" if ENV['STOMP_RABBIT']
+    cha["heart-beat"] = "10000,1000" # Valid heart beat headers, send and receive
+    conn = nil
+    logger = Tlogger.new
+    assert_nothing_raised do
+      conn = Stomp::Connection.open(user, passcode, host, port, false, 5, cha)
+#      m = conn.receive # This will hang forever .....
+      conn.set_logger(logger)
+      sleep 65
+      conn.set_logger(nil)
+      conn.disconnect
+    end
+    hb_asserts_both(conn)
+  end if ENV['STOMP_HB11LONG']
+
+  #
+  def test_conn_1p_0140
+    #
+    cha = {:host => "localhost", "accept-version" => "1.1"}
+    cha[:host] = "/" if ENV['STOMP_RABBIT']
+    cha["heart-beat"] = "1000,10000" # Valid heart beat headers, send and receive
+    conn = nil
+    logger = Tlogger.new
+    assert_nothing_raised do
+      conn = Stomp::Connection.open(user, passcode, host, port, false, 5, cha)
+#      m = conn.receive # This will hang forever .....
+      conn.set_logger(logger)
+      sleep 65
+      conn.set_logger(nil)
+      conn.disconnect
+    end
+    hb_asserts_both(conn)
+  end if ENV['STOMP_HB11LONG']
 
 private
 
