@@ -1,3 +1,11 @@
+== 1.2.4 20120625
+
+* Add ability for client to request flush on write to the connection (Issue #45)
+* Add ability for client to retrieve heartbeat intervals and counters
+* Fix I/O errors with heartbeats and multithreaded clients (Issue #46)
+* Enhance tests for heartbeats
+* Correct typos and clarify comments in many examples
+
 == 1.2.3 20120616
 
 * Fix UnsupportedProtocol on connect to a 1.0 broker

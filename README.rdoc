@@ -10,6 +10,7 @@ An implementation of the Stomp protocol for Ruby. See:
 
 ===New
 
+* Gem version 1.2.2.  Stomp 1.1 heartbeat fix, autoflush capability, miscellaneous fixes
 * Gem version 1.2.3.  Miscellaneous fixes, see changelog for details.
 * Gem version 1.2.2.  Performance and more SSL enhancements.
 * Full support of SSL certificates is announced as of gem version 1.2.1.
@@ -106,4 +107,5 @@ The following people have contributed to Stomp:
 * James Pearson
 * Craig
 * Tommy Bishop
+* Jeremy Gailor
 
