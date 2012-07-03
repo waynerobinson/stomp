@@ -145,6 +145,7 @@ module Stomp
             used_socket = nil
             raise unless @reliable
             raise if @failure.is_a?(Stomp::Error::LoggerConnectionError)
+            @closed = true
             if @logger && @logger.respond_to?(:on_connectfail)
               # on_connectfail may raise
               begin
@@ -853,6 +854,7 @@ module Stomp
         lparms[:cur_recondelay] = @reconnect_delay
         lparms[:cur_parseto] = @parse_timeout
         lparms[:cur_conattempts] = @connection_attempts
+        lparms[:openstat] = open?
         #
         lparms
       end
