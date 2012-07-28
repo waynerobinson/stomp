@@ -25,6 +25,15 @@ require 'stomp/errors'
 require 'stomp/codec'
 require 'stomp/sslparams'
 
+# Private methods in #Client
+require 'client/utils'
+
+# Private methods in #Connection
+require 'connection/utils'
+require 'connection/netio'
+require 'connection/heartbeats'
+require 'connection/utf8'
+
 module Stomp
 end
 
