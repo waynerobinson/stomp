@@ -12,10 +12,10 @@ module Stomp
   # in that thread if you have much message volume.
   class Client
 
-		public
+    public
 
     attr_reader :login, :passcode, :host, :port, :reliable, :parameters
-    
+
     #alias :obj_send :send
 
     # A new Client object can be initialized using two forms:
@@ -42,14 +42,14 @@ module Stomp
       # Parse stomp:// URL's or set params
       if login.is_a?(Hash)
         @parameters = login
-        
+
         first_host = @parameters[:hosts][0]
-        
+
         @login = first_host[:login]
         @passcode = first_host[:passcode]
         @host = first_host[:host]
         @port = first_host[:port] || Connection::default_port(first_host[:ssl])
-        
+
         @reliable = true
       elsif login =~ /^stomp:\/\/#{url_regex}/ # e.g. stomp://login:passcode@host:port or stomp://host:port
         @login = $2 || ""
@@ -57,26 +57,26 @@ module Stomp
         @host = $4
         @port = $5.to_i
         @reliable = false
-      elsif login =~ /^failover:(\/\/)?\(stomp(\+ssl)?:\/\/#{url_regex}(,stomp(\+ssl)?:\/\/#{url_regex}\))+(\?(.*))?$/ # e.g. failover://(stomp://login1:passcode1@localhost:61616,stomp://login2:passcode2@remotehost:61617)?option1=param
-
+      elsif login =~ /^failover:(\/\/)?\(stomp(\+ssl)?:\/\/#{url_regex}(,stomp(\+ssl)?:\/\/#{url_regex}\))+(\?(.*))?$/ 
+        # e.g. failover://(stomp://login1:passcode1@localhost:61616,stomp://login2:passcode2@remotehost:61617)?option1=param
         first_host = {}
         first_host[:ssl] = !$2.nil?
         @login = first_host[:login] = $4 || ""
         @passcode = first_host[:passcode] = $5 || ""
         @host = first_host[:host] = $6
         @port = first_host[:port] = $7.to_i || Connection::default_port(first_host[:ssl])
-        
+
         options = $16 || ""
         parts = options.split(/&|=/)
         options = Hash[*parts]
-        
+
         hosts = [first_host] + parse_hosts(login)
-        
+
         @parameters = {}
         @parameters[:hosts] = hosts
-        
+
         @parameters.merge! filter_options(options)
-                
+
         @reliable = true
       else
         @login = login
@@ -97,11 +97,11 @@ module Stomp
         @connection = Connection.new(@login, @passcode, @host, @port, @reliable)
         @connection.autoflush = autoflush
       end
-      
+
       start_listeners
 
     end
-    
+
     # Syntactic sugar for 'Client.new' See 'initialize' for usage.
     def self.open(login = '', passcode = '', host = 'localhost', port = 61613, reliable = false)
       Client.new(login, passcode, host, port, reliable)
@@ -195,7 +195,7 @@ module Stomp
     def unreceive(message, options = {})
       @connection.unreceive(message, options)
     end
-    
+
     # Publishes message to destination
     #
     # If a block is given a receipt will be requested and passed to the
@@ -208,11 +208,11 @@ module Stomp
       end
       @connection.publish(destination, message, headers)
     end
-    
+
     def obj_send(*args)
       __send__(*args)
     end
-    
+
     def connection_frame
       @connection.connection_frame
     end
@@ -300,6 +300,8 @@ module Stomp
     def autoflush
       @connection.autoflush
     end
-  end
-end
+
+  end # Class
+
+end # Module
 

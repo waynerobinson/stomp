@@ -37,31 +37,31 @@ module Stomp
         "no current connection exists"
       end
     end
-    
+
     class MaxReconnectAttempts < RuntimeError
       def message
         "Maximum number of reconnection attempts reached"
       end
     end
-    
+
     class DuplicateSubscription < RuntimeError
       def message
         "duplicate subscriptions are disallowed"
       end
     end
-    
+
     class ProtocolErrorConnect < RuntimeError
       def message
         "protocol error on CONNECT"
       end
     end
-    
+
     class UnsupportedProtocolError < RuntimeError
       def message
         "unsupported protocol level(s)"
       end
     end
-    
+
     class InvalidHeartBeatHeaderError < RuntimeError
       def message
         "heart-beat header value is malformed"

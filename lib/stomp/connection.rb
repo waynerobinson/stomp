@@ -11,7 +11,7 @@ module Stomp
   # synchronous receives
   class Connection
 
-		public
+    public
 
     attr_reader   :connection_frame
     attr_reader   :disconnect_receipt
@@ -20,7 +20,6 @@ module Stomp
     attr_reader   :hb_received # Heartbeat received on time
     attr_reader   :hb_sent # Heartbeat sent successfully
     attr_accessor :autoflush
-    #alias :obj_send :send
 
     def self.default_port(ssl)
       ssl ? 61612 : 61613
@@ -468,10 +467,10 @@ module Stomp
     # Convenience method
     def valid_utf8?(s)
       case RUBY_VERSION
-        when /1\.8/
-          rv = _valid_utf8?(s)
-        else
-          rv = s.encoding.name != Stomp::UTF8 ? false : s.valid_encoding?
+      when /1\.8/
+        rv = _valid_utf8?(s)
+      else
+        rv = s.encoding.name != Stomp::UTF8 ? false : s.valid_encoding?
       end
       rv
     end
@@ -487,11 +486,11 @@ module Stomp
       0.upto(15) do |i|
         b << rand(255)
       end
-	    b[6] = (b[6] & 0x0F) | 0x40
-	    b[8] = (b[8] & 0xbf) | 0x80
+      b[6] = (b[6] & 0x0F) | 0x40
+      b[8] = (b[8] & 0xbf) | 0x80
       #             0  1  2  3   4   5  6  7   8  9  10 11 12 13 14 15
-	    rs = sprintf("%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x%02x%02x",
-        b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11], b[12], b[13], b[14], b[15])
+      rs = sprintf("%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x%02x%02x",
+      b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11], b[12], b[13], b[14], b[15])
       rs
     end
 

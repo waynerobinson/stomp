@@ -37,5 +37,6 @@ module Stomp
     end
 
   end # of class HeaderCodec
+
 end # of module Stomp
 
