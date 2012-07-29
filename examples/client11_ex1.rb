@@ -66,7 +66,7 @@ puts "Connected Headers required to be present:"
 puts "Connect version - \t#{client.connection_frame().headers['version']}"
 puts
 puts "Connected Headers that are optional:"
-puts "Connect broker - \t\t#{client.connection_frame().headers['broker']}"
+puts "Connect server - \t\t#{client.connection_frame().headers['server']}"
 puts "Session ID - \t\t\t#{client.connection_frame().headers['session']}"
 puts "Server requested heartbeats - \t#{client.connection_frame().headers['heart-beat']}"
 #
