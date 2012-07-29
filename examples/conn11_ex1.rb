@@ -17,7 +17,7 @@ include Stomp11Common
 #
 # Purpose: to demonstrate a connect and disconnect sequence using Stomp 1.1.
 #
-# Note: this example assumes that you have at least the 1.2.0 gem release 
+# Note: this example assumes that you have at least the 1.2.0 gem release
 # installed.
 #
 # When you:
@@ -48,7 +48,7 @@ include Stomp11Common
 # * heartbeat request
 #
 # Using the stomp gem, you can specify this data in the "connect_headers" Hash
-# parameter or a paramaterized connection request.  This example uses a 
+# parameter or a paramaterized connection request.  This example uses a
 # parameterized request.
 #
 # So .........
@@ -59,8 +59,8 @@ include Stomp11Common
 # The two headers used here are _required_ by the specification.
 #
 conn_hdrs = {"accept-version" => "1.1",    # Demand a 1.1 connection (use a CSV list if you will consider multiple versions)
-      "host" => virt_host,                 # The 1.1 vhost (could be different than connection host)
-    }                                      # No heartbeats here:  there will be none for this connection
+  "host" => virt_host,                 # The 1.1 vhost (could be different than connection host)
+}                                      # No heartbeats here:  there will be none for this connection
 #
 # Get a connection
 # ================

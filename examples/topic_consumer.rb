@@ -8,7 +8,7 @@ client = Stomp::Client.new("failover://(stomp://:@localhost:61613,stomp://:@remo
 puts "Subscribing to /topic/ronaldo"
 
 client.subscribe("/topic/ronaldo") do |msg|
-  puts msg.to_s  
+  puts msg.to_s
   puts "----------------"
 end
 

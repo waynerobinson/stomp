@@ -22,10 +22,10 @@ include Stomp11Common
 # Create connection headers
 # =========================
 #
-conn_hdrs = {"accept-version" => "1.1",    # 1.1
-      "host" => virt_host,                 # vhost
-      "heart-beat" => "5000,10000",        # heartbeats
-    }
+conn_hdrs = {"accept-version" => "1.1", # 1.1
+  "host" => virt_host,                  # vhost
+  "heart-beat" => "5000,10000",         # heartbeats
+}
 # Create a logger for demonstration purposes
 logger = Slogger.new
 # Connect - a paramaterized request.

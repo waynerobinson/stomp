@@ -25,13 +25,13 @@ port =      ENV['STOMP_PORT'] ? ENV['STOMP_PORT'].to_i : 61612
 # //////////////////////////////////////////////////////////////////////////////
 # A hash type connect *MUST* be used to enable callback logging.
 # //////////////////////////////////////////////////////////////////////////////
-hash = { :hosts => [ 
-          {:login => user, :passcode => password, :host => host, :port => port,
-            :ssl => true}, # Or provide your insance of SSLParams instead
-          ],
-          :logger => mylog,	# This enables callback logging!
-          :max_reconnect_attempts => 2,
-        }
+hash = { :hosts => [
+    {:login => user, :passcode => password, :host => host, :port => port,
+    :ssl => true}, # Or provide your insance of SSLParams instead
+  ],
+  :logger => mylog,	# This enables callback logging!
+  :max_reconnect_attempts => 2,
+}
 
 # //////////////////////////////////////////////////////////////////////////////
 # For a Connection:

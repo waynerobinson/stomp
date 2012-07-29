@@ -22,11 +22,11 @@ ts_flist = []
 ts_flist << "/home/gmallard/sslwork/twocas_tj/serverCA/ServerTJCA.crt"
 ssl_opts = Stomp::SSLParams.new(:ts_files => ts_flist.join(","))
 #
-hash = { :hosts => [ 
-      {:login => 'guest', :passcode => 'guest', :host => 'localhost', :port => 61612, :ssl => ssl_opts},
-      ],
-    :reliable => false, # YMMV, to test this in a sane manner
-    }
+hash = { :hosts => [
+    {:login => 'guest', :passcode => 'guest', :host => 'localhost', :port => 61612, :ssl => ssl_opts},
+  ],
+  :reliable => false, # YMMV, to test this in a sane manner
+}
 #
 puts "Connect starts, SSL Use Case 2"
 c = Stomp::Connection.new(hash)

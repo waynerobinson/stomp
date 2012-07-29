@@ -18,14 +18,14 @@ include Stomp11Common
 # This is much like sending and receiving with a Stomp::Connection.
 #
 client_hdrs = {"accept-version" => "1.1",    # Demand a 1.1 connection (use a CSV list if you will consider multiple versions)
-      "host" => virt_host,                 # The 1.1 vhost (could be different than connection host)
-    }                                      # No heartbeats here:  there will be none for this connection
+  "host" => virt_host,                 # The 1.1 vhost (could be different than connection host)
+}                                      # No heartbeats here:  there will be none for this connection
 #
-client_hash = { :hosts => [ 
-      {:login => login, :passcode => passcode, :host => host, :port => port},
-      ],
-      :connect_headers => client_hdrs,
-    }
+client_hash = { :hosts => [
+    {:login => login, :passcode => passcode, :host => host, :port => port},
+  ],
+  :connect_headers => client_hdrs,
+}
 #
 client = Stomp::Client.new(client_hash)
 puts "Client Connect complete"
@@ -37,13 +37,13 @@ data = "message payload: #{Time.now.to_f}"
 headers = {}
 # Send it
 client.publish qname, data
-# Receive 
+# Receive
 uuid = client.uuid() # uuid for Stomp::Client is a public method
 message = nil
 # Clients must pass a receive block.  This is business as usual, required for 1.0.
 # For 1.1, a unique subscription id is required.
-client.subscribe(qname, {'id' => uuid}) {|m| 
-  message = m
+client.subscribe(qname, {'id' => uuid}) {|m|
+message = m
 }
 sleep 0.1 until message # Wait for completion
 # Unsubscribe, with the unique id

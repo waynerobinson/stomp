@@ -14,11 +14,11 @@ ssl_opts = Stomp::SSLParams.new(:use_ruby_ciphers => true) # Plus other paramete
 #
 # SSL Use Case: Using default Stomp ciphers
 #
-hash = { :hosts => [ 
-      {:login => 'guest', :passcode => 'guest', :host => 'localhost', 
-        :port => 61612, :ssl => ssl_opts},
-      ]
-    }
+hash = { :hosts => [
+    {:login => 'guest', :passcode => 'guest', :host => 'localhost',
+    :port => 61612, :ssl => ssl_opts},
+  ]
+}
 #
 puts "Connect starts, SSL , Use Default Ruby Ciphers"
 c = Stomp::Connection.new(hash)

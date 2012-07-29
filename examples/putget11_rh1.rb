@@ -18,8 +18,8 @@ include Stomp11Common
 # Purpose: to demonstrate sending and receiving using Stomp 1.1, and an unusual
 # aspect of the specification.  What is demonstrated here is the use of
 # 'repeated headers'. Note that brokers MAY support repeated headers as
-# demonstrated, but are not required to provide this support. This example 
-# should run against the Apollo broker.  It will *not* currently run against 
+# demonstrated, but are not required to provide this support. This example
+# should run against the Apollo broker.  It will *not* currently run against
 # RabbitMQ.  YMMV depending on your broker.
 #
 # See: http://stomp.github.com/stomp-specification-1.1.html#Repeated_Header_Entries
@@ -64,7 +64,7 @@ raise "Missing key" unless received.headers["key2"]
 raise "Repeats not present" unless received.headers.has_value?(key2_repeats)
 raise "Unexpected repeat values" unless key2_repeats == received.headers["key2"]
 #
-# Demonstrate how to process repeated headers received by display of those 
+# Demonstrate how to process repeated headers received by display of those
 # received headers for a visual check.
 #
 received.headers.each_pair do |k,v|

@@ -199,6 +199,7 @@ class Slogger
     # parms[:cur_recondelay]
     # parms[:cur_parseto]
     # parms[:cur_conattempts]
+    # parms[:openstat]
     #
     # For the on_ssl_connectfail callback these are also available:
     # parms[:ssl_exception]

@@ -19,11 +19,11 @@ require "stomp"
 # - Expect connection failure (broker must be sent a valid client certificate)
 #
 ssl_opts = Stomp::SSLParams.new
-hash = { :hosts => [ 
-      {:login => 'guest', :passcode => 'guest', :host => 'localhost', :port => 61612, :ssl => ssl_opts},
-      ],
-    :reliable => false, # YMMV, to test this in a sane manner
-    }
+hash = { :hosts => [
+    {:login => 'guest', :passcode => 'guest', :host => 'localhost', :port => 61612, :ssl => ssl_opts},
+  ],
+  :reliable => false, # YMMV, to test this in a sane manner
+}
 #
 puts "Connect starts, SSL Use Case 1"
 c = Stomp::Connection.new(hash)

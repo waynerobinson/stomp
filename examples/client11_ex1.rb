@@ -28,17 +28,17 @@ include Stomp11Common
 # The two headers used here are _required_ by the specification.
 #
 client_hdrs = {"accept-version" => "1.1",    # Demand a 1.1 connection (use a CSV list if you will consider multiple versions)
-      "host" => virt_host,                   # The 1.1 vhost (could be different than connection host)
-    }                                        # No heartbeats here:  there will be none for this connection
+  "host" => virt_host,                   # The 1.1 vhost (could be different than connection host)
+}                                        # No heartbeats here:  there will be none for this connection
 #
 # Create the connect hash.
 # ========================
 #
-client_hash = { :hosts => [ 
-      {:login => login, :passcode => passcode, :host => host, :port => port},
-      ],
-      :connect_headers => client_hdrs,
-    }
+client_hash = { :hosts => [
+    {:login => login, :passcode => passcode, :host => host, :port => port},
+  ],
+  :connect_headers => client_hdrs,
+}
 #
 # Get a connection
 # ================

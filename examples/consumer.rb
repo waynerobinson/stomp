@@ -3,7 +3,6 @@
 require 'rubygems'
 require 'stomp'
 
-
 client = Stomp::Client.new("failover://(stomp://:@localhost:61613,stomp://:@remotehost:61613)?initialReconnectDelay=5000&randomize=false&useExponentialBackOff=false")
 puts "Subscribing ronaldo"
 client.subscribe("/queue/ronaldo", {:ack => "client", "activemq.prefetchSize" => 1, "activemq.exclusive" => true }) do |msg|
@@ -11,7 +10,7 @@ client.subscribe("/queue/ronaldo", {:ack => "client", "activemq.prefetchSize" =>
     f.write(msg.body)
     f.write("\n----------------\n")
   end
-  
+
   client.acknowledge(msg)
 end
 

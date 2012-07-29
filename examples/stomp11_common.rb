@@ -25,23 +25,23 @@ module Stomp11Common
   end
   #
   def virt_host()
-        ENV['STOMP_VHOST'] || "localhost" # The 1.1 virtual host name
+    ENV['STOMP_VHOST'] || "localhost" # The 1.1 virtual host name
   end
   #
   def get_connection()
     conn_hdrs = {"accept-version" => "1.1",    # 1.1 only
-          "host" => virt_host,                 # the vhost
-        }
-    conn_hash = { :hosts => [ 
-          {:login => login, :passcode => passcode, :host => host, :port => port},
-          ],
-          :connect_headers => conn_hdrs,
-        }
-    conn = Stomp::Connection.new(conn_hash)
-  end
-  #
-  def nmsgs()
-    (ENV['STOMP_NMSGS'] || 1).to_i # Number of messages
-  end
+      "host" => virt_host,                     # the vhost
+    }
+    conn_hash = { :hosts => [
+      {:login => login, :passcode => passcode, :host => host, :port => port},
+    ],
+    :connect_headers => conn_hdrs,
+  }
+  conn = Stomp::Connection.new(conn_hash)
+end
+#
+def nmsgs()
+  (ENV['STOMP_NMSGS'] || 1).to_i # Number of messages
+end
 end
 

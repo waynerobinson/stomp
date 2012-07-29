@@ -36,7 +36,7 @@ conn.subscribe qname, {'id' => uuid, 'ack' => 'client'} #
   received = conn.receive
   puts "Received data: #{received.body}"
   #
-  # We want now to ACK this message.  In Stomp 1.0, a 'message-id' header was 
+  # We want now to ACK this message.  In Stomp 1.0, a 'message-id' header was
   # required for the ACK.  In Stomp 1.1, and additional header is required:
   #
   # * 'subscription' => id
