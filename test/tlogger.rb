@@ -139,7 +139,7 @@ class Tlogger
 
   def info(parms)
     #
-    # Available in the Hash:
+    # Available in the parms Hash:
     # parms[:cur_host]
     # parms[:cur_port]
     # parms[:cur_login]
@@ -148,8 +148,9 @@ class Tlogger
     # parms[:cur_recondelay]
     # parms[:cur_parseto]
     # parms[:cur_conattempts]
+    # parms[:openstat]
     #
-    "Host: #{parms[:cur_host]}, Port: #{parms[:cur_port]}, Login: Port: #{parms[:cur_login]}, Passcode: #{parms[:cur_passcode]}" 
+    "Host: #{parms[:cur_host]}, Port: #{parms[:cur_port]}, Login: #{parms[:cur_login]}, Passcode: #{parms[:cur_passcode]}" 
   end
 end # of class
 

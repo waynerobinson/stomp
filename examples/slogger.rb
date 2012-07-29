@@ -190,7 +190,7 @@ class Slogger
 
   def info(parms)
     #
-    # Available in the Hash:
+    # Available in the parms Hash:
     # parms[:cur_host]
     # parms[:cur_port]
     # parms[:cur_login]
@@ -204,7 +204,7 @@ class Slogger
     # For the on_ssl_connectfail callback these are also available:
     # parms[:ssl_exception]
     #
-    "Host: #{parms[:cur_host]}, Port: #{parms[:cur_port]}, Login: Port: #{parms[:cur_login]}, Passcode: #{parms[:cur_passcode]}, ssl: #{parms[:cur_ssl]}"
+    "Host: #{parms[:cur_host]}, Port: #{parms[:cur_port]}, Login: #{parms[:cur_login]}, Passcode: #{parms[:cur_passcode]}, ssl: #{parms[:cur_ssl]}"
   end
 end # of class
 
