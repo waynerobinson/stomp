@@ -35,11 +35,14 @@ module Stomp
     # dynamically by calling code.
     attr_accessor :autoflush
 
+    # default_port returns the default port used by the gem for TCP or SSL.
     def self.default_port(ssl)
       ssl ? 61612 : 61613
     end
 
-    # A new Connection object accepts the following parameters:
+    # A new Connection object can be initialized using two forms:
+    #
+    # Standard positional parameters:
     #
     #   login             (String,  default : '')
     #   passcode          (String,  default : '')
@@ -48,9 +51,9 @@ module Stomp
     #   reliable          (Boolean, default : false)
     #   reconnect_delay   (Integer, default : 5)
     #
-    #   e.g. c = Connection.new("username", "password", "localhost", 61613, true)
+    #   e.g. c = Stomp::Connection.new("username", "password", "localhost", 61613, true)
     #
-    # Hash:
+    # Hash (the recommended connection initialization):
     #
     #   hash = {
     #     :hosts => [
@@ -71,16 +74,7 @@ module Stomp
     #     :logger => nil,
     #   }
     #
-    #   e.g. c = Connection.new(hash)
-    #
-    # TODO
-    # Stomp URL :
-    #   A Stomp URL must begin with 'stomp://' and can be in one of the following forms:
-    #
-    #   stomp://host:port
-    #   stomp://host.domain.tld:port
-    #   stomp://user:pass@host:port
-    #   stomp://user:pass@host.domain.tld:port
+    #   e.g. c = Stomp::Connection.new(hash)
     #
     def initialize(login = '', passcode = '', host = 'localhost', port = 61613, reliable = false, reconnect_delay = 5, connect_headers = {})
       @received_messages = []
@@ -420,6 +414,7 @@ module Stomp
       end
     end
 
+    # client_ack? determines if headers contain :ack => "client".
     def client_ack?(message)
       headers = @subscriptions[message.headers[:destination]]
       !headers.nil? && headers[:ack] == "client"

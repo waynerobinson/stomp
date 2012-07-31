@@ -1,5 +1,7 @@
 # -*- encoding: utf-8 -*-
 
+require 'logger'	# use the standard Ruby logger .....
+
 =begin
 
 Example STOMP call back logger class.
@@ -43,11 +45,9 @@ Callback parameters: are a copy of the @parameters instance variable for
 the Stomp::Connection.
 
 =end
-
-require 'logger'	# use the standard Ruby logger .....
-
 class Slogger
-  #
+
+  # Initialize a new callback logger instance.
   def initialize(init_parms = nil)
     @log = Logger::new(STDOUT)		# User preference
     @log.level = Logger::DEBUG		# User preference
@@ -105,7 +105,7 @@ class Slogger
     end
   end
 
-  # Subscribe
+  # Log Subscribe
   def on_subscribe(parms, headers)
     begin
       @log.debug "Subscribe Parms #{info(parms)}"
@@ -115,7 +115,7 @@ class Slogger
     end
   end
 
-  # Publish
+  # Log Publish
   def on_publish(parms, message, headers)
     begin
       @log.debug "Publish Parms #{info(parms)}"
@@ -126,7 +126,7 @@ class Slogger
     end
   end
 
-  # Receive
+  # Log Receive
   def on_receive(parms, result)
     begin
       @log.debug "Receive Parms #{info(parms)}"
@@ -136,7 +136,7 @@ class Slogger
     end
   end
 
-  # Stomp 1.1+ - heart beat read (receive) failed
+  # Stomp 1.1+ - heart beat read (receive) failed.
   def on_hbread_fail(parms, ticker_data)
     begin
       @log.debug "Hbreadf Parms #{info(parms)}"
@@ -146,7 +146,7 @@ class Slogger
     end
   end
 
-  # Stomp 1.1+ - heart beat send (transmit) failed
+  # Stomp 1.1+ - heart beat send (transmit) failed.
   def on_hbwrite_fail(parms, ticker_data)
     begin
       @log.debug "Hbwritef Parms #{info(parms)}"
@@ -156,6 +156,7 @@ class Slogger
     end
   end
 
+  # Log SSL connection start.
   def on_ssl_connecting(parms)
     begin
       @log.debug "SSL Connecting Parms #{info(parms)}"
@@ -164,6 +165,7 @@ class Slogger
     end
   end
 
+  # Log a successful SSL connect.
   def on_ssl_connected(parms)
     begin
       @log.debug "SSL Connected Parms #{info(parms)}"
@@ -172,6 +174,7 @@ class Slogger
     end
   end
 
+  # Log an unsuccessful SSL connect.
   def on_ssl_connectfail(parms)
     begin
       @log.debug "SSL Connect Fail Parms #{info(parms)}"
@@ -188,6 +191,7 @@ class Slogger
 
   private
 
+  # Example information extract.
   def info(parms)
     #
     # Available in the parms Hash:

@@ -16,7 +16,7 @@ An implementation of the Stomp protocol for Ruby. See:
 * Full support of SSL certificates is announced as of gem version 1.2.1.
 * Support of Stomp protocol level 1.1 is announced as of gem version 1.2.0.
 
-See the change log for details.
+See _CHANGELOG.rdoc_ for details.
 
 ===Example Usage
 
@@ -38,7 +38,7 @@ See the change log for details.
       p msg
     end
 
-===Hash Login Example Usage
+===Hash Login Example Usage (the recommended login technique)
 
   hash = {
       :hosts => [
@@ -68,7 +68,7 @@ See the change log for details.
     connection = Stomp::Connection.new(hash)
     
 
-===Hstorical Information
+===Historical Information
 
 Up until March 2009 the project was maintained and primarily developed by Brian McCallister. 
 

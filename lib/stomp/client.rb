@@ -14,11 +14,25 @@ module Stomp
 
     public
 
-    attr_reader :login, :passcode, :host, :port, :reliable, :parameters
+    # The login ID used by the client.
+    attr_reader :login
 
-    #alias :obj_send :send
+    # The login credentials used by the client.
+    attr_reader :passcode
 
-    # A new Client object can be initialized using two forms:
+    # The Stomp host specified by the client.
+    attr_reader :host
+
+    # The Stomp host's listening port.
+    attr_reader :port
+
+    # Is this connection reliable?
+    attr_reader :reliable
+
+    # Parameters Hash, possibly nil for a non-hashed connect.
+    attr_reader :parameters
+
+    # A new Client object can be initialized using three forms:
     #
     # Standard positional parameters:
     #   login     (String,  default : '')
@@ -27,7 +41,7 @@ module Stomp
     #   port      (Integer, default : 61613)
     #   reliable  (Boolean, default : false)
     #
-    #   e.g. c = Client.new('login', 'passcode', 'localhost', 61613, true)
+    #   e.g. c = Stomp::Client.new('login', 'passcode', 'localhost', 61613, true)
     #
     # Stomp URL :
     #   A Stomp URL must begin with 'stomp://' and can be in one of the following forms:
@@ -36,6 +50,31 @@ module Stomp
     #   stomp://host.domain.tld:port
     #   stomp://login:passcode@host:port
     #   stomp://login:passcode@host.domain.tld:port
+    #
+    #   e.g. c = Stomp::Client.new(urlstring)
+    #
+    # Hash (the recommended Client initialization):
+    #
+    #   hash = {
+    #     :hosts => [
+    #       {:login => "login1", :passcode => "passcode1", :host => "localhost", :port => 61616, :ssl => false},
+    #       {:login => "login2", :passcode => "passcode2", :host => "remotehost", :port => 61617, :ssl => false}
+    #     ],
+    #     :reliable => true,
+    #     :initial_reconnect_delay => 0.01,
+    #     :max_reconnect_delay => 30.0,
+    #     :use_exponential_back_off => true,
+    #     :back_off_multiplier => 2,
+    #     :max_reconnect_attempts => 0,
+    #     :randomize => false,
+    #     :backup => false,
+    #     :connect_timeout => 0,
+    #     :connect_headers => {},
+    #     :parse_timeout => 5,
+    #     :logger => nil,
+    #   }
+    #
+    #   e.g. c = Stomp::Client.new(hash)
     #
     def initialize(login = '', passcode = '', host = 'localhost', port = 61613, reliable = false, autoflush = false)
 

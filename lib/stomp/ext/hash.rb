@@ -1,10 +1,13 @@
 # -*- encoding: utf-8 -*-
 
 class ::Hash
+
+  # Returns self with keys uncamelized and converted to symbols.
   def uncamelize_and_symbolize_keys
     self.uncamelize_and_stringify_keys.symbolize_keys
   end
 
+  # Returns self with keys uncamelized and converted to strings.
   def uncamelize_and_stringify_keys
     uncamelized = {}
     self.each_pair do |key, value|
@@ -15,6 +18,7 @@ class ::Hash
     uncamelized
   end
 
+  # Returns self with all keys symbolized.
   def symbolize_keys
     symbolized = {}
     self.each_pair do |key, value|
