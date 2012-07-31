@@ -15,24 +15,24 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-require 'stomp/constants' # Constants first
-require 'stomp/ext/hash'
-require 'stomp/connection'
-require 'stomp/client'
-require 'stomp/message'
-require 'stomp/version'
-require 'stomp/errors'
-require 'stomp/codec'
-require 'stomp/sslparams'
+require 'stomp/constants'       # Constants first
+require 'stomp/ext/hash'        # #Hash additions
+require 'stomp/connection'      # Main Stomp#Connection
+require 'stomp/client'          # Main Stomp#Client
+require 'stomp/message'         # Stomp#Message
+require 'stomp/version'         # Stomp#Version#STRING
+require 'stomp/errors'          # All Stomp# exceptions
+require 'stomp/codec'           # Stomp 1.1 codec
+require 'stomp/sslparams'       # Stomp SSL support
 
 # Private methods in #Client
-require 'client/utils'
+require 'client/utils'          # private Client Utility methods
 
 # Private methods in #Connection
-require 'connection/utils'
-require 'connection/netio'
-require 'connection/heartbeats'
-require 'connection/utf8'
+require 'connection/utils'      # private Connection Utility methods
+require 'connection/netio'      # private Network io methods
+require 'connection/heartbeats' # private 1.1+ heartbeat methods
+require 'connection/utf8'       # private 1.1+ utf8 methods
 
 module Stomp
 end

@@ -39,7 +39,7 @@ module Stomp
       RUBY_VERSION > '1.9' ? char : char.chr
     end
 
-    def log_params
+    def log_params()
       lparms = @parameters.clone if @parameters
       lparms = {} unless lparms
       lparms[:cur_host] = @host
@@ -55,7 +55,7 @@ module Stomp
       lparms
     end
 
-    def _pre_connect
+    def _pre_connect()
       @connect_headers = @connect_headers.symbolize_keys
       raise Stomp::Error::ProtocolErrorConnect if (@connect_headers[:"accept-version"] && !@connect_headers[:host])
       raise Stomp::Error::ProtocolErrorConnect if (!@connect_headers[:"accept-version"] && @connect_headers[:host])
@@ -75,7 +75,7 @@ module Stomp
       _validate_hbheader()
     end
 
-    def _post_connect
+    def _post_connect()
       return unless (@connect_headers[:"accept-version"] && @connect_headers[:host])
       return if @connection_frame.command == Stomp::CMD_ERROR
       # We are CONNECTed

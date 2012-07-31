@@ -102,23 +102,23 @@ module Stomp
 
     end
 
-    # Syntactic sugar for 'Client.new' See 'initialize' for usage.
+    # open is syntactic sugar for 'Client.new' See 'initialize' for usage.
     def self.open(login = '', passcode = '', host = 'localhost', port = 61613, reliable = false)
       Client.new(login, passcode, host, port, reliable)
     end
 
     # Join the listener thread for this client,
-    # generally used to wait for a quit signal
+    # generally used to wait for a quit signal.
     def join(limit = nil)
       @listener_thread.join(limit)
     end
 
-    # Begin a transaction by name
+    # Begin starts work in a a transaction by name.
     def begin(name, headers = {})
       @connection.begin(name, headers)
     end
 
-    # Abort a transaction by name
+    # Abort aborts work in a transaction by name.
     def abort(name, headers = {})
       @connection.abort(name, headers)
 
@@ -133,7 +133,7 @@ module Stomp
       end
     end
 
-    # Commit a transaction by name
+    # Commit commits work in a transaction by name.
     def commit(name, headers = {})
       txn_id = headers[:transaction]
       @replay_messages_by_txn.delete(txn_id)
@@ -141,9 +141,8 @@ module Stomp
     end
 
     # Subscribe to a destination, must be passed a block
-    # which will be used as a callback listener
-    #
-    # Accepts a transaction header ( :transaction => 'some_transaction_id' )
+    # which will be used as a callback listener.
+    # Accepts a transaction header ( :transaction => 'some_transaction_id' ).
     def subscribe(destination, headers = {})
       raise "No listener given" unless block_given?
       # use subscription id to correlate messages to subscription. As described in
@@ -157,7 +156,7 @@ module Stomp
       @connection.subscribe(destination, headers)
     end
 
-    # Unsubecribe from a channel
+    # Unsubscribe from a subscription by name.
     def unsubscribe(name, headers = {})
       set_subscription_id_if_missing(name, headers)
       @connection.unsubscribe(name, headers)
@@ -165,9 +164,8 @@ module Stomp
     end
 
     # Acknowledge a message, used when a subscription has specified
-    # client acknowledgement ( connection.subscribe "/queue/a", :ack => 'client'g
-    #
-    # Accepts a transaction header ( :transaction => 'some_transaction_id' )
+    # client acknowledgement ( connection.subscribe("/queue/a",{:ack => 'client'}).
+    # Accepts a transaction header ( :transaction => 'some_transaction_id' ).
     def acknowledge(message, headers = {})
       txn_id = headers[:transaction]
       if txn_id
@@ -182,26 +180,23 @@ module Stomp
       if block_given?
         headers['receipt'] = register_receipt_listener lambda {|r| yield r}
       end
-      @connection.ack message.headers['message-id'], headers
+      @connection.ack(message.headers['message-id'], headers)
     end
 
-    # Stomp 1.1+ NACK
+    # Stomp 1.1+ NACK.
     def nack(message_id, headers = {})
-      @connection.nack message_id, headers
+      @connection.nack(message_id, headers)
     end
 
-    # Unreceive a message, sending it back to its queue or to the DLQ
-    #
+    # Unreceive a message, sending it back to its queue or to the DLQ.
     def unreceive(message, options = {})
       @connection.unreceive(message, options)
     end
 
-    # Publishes message to destination
-    #
+    # Publishes message to destination.
     # If a block is given a receipt will be requested and passed to the
-    # block on receipt
-    #
-    # Accepts a transaction header ( :transaction => 'some_transaction_id' )
+    # block on receipt.
+    # Accepts a transaction header ( :transaction => 'some_transaction_id' ).
     def publish(destination, message, headers = {})
       if block_given?
         headers['receipt'] = register_receipt_listener lambda {|r| yield r}
@@ -209,96 +204,103 @@ module Stomp
       @connection.publish(destination, message, headers)
     end
 
+    # :TODO: This should not be used.  Currently only referenced in the 
+    # spec tests.  This will be removed in the next release.
     def obj_send(*args)
       __send__(*args)
     end
 
-    def connection_frame
+    # Return the broker's CONNECTED frame to the client.  Misnamed.
+    def connection_frame()
       @connection.connection_frame
     end
 
-    def disconnect_receipt
+    # Return any RECEIPT frame received by DISCONNECT.
+    def disconnect_receipt()
       @connection.disconnect_receipt
     end
 
-    # Is this client open?
+    # open? tests if this client connection is open.
     def open?
-      @connection.open?
+      @connection.open?()
     end
 
-    # Is this client closed?
-    def closed?
-      @connection.closed?
+    # close? tests if this client connection is closed.
+    def closed?()
+      @connection.closed?()
     end
 
-    # Close out resources in use by this client
-    def close headers={}
+    # close frees resources in use by this client.  The listener thread is
+    # terminated, and disconnect on the connection is called.
+    def close(headers={})
       @listener_thread.exit
-      @connection.disconnect headers
+      @connection.disconnect(headers)
     end
 
-    # Check if the thread was created and isn't dead
-    def running
+    # running checks if the thread was created and is not dead.
+    def running()
       @listener_thread && !!@listener_thread.status
     end
 
-    # Convenience method
+    # set_logger identifies a new callback logger.
     def set_logger(logger)
       @connection.set_logger(logger)
     end
 
-    # Convenience method
+    # protocol returns the current client's protocol level.
     def protocol()
-      @connection.protocol
+      @connection.protocol()
     end
 
-    # Convenience method
+    # valid_utf8? validates any given string for UTF8 compliance.
     def valid_utf8?(s)
       @connection.valid_utf8?(s)
     end
 
-    # Convenience method for clients
+    # sha1 returns a SHA1 sum of a given string.
     def sha1(data)
       @connection.sha1(data)
     end
 
-    # Convenience method for clients
+    # uuid returns a type 4 UUID.
     def uuid()
       @connection.uuid()
     end
 
-    # Retrieve heartbeat send interval
-    def hbsend_interval
-      @connection.hbsend_interval
+    # hbsend_interval returns the connection's heartbeat send interval.
+    def hbsend_interval()
+      @connection.hbsend_interval()
     end
 
-    # Retrieve heartbeat receive interval
-    def hbrecv_interval
-      @connection.hbrecv_interval
+    # hbrecv_interval returns the connection's heartbeat receive interval.
+    def hbrecv_interval()
+      @connection.hbrecv_interval()
     end
 
-    # Retrieve heartbeat send count
-    def hbsend_count
-      @connection.hbsend_count
+    # hbsend_count returns the current connection's heartbeat send count.
+    def hbsend_count()
+      @connection.hbsend_count()
     end
 
-    # Retrieve heartbeat receive count
-    def hbrecv_count
-      @connection.hbrecv_count
+    # hbrecv_count returns the current connection's heartbeat receive count.
+    def hbrecv_count()
+      @connection.hbrecv_count()
     end
 
     # Poll for asynchronous messages issued by broker.
     # Return nil of no message available, else the message
-    def poll
-      @connection.poll
+    def poll()
+      @connection.poll()
     end
 
+    # autoflush= sets the current connection's autoflush setting.
     def autoflush=(af)
       @connection.autoflush = af
     end
 
-    def autoflush
-      @connection.autoflush
+    # autoflush returns the current connection's autoflush setting.
+    def autoflush()
+      @connection.autoflush()
     end
 
   end # Class

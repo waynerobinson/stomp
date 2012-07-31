@@ -11,12 +11,13 @@ module Stomp
 
     private
 
-    def _receive( read_socket )
+    # Really read from the wire.
+    def _receive(read_socket)
       @read_semaphore.synchronize do
         line = ''
         if @protocol == Stomp::SPL_10 || (@protocol >= Stomp::SPL_11 && !@hbr)
           line = read_socket.gets # The old way
-        else # We are >= 1.1 and receiving heartbeats.
+        else # We are >= 1.1 *AND* receiving heartbeats.
           while true
             line = read_socket.gets # Data from wire
             break unless line == "\n"
@@ -56,7 +57,7 @@ module Stomp
           # returns true.  This means that this code to drain trailing new
           # lines never runs using JRuby.
           #
-          # Note 2: the draining of new lines mmust be done _after_ a message
+          # Note 2: the draining of new lines must be done _after_ a message
           # is read.  Do _not_ leave them on the wire and attempt to drain them
           # at the start of the next read.  Attempting to do that breaks the
           # asynchronous nature of the 'poll' method.
@@ -86,6 +87,7 @@ module Stomp
       end
     end
 
+    # transmit puts a Message on the wire.
     def transmit(command, headers = {}, body = '')
       # The transmit may fail so we may need to retry.
       while TRUE
@@ -108,6 +110,7 @@ module Stomp
       end
     end
 
+    # _transmit is the real wire write logic.
     def _transmit(used_socket, command, headers = {}, body = '')
       if @protocol >= Stomp::SPL_11 && command != Stomp::CMD_CONNECT
         headers = _encodeHeaders(headers)
@@ -150,7 +153,8 @@ module Stomp
       end
     end
 
-    def open_tcp_socket
+    # open_tcp_socket opens a TCP socket.
+    def open_tcp_socket()
       tcp_socket = nil
 
       if @logger && @logger.respond_to?(:on_connecting)
@@ -164,7 +168,8 @@ module Stomp
       tcp_socket
     end
 
-    def open_ssl_socket
+    # open_ssl_socket opens an SSL socket.
+    def open_ssl_socket()
       require 'openssl' unless defined?(OpenSSL)
       begin # Any raised SSL exceptions
         ctx = OpenSSL::SSL::SSLContext.new
@@ -268,7 +273,8 @@ module Stomp
       end
     end
 
-    def close_socket
+    # close_socket closes the current open socket, and hence the connection.
+    def close_socket()
       begin
         # Need to set @closed = true before closing the socket
         # within the @read_semaphore thread
@@ -282,7 +288,8 @@ module Stomp
       @closed
     end
 
-    def open_socket
+    # open_socket opens a TCP or SSL soclet as required.
+    def open_socket()
       used_socket = @ssl ? open_ssl_socket : open_tcp_socket
       # try to close the old connection if any
       close_socket
@@ -293,6 +300,7 @@ module Stomp
       used_socket
     end
 
+    # connect performs a basic STOMP CONNECT operation.
     def connect(used_socket)
       @connect_headers = {} unless @connect_headers # Caller said nil/false
       headers = @connect_headers.clone

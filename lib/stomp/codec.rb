@@ -14,7 +14,9 @@ module Stomp
   #
   class HeaderCodec
 
-    # Encode header data per STOMP 1.1 specification
+    public
+
+    # encode encodes header data per STOMP 1.1 specification.
     def self.encode(in_string = nil)
       return in_string unless in_string
       ev = Stomp::ENCODE_VALUES # avoid typing below
@@ -25,7 +27,7 @@ module Stomp
       os
     end
 
-    # Decode header data per STOMP 1.1 specification
+    # decode decodes header data per STOMP 1.1 specification.
     def self.decode(in_string = nil)
       return in_string unless in_string
       ev = Stomp::DECODE_VALUES # avoid typing below

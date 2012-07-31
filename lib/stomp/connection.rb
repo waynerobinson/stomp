@@ -13,12 +13,26 @@ module Stomp
 
     public
 
+    # The CONNECTED frame from the broker.
     attr_reader   :connection_frame
+
+    # Any disconnect RECEIPT frame if requested.
     attr_reader   :disconnect_receipt
+
+    # The Stomp Protocol version.
     attr_reader   :protocol
+
+    # A unique session ID, assigned by the broker.
     attr_reader   :session
+
+    # Heartbeat has been received on time.
     attr_reader   :hb_received # Heartbeat received on time
+
+    # Heartbeat send is successful.
     attr_reader   :hb_sent # Heartbeat sent successfully
+
+    # Autoflush forces a flush on each transmit.  This may be changed
+    # dynamically by calling code.
     attr_accessor :autoflush
 
     def self.default_port(ssl)
@@ -107,6 +121,8 @@ module Stomp
       socket
     end
 
+    # hashed_initialize prepares a new connection with a Hash of initialization
+    # parameters.
     def hashed_initialize(params)
 
       @parameters = refine_params(params)
@@ -126,7 +142,9 @@ module Stomp
       Connection.new(login, passcode, host, port, reliable, reconnect_delay, connect_headers)
     end
 
-    def socket
+    # socket creates and returns a new socket for use by the connection.
+    # *NOTE* this method will be made private in the next realease.
+    def socket()
       @socket_semaphore.synchronize do
         used_socket = @socket
         used_socket = nil if closed?
@@ -134,7 +152,7 @@ module Stomp
         while used_socket.nil? || !@failure.nil?
           @failure = nil
           begin
-            used_socket = open_socket
+            used_socket = open_socket()
             # Open complete
 
             connect(used_socket)
@@ -165,8 +183,8 @@ module Stomp
             @connection_attempts += 1
 
             if @parameters
-              change_host
-              increase_reconnect_delay
+              change_host()
+              increase_reconnect_delay()
             end
           end
         end
@@ -174,6 +192,8 @@ module Stomp
       end
     end
 
+    # refine_params sets up defaults for a Hash initialize.
+    # *NOTE* This method will be made private in the next release.
     def refine_params(params)
       params = params.uncamelize_and_symbolize_keys
       default_params = {
@@ -200,6 +220,8 @@ module Stomp
       return res_params
     end
 
+    # change_host selects the next host for retires.
+    # *NOTE* This method will be made private in the next release.
     def change_host
       @parameters[:hosts] = @parameters[:hosts].sort_by { rand } if @parameters[:randomize]
 
@@ -215,10 +237,16 @@ module Stomp
 
     end
 
+    # max_reconnect_attempts? returns nil or the number of maximum reconnect
+    # attempts.
+    # *NOTE* This method will be made private in the next release.
     def max_reconnect_attempts?
       !(@parameters.nil? || @parameters[:max_reconnect_attempts].nil?) && @parameters[:max_reconnect_attempts] != 0 && @connection_attempts >= @parameters[:max_reconnect_attempts]
     end
 
+    # increase_reconnect_delay increases the reconnect delay for the next connection
+    # attempt.
+    # *NOTE* This method will be made private in the next release.
     def increase_reconnect_delay
 
       @reconnect_delay *= @parameters[:back_off_multiplier] if @parameters[:use_exponential_back_off]
@@ -227,17 +255,17 @@ module Stomp
       @reconnect_delay
     end
 
-    # Is this connection open?
+    # open? tests if this connection is open.
     def open?
       !@closed
     end
 
-    # Is this connection closed?
+    # closed? tests if this connection is closed.
     def closed?
       @closed
     end
 
-    # Begin a transaction, requires a name for the transaction
+    # Begin starts a transaction, and requires a name for the transaction
     def begin(name, headers = {})
       raise Stomp::Error::NoCurrentConnection if closed?
       headers = headers.symbolize_keys
@@ -247,8 +275,7 @@ module Stomp
     end
 
     # Acknowledge a message, used when a subscription has specified
-    # client acknowledgement ( connection.subscribe "/queue/a", :ack => 'client'g
-    #
+    # client acknowledgement i.e. connection.subscribe("/queue/a", :ack => 'client').
     # Accepts a transaction header ( :transaction => 'some_transaction_id' )
     def ack(message_id, headers = {})
       raise Stomp::Error::NoCurrentConnection if closed?
@@ -262,7 +289,7 @@ module Stomp
       transmit(Stomp::CMD_ACK, headers)
     end
 
-    # STOMP 1.1+ NACK
+    # STOMP 1.1+ NACK.
     def nack(message_id, headers = {})
       raise Stomp::Error::NoCurrentConnection if closed?
       raise Stomp::Error::UnsupportedProtocolError if @protocol == Stomp::SPL_10
@@ -274,7 +301,7 @@ module Stomp
       transmit(Stomp::CMD_NACK, headers)
     end
 
-    # Commit a transaction by name
+    # Commit commits a transaction by name.
     def commit(name, headers = {})
       raise Stomp::Error::NoCurrentConnection if closed?
       headers = headers.symbolize_keys
@@ -283,7 +310,7 @@ module Stomp
       transmit(Stomp::CMD_COMMIT, headers)
     end
 
-    # Abort a transaction by name
+    # Abort aborts a transaction by name.
     def abort(name, headers = {})
       raise Stomp::Error::NoCurrentConnection if closed?
       headers = headers.symbolize_keys
@@ -292,7 +319,8 @@ module Stomp
       transmit(Stomp::CMD_ABORT, headers)
     end
 
-    # Subscribe to a destination, must specify a name
+    # Subscribe subscribes to a destination.  A subscription name is required.
+    # For Stomp 1.1 a session unique subscription ID is required.
     def subscribe(name, headers = {}, subId = nil)
       raise Stomp::Error::NoCurrentConnection if closed?
       headers = headers.symbolize_keys
@@ -316,7 +344,8 @@ module Stomp
       transmit(Stomp::CMD_SUBSCRIBE, headers)
     end
 
-    # Unsubscribe from a destination, which must be specified
+    # Unsubscribe from a destination.   A subscription name is required.
+    # For Stomp 1.1 a session unique subscription ID is required.
     def unsubscribe(dest, headers = {}, subId = nil)
       raise Stomp::Error::NoCurrentConnection if closed?
       headers = headers.symbolize_keys
@@ -332,10 +361,9 @@ module Stomp
       end
     end
 
-    # Publish message to destination
-    #
-    # To disable content length header ( :suppress_content_length => true )
-    # Accepts a transaction header ( :transaction => 'some_transaction_id' )
+    # Publish message to destination.
+    # To disable content length header use header ( :suppress_content_length => true ).
+    # Accepts a transaction header ( :transaction => 'some_transaction_id' ).
     def publish(destination, message, headers = {})
       raise Stomp::Error::NoCurrentConnection if closed?
       headers = headers.symbolize_keys
@@ -347,18 +375,19 @@ module Stomp
       transmit(Stomp::CMD_SEND, headers, message)
     end
 
+    # :TODO: Remove this method.
+    # *NOTE* This method will be removed in the next release.
     def obj_send(*args)
       __send__(*args)
     end
 
-    # Send a message back to the source or to the dead letter queue
-    #
-    # Accepts a dead letter queue option ( :dead_letter_queue => "/queue/DLQ" )
-    # Accepts a limit number of redeliveries option ( :max_redeliveries => 6 )
-    # Accepts a force client acknowledgement option (:force_client_ack => true)
+    # Send a message back to the source or to the dead letter queue.
+    # Accepts a dead letter queue option ( :dead_letter_queue => "/queue/DLQ" ).
+    # Accepts a limit number of redeliveries option ( :max_redeliveries => 6 ).
+    # Accepts a force client acknowledgement option (:force_client_ack => true).
     def unreceive(message, options = {})
       raise Stomp::Error::NoCurrentConnection if closed?
-      options = { :dead_letter_queue => "/queue/DLQ", :max_redeliveries => 6 }.merge options
+      options = { :dead_letter_queue => "/queue/DLQ", :max_redeliveries => 6 }.merge(options)
       # Lets make sure all keys are symbols
       message.headers = message.headers.symbolize_keys
 
@@ -375,10 +404,14 @@ module Stomp
         end
 
         if retry_count <= options[:max_redeliveries]
-          self.publish(message.headers[:destination], message.body, message.headers.merge(:transaction => transaction_id))
+          self.publish(message.headers[:destination], message.body, 
+            message.headers.merge(:transaction => transaction_id))
         else
           # Poison ack, sending the message to the DLQ
-          self.publish(options[:dead_letter_queue], message.body, message.headers.merge(:transaction => transaction_id, :original_destination => message.headers[:destination], :persistent => true))
+          self.publish(options[:dead_letter_queue], message.body, 
+            message.headers.merge(:transaction => transaction_id, 
+            :original_destination => message.headers[:destination], 
+            :persistent => true))
         end
         self.commit transaction_id
       rescue Exception => exception
@@ -392,7 +425,8 @@ module Stomp
       !headers.nil? && headers[:ack] == "client"
     end
 
-    # Close this connection
+    # disconnect closes this connection.  If requested, a disconnect RECEIPT 
+    # is received.
     def disconnect(headers = {})
       raise Stomp::Error::NoCurrentConnection if closed?
       headers = headers.symbolize_keys
@@ -409,18 +443,19 @@ module Stomp
       close_socket
     end
 
-    # Return a pending message if one is available, otherwise
-    # return nil
+    # poll returns a pending message if one is available, otherwise
+    # returns nil.
     def poll
       raise Stomp::Error::NoCurrentConnection if closed?
       # No need for a read lock here.  The receive method eventually fulfills
       # that requirement.
       return nil if @socket.nil? || !@socket.ready?
-      receive
+      receive()
     end
 
-    # Receive a frame, block until the frame is received
-    def __old_receive
+    # __old_receive receives a frame, blocks until the frame is received.
+    # *NOTE* This method will be made private in the next release.
+    def __old_receive()
       # The receive may fail so we may need to retry.
       while TRUE
         begin
@@ -439,7 +474,8 @@ module Stomp
       end
     end
 
-    def receive
+    # receive returns the next Message off of the wire.
+    def receive()
       raise Stomp::Error::NoCurrentConnection if closed?
       super_result = __old_receive
       if super_result.nil? && @reliable && !closed?
@@ -459,12 +495,12 @@ module Stomp
       return super_result
     end
 
-    # Convenience method
+    # set_logger selects a new callback logger instance.
     def set_logger(logger)
       @logger = logger
     end
 
-    # Convenience method
+    # valid_utf8? returns an indicator if the given string is a valid UTF8 string.
     def valid_utf8?(s)
       case RUBY_VERSION
       when /1\.8/
@@ -475,12 +511,12 @@ module Stomp
       rv
     end
 
-    # Convenience method for clients, return a SHA1 digest for arbitrary data
+    # sha1 returns a SHA1 digest for arbitrary string data.
     def sha1(data)
       Digest::SHA1.hexdigest(data)
     end
 
-    # Convenience method for clients, return a type 4 UUID.
+    # uuid returns a type 4 UUID.
     def uuid()
       b = []
       0.upto(15) do |i|
@@ -494,26 +530,26 @@ module Stomp
       rs
     end
 
-    # Retrieve heartbeat send interval
-    def hbsend_interval
+    # hbsend_interval returns the connection's heartbeat send interval.
+    def hbsend_interval()
       return 0 unless @hbsend_interval
       @hbsend_interval / 1000.0 # ms
     end
 
-    # Retrieve heartbeat receive interval
-    def hbrecv_interval
+    # hbrecv_interval returns the connection's heartbeat receive interval.
+    def hbrecv_interval()
       return 0 unless @hbrecv_interval
       @hbrecv_interval / 1000.0 # ms
     end
 
-    # Retrieve heartbeat send count
-    def hbsend_count
+    # hbsend_count returns the current connection's heartbeat send count.
+    def hbsend_count()
       return 0 unless @hbsend_count
       @hbsend_count
     end
 
-    # Retrieve heartbeat receive count
-    def hbrecv_count
+    # hbrecv_count returns the current connection's heartbeat receive count.
+    def hbrecv_count()
       return 0 unless @hbrecv_count
       @hbrecv_count
     end

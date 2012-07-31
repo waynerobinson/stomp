@@ -57,7 +57,7 @@ module Stomp
         sm = @cx >= @sy ? @cx : @sy # ticker interval, ms
         @hbsend_interval = 1000.0 * sm # ticker interval, μs
         @ls = Time.now.to_f # best guess at start
-        _start_send_ticker
+        _start_send_ticker()
       end
 
       # If receiving
@@ -65,12 +65,12 @@ module Stomp
         rm = @sx >= @cy ? @sx : @cy # ticker interval, ms
         @hbrecv_interval = 1000.0 * rm # ticker interval, μs
         @lr = Time.now.to_f # best guess at start
-        _start_receive_ticker
+        _start_receive_ticker()
       end
 
     end
 
-    def _start_send_ticker
+    def _start_send_ticker()
       sleeptime = @hbsend_interval / 1000000.0 # Sleep time secs
       @st = Thread.new {
         while true do
@@ -106,7 +106,7 @@ module Stomp
       }
     end
 
-    def _start_receive_ticker
+    def _start_receive_ticker()
       sleeptime = @hbrecv_interval / 1000000.0 # Sleep time secs
       @rt = Thread.new {
         while true do

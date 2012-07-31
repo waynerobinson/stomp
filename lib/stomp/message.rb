@@ -2,12 +2,28 @@
 
 module Stomp
 
-  # Container class for frames, misnamed technically
+  # Message is a container class for frames.  Misnamed technically.
   class Message
-    attr_accessor :command, :headers, :body, :original
 
+    public
+
+    # The COMMAND value.
+    attr_accessor :command
+
+    # The Headers Hash.
+    attr_accessor :headers
+
+    # The message Body.
+    attr_accessor :body
+
+    # The original input(s).
+    attr_accessor :original
+
+
+    # Commands that are allowed from the wire.
     @@allowed_commands = [ Stomp::CMD_CONNECTED, Stomp::CMD_MESSAGE, Stomp::CMD_RECEIPT, Stomp::CMD_ERROR ]
 
+    # initialize returns a Message from a raw physical frame.
     def initialize(frame, protocol11p = false)
       # p [ "00", frame, frame.encoding ]
       # Set default empty values
@@ -79,18 +95,23 @@ module Stomp
       self.body = work_body[0..body_length]
     end
 
+    # to_s returns a string prepresentation of this Message
     def to_s
       "<Stomp::Message headers=#{headers.inspect} body='#{body}' command='#{command}' >"
     end
 
+    private
+
+    # is_blank? tests if a data value is nil or empty.
+    def is_blank?(value)
+      value.nil? || (value.respond_to?(:empty?) && value.empty?)
+    end
+
+    # empty? tests if a Message has any blank parts.
     def empty?
       is_blank?(command) && is_blank?(headers) && is_blank?(body)
     end
 
-    private
-    def is_blank?(value)
-      value.nil? || (value.respond_to?(:empty?) && value.empty?)
-    end
   end
 
 end

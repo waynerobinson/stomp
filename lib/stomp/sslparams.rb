@@ -32,15 +32,16 @@ module  Stomp
     #  Ruby's  OpenSSL.
     attr_accessor  :ciphers
 
-    #  Absolute  command  to  use  Ruby  default  ciphers
+    #  Absolute  command  to  use  Ruby  default  ciphers.
     attr_reader  :use_ruby_ciphers
 
-    #  Back  reference  to  the  OpenSSL::SSL::SSLContext  instance,  gem  sets  before  connect
+    #  Back  reference  to  the  OpenSSL::SSL::SSLContext  instance,  gem  sets  before  connect.
     attr_accessor  :ctx  #  Set  by  the  gem  during  connect,  before  the  callbacks
 
-    # Client  wants  file  existance  check on initialize. true/value or false/nil
+    # Client  wants  file  existance  check on initialize. true/value or false/nil.
     attr_reader  :fsck  #
-    #
+
+    # initialize returns a valid set of SSLParams or raises an error.
     def  initialize(opts={})
 
       #  Server  authentication  parameters

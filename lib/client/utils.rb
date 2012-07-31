@@ -52,7 +52,7 @@ module Stomp
       hosts
     end
 
-    def check_arguments!
+    def check_arguments!()
       raise ArgumentError if @host.nil? || @host.empty?
       raise ArgumentError if @port.nil? || @port == '' || @port < 1 || @port > 65535
       raise ArgumentError unless @reliable.is_a?(TrueClass) || @reliable.is_a?(FalseClass)
@@ -83,7 +83,7 @@ module Stomp
       @listeners[subscription_id]
     end
 
-    def start_listeners
+    def start_listeners()
       @listeners = {}
       @receipt_listeners = {}
       @replay_messages_by_txn = {}
