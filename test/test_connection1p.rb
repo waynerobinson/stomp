@@ -4,6 +4,11 @@ $:.unshift(File.dirname(__FILE__))
 
 require 'test_helper'
 
+=begin
+
+  Main class for testing Stomp::Connection instances, protocol level 1.1+.
+
+=end
 class TestConnection1P < Test::Unit::TestCase
   include TestBase
   
@@ -14,11 +19,13 @@ class TestConnection1P < Test::Unit::TestCase
   def teardown
     @conn.disconnect if @conn.open? # allow tests to disconnect
   end
-  #
+
+  # Test basic connection open.
   def test_conn_1p_0000
     assert @conn.open?
   end
-  #
+
+  # Test missing connect headers.
   def test_conn_1p_0010
     #
     cha = {:host => "localhost"}
@@ -31,7 +38,8 @@ class TestConnection1P < Test::Unit::TestCase
       conn = Stomp::Connection.open(user, passcode, host, port, false, 5, chb)
     end    
   end
-  #
+
+  # Test requesting only a 1.0 connection.
   def test_conn_1p_0020
     #
     cha = {:host => "localhost", "accept-version" => "1.0"}
@@ -43,7 +51,8 @@ class TestConnection1P < Test::Unit::TestCase
     end
     assert_equal conn.protocol, Stomp::SPL_10
   end
-  #
+
+  # Test requesting only a 1.1 connection.
   def test_conn_1p_0030
     #
     cha = {:host => "localhost", "accept-version" => "1.1"}
@@ -55,7 +64,8 @@ class TestConnection1P < Test::Unit::TestCase
     end
     assert_equal conn.protocol, Stomp::SPL_11
   end
-  #
+
+  # Test basic request for no heartbeats.
   def test_conn_1p_0040
     #
     cha = {:host => "localhost", "accept-version" => "1.1"}
@@ -68,8 +78,8 @@ class TestConnection1P < Test::Unit::TestCase
     end
     assert_equal conn.protocol, Stomp::SPL_11
   end
-  #
 
+  # Test malformed heartbeat header.
   def test_conn_1p_0050
     #
     cha = {:host => "localhost", "accept-version" => "1.1"}
@@ -80,7 +90,8 @@ class TestConnection1P < Test::Unit::TestCase
       conn = Stomp::Connection.open(user, passcode, host, port, false, 5, cha)
     end
   end
-  #
+
+  # Test malformed heartbeat header.
   def test_conn_11h_0060
     #
     cha = {:host => "localhost", "accept-version" => "1.1"}
@@ -91,7 +102,8 @@ class TestConnection1P < Test::Unit::TestCase
       conn = Stomp::Connection.open(user, passcode, host, port, false, 5, cha)
     end
   end
-  #
+
+  # Test a valid heartbeat header.
   def test_conn_1p_0070
     #
     cha = {:host => "localhost", "accept-version" => "1.1"}
@@ -106,7 +118,7 @@ class TestConnection1P < Test::Unit::TestCase
     assert conn.hbrecv_interval > 0
   end
 
-  #
+  # Test only sending heartbeats.
   def test_conn_1p_0080
     #
     cha = {:host => "localhost", "accept-version" => "1.1"}
@@ -124,7 +136,7 @@ class TestConnection1P < Test::Unit::TestCase
     hb_asserts_send(conn)
   end if ENV['STOMP_HB11LONG']
 
-  #
+  # Test only receiving heartbeats.
   def test_conn_1p_0090
     #
     cha = {:host => "localhost", "accept-version" => "1.1"}
@@ -143,7 +155,7 @@ class TestConnection1P < Test::Unit::TestCase
     hb_asserts_recv(conn)
   end if ENV['STOMP_HB11LONG']
 
-  #
+  # Test sending and receiving heartbeats.
   def test_conn_1p_0100
     #
     cha = {:host => "localhost", "accept-version" => "1.1"}
@@ -162,7 +174,7 @@ class TestConnection1P < Test::Unit::TestCase
     hb_asserts_both(conn)
   end if ENV['STOMP_HB11LONG']
 
-  #
+  # Test valid UTF8 data.
   def test_conn_1p_0110
     #
     cha = {:host => "localhost", "accept-version" => "1.1"}
@@ -193,7 +205,7 @@ class TestConnection1P < Test::Unit::TestCase
     conn.disconnect
   end
 
-  #
+  # Test invalid UTF8 data.
   def test_conn_1p_0120
     #
     cha = {:host => "localhost", "accept-version" => "1.1"}
@@ -230,6 +242,8 @@ class TestConnection1P < Test::Unit::TestCase
   # Repeated headers test. Currently:
   # - Apollo emits repeated headers for a 1.1 connection only
   # - RabbitMQ does not emit repeated headers under any circumstances
+  # - AMQ 5.6 does not emit repeated headers under any circumstances
+  # Pure luck that this runs against AMQ at present.
   def test_conn_1p_0120
     dest = make_destination
     msg = "payload: #{Time.now.to_f}"
@@ -253,6 +267,7 @@ class TestConnection1P < Test::Unit::TestCase
     @conn.unsubscribe dest, :id => sid
   end
 
+  # Test frozen headers.
   def test_conn_1p_0120
     dest = make_destination
     sid = @conn.uuid()
@@ -262,7 +277,7 @@ class TestConnection1P < Test::Unit::TestCase
     }
   end
 
-  #
+  # Test heartbeats with send and receive.
   def test_conn_1p_0130
     #
     cha = {:host => "localhost", "accept-version" => "1.1"}
@@ -281,7 +296,7 @@ class TestConnection1P < Test::Unit::TestCase
     hb_asserts_both(conn)
   end if ENV['STOMP_HB11LONG']
 
-  #
+  # Test heartbeats with send and receive.
   def test_conn_1p_0130
     #
     cha = {:host => "localhost", "accept-version" => "1.1"}
@@ -300,7 +315,7 @@ class TestConnection1P < Test::Unit::TestCase
     hb_asserts_both(conn)
   end if ENV['STOMP_HB11LONG']
 
-  #
+  # Test heartbeats with send and receive.
   def test_conn_1p_0140
     #
     cha = {:host => "localhost", "accept-version" => "1.1"}

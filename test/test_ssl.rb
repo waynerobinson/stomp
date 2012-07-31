@@ -4,6 +4,11 @@ $:.unshift(File.dirname(__FILE__))
 
 require 'test_helper'
 
+=begin
+
+  Main class for testing Stomp::SSLParams.
+
+=end
 class TestSSL < Test::Unit::TestCase
   include TestBase
   
@@ -19,7 +24,7 @@ class TestSSL < Test::Unit::TestCase
     assert @conn.open?
   end
 
-  #
+  # Test SSLParams basic.
   def test_ssl_0010_parms
     ssl_params = Stomp::SSLParams.new
     assert ssl_params.ts_files.nil?
@@ -28,7 +33,7 @@ class TestSSL < Test::Unit::TestCase
     assert ssl_params.fsck.nil?
   end
 
-  #
+  # Test using correct parameters.
   def test_ssl_0020_noraise
     assert_nothing_raised {
       ssl_parms = Stomp::SSLParams.new(:cert_file => "dummy1", :key_file => "dummy2")
@@ -41,7 +46,8 @@ class TestSSL < Test::Unit::TestCase
         :cert_file => "dummy1", :key_file => "dummy2")
     }
   end
-  #
+
+  # Test using incorrect / incomplete parameters.
   def test_ssl_0030_raise
     assert_raise(Stomp::Error::SSLClientParamsError) {
       ssl_parms = Stomp::SSLParams.new(:cert_file => "dummy1")
@@ -51,7 +57,7 @@ class TestSSL < Test::Unit::TestCase
     }
   end
 
-  #
+  # Test that :fsck works.
   def test_ssl_0040_fsck
     assert_raise(Stomp::Error::SSLNoCertFileError) {
       ssl_parms = Stomp::SSLParams.new(:cert_file => "dummy1", 

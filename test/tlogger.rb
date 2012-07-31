@@ -1,22 +1,22 @@
 # -*- encoding: utf-8 -*-
 
-=begin
-
-Callback logger for tests.
-
-=end
-
 require 'logger'	# use the standard Ruby logger .....
 
+=begin
+
+Callback logger for Stomp 1.1 heartbeat tests.
+
+=end
 class Tlogger
-  #
+
+  # Initialize a callback logger class.
   def initialize(init_parms = nil)
     @log = Logger::new(STDOUT)		# User preference
     @log.level = Logger::DEBUG		# User preference
     @log.info("Logger initialization complete.")
   end
 
-  # Log connecting events
+  # Log connecting events.
   def on_connecting(parms)
     begin
       @log.debug "Connecting: #{info(parms)}"
@@ -25,7 +25,7 @@ class Tlogger
     end
   end
 
-  # Log connected events
+  # Log connected events.
   def on_connected(parms)
     begin
       @log.debug "Connected: #{info(parms)}"
@@ -34,7 +34,7 @@ class Tlogger
     end
   end
 
-  # Log connectfail events
+  # Log connectfail events.
   def on_connectfail(parms)
     begin
       @log.debug "Connect Fail #{info(parms)}"
@@ -43,7 +43,7 @@ class Tlogger
     end
   end
 
-  # Log disconnect events
+  # Log disconnect events.
   def on_disconnect(parms)
     begin
       @log.debug "Disconnected #{info(parms)}"
@@ -52,7 +52,7 @@ class Tlogger
     end
   end
 
-  # Log miscellaneous errors
+  # Log miscellaneous errors.
   def on_miscerr(parms, errstr)
     begin
       @log.debug "Miscellaneous Error #{info(parms)}"
@@ -62,7 +62,7 @@ class Tlogger
     end
   end
 
-  # Subscribe
+  # Log subscribes.
   def on_subscribe(parms, headers)
     begin
       @log.debug "Subscribe Parms #{info(parms)}"
@@ -72,7 +72,7 @@ class Tlogger
     end
   end
 
-  # Publish
+  # Log publishes.
   def on_publish(parms, message, headers)
     begin
       @log.debug "Publish Parms #{info(parms)}"
@@ -83,7 +83,7 @@ class Tlogger
     end
   end
 
-  # Receive
+  # Log receives.
   def on_receive(parms, result)
     begin
       @log.debug "Receive Parms #{info(parms)}"

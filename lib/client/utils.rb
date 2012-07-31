@@ -8,6 +8,7 @@ module Stomp
   class Client
 
     private
+
     # Set a subscription id in the headers hash if one does not already exist.
     # For simplicities sake, all subscriptions have a subscription ID.
     # setting an id in the SUBSCRIPTION header is described in the stomp protocol docs:
@@ -19,6 +20,7 @@ module Stomp
       end
     end
 
+    # Register a receipt listener.
     def register_receipt_listener(listener)
       id = -1
       @id_mutex.synchronize do
@@ -34,6 +36,7 @@ module Stomp
       '(([\w\.\-]*):(\w*)@)?([\w\.\-]+):(\d+)'
     end
 
+    # Parse a stomp URL.
     def parse_hosts(url)
       hosts = []
 

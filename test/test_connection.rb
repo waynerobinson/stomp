@@ -4,6 +4,11 @@ $:.unshift(File.dirname(__FILE__))
 
 require 'test_helper'
 
+=begin
+
+  Main class for testing Stomp::Connection instances.
+
+=end
 class TestConnection < Test::Unit::TestCase
   include TestBase
   
@@ -18,10 +23,12 @@ class TestConnection < Test::Unit::TestCase
     @conn.disconnect if @conn.open? # allow tests to disconnect
   end
 
+  # Test basic connection creation.
   def test_connection_exists
     assert_not_nil @conn
   end
 
+  # Test asynchronous polling.
   def test_poll_async
     @conn.subscribe("/queue/do.not.put.messages.on.this.queue", :id => "a.no.messages.queue")
     # If the test 'hangs' here, Connection#poll is broken.
@@ -29,6 +36,7 @@ class TestConnection < Test::Unit::TestCase
     assert m.nil?
   end
 
+  # Test suppression of content length header.
   def test_no_length
     conn_subscribe make_destination
     #
@@ -47,6 +55,7 @@ class TestConnection < Test::Unit::TestCase
     end
   end unless ENV['STOMP_RABBIT']
 
+  # Test direct / explicit receive.
   def test_explicit_receive
     conn_subscribe make_destination
     @conn.publish make_destination, "test_stomp#test_explicit_receive"
@@ -54,12 +63,14 @@ class TestConnection < Test::Unit::TestCase
     assert_equal "test_stomp#test_explicit_receive", msg.body
   end
 
+  # Test asking for a receipt.
   def test_receipt
     conn_subscribe make_destination, :receipt => "abc"
     msg = @conn.receive
     assert_equal "abc", msg.headers['receipt-id']
   end
 
+  # Test asking for a receipt on disconnect.
   def test_disconnect_receipt
     @conn.disconnect :receipt => "abc123"
     assert_nothing_raised {
@@ -69,6 +80,7 @@ class TestConnection < Test::Unit::TestCase
     }
   end
 
+  # Test ACKs using symbols for header keys.
   def test_client_ack_with_symbol
     if @conn.protocol == Stomp::SPL_10
       @conn.subscribe make_destination, :ack => :client
@@ -87,6 +99,7 @@ class TestConnection < Test::Unit::TestCase
     }
   end
 
+  # Test a message with 0x00 embedded in the body.
   def test_embedded_null
     conn_subscribe make_destination
     @conn.publish make_destination, "a\0"
@@ -94,18 +107,21 @@ class TestConnection < Test::Unit::TestCase
     assert_equal "a\0" , msg.body
   end
 
+  # Test connection open checking.
   def test_connection_open?
     assert_equal true , @conn.open?
     @conn.disconnect
     assert_equal false, @conn.open?
   end
 
+  # Test connection closed checking.
   def test_connection_closed?
     assert_equal false, @conn.closed?
     @conn.disconnect
     assert_equal true, @conn.closed?
   end
 
+  # Test that methods detect a closed connection.
   def test_closed_checks_conn
     @conn.disconnect
     #
@@ -154,6 +170,7 @@ class TestConnection < Test::Unit::TestCase
     end
   end
 
+  # Test that we receive a Stomp::Message.
   def test_response_is_instance_of_message_class
     conn_subscribe make_destination
     @conn.publish make_destination, "a\0"
@@ -161,6 +178,7 @@ class TestConnection < Test::Unit::TestCase
     assert_instance_of Stomp::Message , msg
   end
 
+  # Test converting a Message to a string.
   def test_message_to_s
     conn_subscribe make_destination
     @conn.publish make_destination, "a\0"
@@ -168,10 +186,12 @@ class TestConnection < Test::Unit::TestCase
     assert_match /^<Stomp::Message headers=/ , msg.to_s
   end
   
+  # Test that a connection frame is present.
   def test_connection_frame
   	assert_not_nil @conn.connection_frame
   end
   
+  # Test messages with multiple line ends.
   def test_messages_with_multipleLine_ends
     conn_subscribe make_destination
     @conn.publish make_destination, "a\n\n"
@@ -184,6 +204,7 @@ class TestConnection < Test::Unit::TestCase
     assert_equal "b\n\na\n\n", msg_b.body
   end
 
+  # Test publishing multiple messages.
   def test_publish_two_messages
     conn_subscribe make_destination
     @conn.publish make_destination, "a\0"
@@ -211,6 +232,7 @@ class TestConnection < Test::Unit::TestCase
     assert_equal message, received.body
   end
 
+  # Test polling with a single thread.
   def test_thread_poll_one
     received = nil
     max_sleep = (RUBY_VERSION =~ /1\.8/) ? 10 : 1
@@ -231,6 +253,7 @@ class TestConnection < Test::Unit::TestCase
     assert_equal message, received.body
   end
 
+  # Test receiving with multiple threads.
   def test_multi_thread_receive
     lock = Mutex.new
     msg_ctr = 0
@@ -268,6 +291,7 @@ class TestConnection < Test::Unit::TestCase
     assert_equal @max_msgs, msg_ctr
   end unless RUBY_ENGINE =~ /jruby/
 
+  # Test polling with multiple threads.
   def test_multi_thread_poll
     #
     lock = Mutex.new
@@ -311,6 +335,7 @@ class TestConnection < Test::Unit::TestCase
     assert_equal @max_msgs, msg_ctr
   end unless RUBY_ENGINE =~ /jruby/
 
+  # Test using a nil body.
   def test_nil_body
     dest = make_destination
     assert_nothing_raised {
@@ -321,6 +346,7 @@ class TestConnection < Test::Unit::TestCase
     assert_equal "", msg.body    
   end
 
+  # Test transaction message sequencing.
   def test_transaction
     conn_subscribe make_destination
 
@@ -337,6 +363,7 @@ class TestConnection < Test::Unit::TestCase
     assert_equal "txn message", msg.body
   end
 
+  # Test duplicate subscriptions.
   def test_duplicate_subscription
     @conn.disconnect # not reliable
     @conn = Stomp::Connection.open(user, passcode, host, port, true) # reliable
@@ -348,6 +375,7 @@ class TestConnection < Test::Unit::TestCase
     end
   end
 
+  # Test nil 1.1 connection parameters.
   def test_nil_connparms
     @conn.disconnect
     #
@@ -356,6 +384,7 @@ class TestConnection < Test::Unit::TestCase
     end
   end
 
+  # Basic NAK test.
   def test_nack11p_0010
     if @conn.protocol == Stomp::SPL_10
       assert_raise Stomp::Error::UnsupportedProtocolError do

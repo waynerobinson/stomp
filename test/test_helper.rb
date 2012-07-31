@@ -13,30 +13,43 @@ rescue NameError => ne
   RUBY_ENGINE = "unknown"
 end
 
-# Helper routines
+=begin
+
+  Test helper methods.
+
+=end
 module TestBase
+
+  # Get user
   def user
     ENV['STOMP_USER'] || "guest"
   end
+
+  # Gete passcode
   def passcode
     ENV['STOMP_PASSCODE'] || "guest"
   end
+
   # Get host
   def host
     ENV['STOMP_HOST'] || "localhost"
   end
+
   # Get port
   def port
     (ENV['STOMP_PORT'] || 61613).to_i
   end
+
   # Get SSL port
   def ssl_port
     (ENV['STOMP_SSLPORT'] || 61612).to_i
   end
+
   # Helper for minitest on 1.9
   def caller_method_name
     parse_caller(caller(2).first).last
   end
+
   # Helper for minitest on 1.9
   def parse_caller(at)
     if /^(.+?):(\d+)(?::in `(.*)')?/ =~ at
@@ -48,12 +61,14 @@ module TestBase
     end
   end
 
+  # Get a Stomp Connection.
   def get_connection()
     ch = get_conn_headers()
     conn = Stomp::Connection.open(user, passcode, host, port, false, 5, ch)
     conn
   end
 
+  # Get a Stomp SSL Connection.
   def get_ssl_connection()
     ch = get_conn_headers()
     ssl_params = Stomp::SSLParams.new # S/B safe for all Ruby versions tested
@@ -66,6 +81,7 @@ module TestBase
     conn
   end
 
+  # Get a Stomp Client.
   def get_client()
     hash = { :hosts => [ 
           {:login => user, :passcode => passcode, :host => host, :port => port},
@@ -77,6 +93,7 @@ module TestBase
     client
   end
 
+  # Get a connection headers hash.
   def get_conn_headers()
     ch = {}
     if ENV['STOMP_TEST11']
@@ -92,6 +109,7 @@ module TestBase
     ch
   end
 
+  # Subscribe to a destination.
   def conn_subscribe(dest, headers = {})
     if @conn.protocol >= Stomp::SPL_11
       headers[:id] = @conn.uuid() unless headers[:id]
@@ -99,8 +117,7 @@ module TestBase
     @conn.subscribe dest, headers
   end
 
-  # Test helper methods
-
+  # Get a dynamic destination name.
   def make_destination
     name = caller_method_name unless name
     qname = ENV['STOMP_DOTQUEUE'] ? "/queue/test.ruby.stomp." + name : "/queue/test/ruby/stomp/" + name

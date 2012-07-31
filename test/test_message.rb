@@ -11,7 +11,12 @@ $:.unshift(File.dirname(__FILE__))
 # Test Ruby 1.8 with $KCODE='U'
 #
 require 'test_helper'
-#
+
+=begin
+
+  Main class for testing Stomp::Message.
+
+=end
 class TestMessage < Test::Unit::TestCase
   include TestBase
   #
@@ -87,7 +92,7 @@ class TestMessage < Test::Unit::TestCase
 		end
   end
 
-	#
+	# Test various valid and invalid frames.
 	def test_0040_msg_create
 		#
 		assert_raise(Stomp::Error::InvalidFormat) {
@@ -132,7 +137,7 @@ class TestMessage < Test::Unit::TestCase
 
 	end
 
-	# Multiple headers with the same key
+	# Test multiple headers with the same key
 	def test_0050_mh_msg_create
     aframe = bframe = nil
 		assert_nothing_raised {

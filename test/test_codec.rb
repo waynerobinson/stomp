@@ -4,6 +4,11 @@ $:.unshift(File.dirname(__FILE__))
 
 require 'test_helper'
 
+=begin
+
+  Main class for testing Stomp::HeadreCodec methods.
+
+=end
 class TestCodec < Test::Unit::TestCase
   include TestBase
   
@@ -18,6 +23,7 @@ class TestCodec < Test::Unit::TestCase
     @conn.disconnect if @conn.open? # allow tests to disconnect
   end
 
+  # Test that the codec does nothing to strings that do not need encoding.
   def test_1000_check_notneeded
     test_data = [
       "a",
@@ -39,7 +45,7 @@ class TestCodec < Test::Unit::TestCase
     end
   end
 
-  #
+  # Test the basic encoding / decoding requirements.
   def test_1010_basic_encode_decode
     test_data = [
     	[ "\\\\", "\\" ],
@@ -62,7 +68,7 @@ class TestCodec < Test::Unit::TestCase
     end
   end
 
-  #
+  # Test more complex strings with the codec.
   def test_1020_fancier
     test_data = [
     	[ "a\\\\b", "a\\b" ],

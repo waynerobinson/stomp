@@ -4,6 +4,11 @@ $:.unshift(File.dirname(__FILE__))
 
 require 'test_helper'
 
+=begin
+
+  Main class for testing Stomp::Client instances.
+
+=end
 class TestClient < Test::Unit::TestCase
   include TestBase
   
@@ -18,12 +23,14 @@ class TestClient < Test::Unit::TestCase
     @client.close if @client.open? # allow tests to close
   end
 
+  # Test poll works.
   def test_poll_async
     # If the test 'hangs' here, Connection#poll is broken.
     m = @client.poll
     assert m.nil?
   end
 
+  # Test ACKs.
   def test_ack_api_works
     @client.publish make_destination, message_text, {:suppress_content_length => true}
 
@@ -41,6 +48,7 @@ class TestClient < Test::Unit::TestCase
     assert_not_nil receipt.headers['receipt-id']
   end unless ENV['STOMP_RABBIT']
 
+  # Test Client subscribe
   def test_asynch_subscribe
     received = false
     @client.subscribe(make_destination) {|msg| received = msg}
@@ -50,6 +58,7 @@ class TestClient < Test::Unit::TestCase
     assert_equal message_text, received.body
   end
 
+  # Test not ACKing messages.
   def test_noack
     @client.publish make_destination, message_text
 
@@ -71,17 +80,19 @@ class TestClient < Test::Unit::TestCase
     assert_equal received.headers['message-id'], received2.headers['message-id'] unless ENV['STOMP_RABBIT']
   end unless RUBY_ENGINE =~ /jruby/
 
+  # Test obtaining a RECEIPT via a listener.
   def test_receipts
     receipt = false
     @client.publish(make_destination, message_text) {|r| receipt = r}
     sleep 0.1 until receipt
-
+    assert_equal receipt.command, Stomp::CMD_RECEIPT
     message = nil
     @client.subscribe(make_destination) {|m| message = m}
     sleep 0.1 until message
     assert_equal message_text, message.body
   end
 
+  # Test requesting a receipt on disconnect.
   def test_disconnect_receipt
     @client.close :receipt => "xyz789"
     assert_nothing_raised {
@@ -91,6 +102,7 @@ class TestClient < Test::Unit::TestCase
     }
   end
 
+  # Test publish and immediate subscribe.
   def test_publish_then_sub
     @client.publish make_destination, message_text
     message = nil
@@ -100,12 +112,14 @@ class TestClient < Test::Unit::TestCase
     assert_equal message_text, message.body
   end
 
+  # Test that Client subscribe requires a block.
   def test_subscribe_requires_block
     assert_raise(RuntimeError) do
       @client.subscribe make_destination
     end
   end unless RUBY_ENGINE =~ /jruby/
 
+  # Test transaction publish.
   def test_transactional_publish
     @client.begin 'tx1'
     @client.publish make_destination, message_text, :transaction => 'tx1'
@@ -118,6 +132,7 @@ class TestClient < Test::Unit::TestCase
     assert_equal message_text, message.body
   end
 
+  # Test transaction publish and abort.
   def test_transaction_publish_then_rollback
     @client.begin 'tx1'
     @client.publish make_destination, "first_message", :transaction => 'tx1'
@@ -133,6 +148,7 @@ class TestClient < Test::Unit::TestCase
     assert_equal "second_message", message.body
   end unless RUBY_ENGINE =~ /jruby/
 
+  # Test transaction publish and abort, receive with new client.
   def test_transaction_ack_rollback_with_new_client
     @client.publish make_destination, message_text
 
@@ -185,6 +201,7 @@ class TestClient < Test::Unit::TestCase
     }
   end
 
+  # Test that subscription destinations must be unique for a Client.
   def test_raise_on_multiple_subscriptions_to_same_make_destination
     subscribe_dest = make_destination
     @client.subscribe(subscribe_dest) {|m| nil }
@@ -193,6 +210,7 @@ class TestClient < Test::Unit::TestCase
     end
   end
 
+  # Test that subscription IDs must be unique for a Client.
   def test_raise_on_multiple_subscriptions_to_same_id
     subscribe_dest = make_destination
     @client.subscribe(subscribe_dest, {'id' => 'myid'}) {|m| nil }
@@ -201,6 +219,7 @@ class TestClient < Test::Unit::TestCase
     end
   end
 
+  # Test that subscription IDs must be unique for a Client, mixed id specification.
   def test_raise_on_multiple_subscriptions_to_same_id_mixed
     subscribe_dest = make_destination
     @client.subscribe(subscribe_dest, {'id' => 'myid'}) {|m| nil }
@@ -209,6 +228,7 @@ class TestClient < Test::Unit::TestCase
     end
   end
 
+  # Test wildcard subscribe.  Primarily for AMQ.
   def  test_asterisk_wildcard_subscribe
     queue_base_name = make_destination
     queue1 = queue_base_name + ".a"
@@ -239,6 +259,7 @@ class TestClient < Test::Unit::TestCase
 
   end unless ENV['STOMP_NOWILD']
 
+  # Test wildcard subscribe with >.  Primarily for AMQ.
   def test_greater_than_wildcard_subscribe
     queue_base_name = make_destination + "."
     queue1 = queue_base_name + "foo.a"
@@ -272,6 +293,7 @@ class TestClient < Test::Unit::TestCase
     assert results.all?{|a| a == true }
   end unless ENV['STOMP_NOWILD'] || ENV['STOMP_DOTQUEUE']
 
+  # Test transaction with client side redilivery.
   def test_transaction_with_client_side_redelivery
     @client.publish make_destination, message_text
 
@@ -310,10 +332,12 @@ class TestClient < Test::Unit::TestCase
     @client.commit 'tx2'
   end
 
+  # Test that a connection frame is received.
   def test_connection_frame
   	assert_not_nil @client.connection_frame
   end unless RUBY_ENGINE =~ /jruby/
 
+  # Test basic unsubscribe.
   def test_unsubscribe
     message = nil
     dest = make_destination
@@ -353,6 +377,7 @@ class TestClient < Test::Unit::TestCase
     assert_equal message.headers['message-id'], message_copy.headers['message-id'], "header check" unless ENV['STOMP_RABBIT']
   end
 
+  # Test subscribe from a worker thread.
   def test_thread_one_subscribe
     msg = nil
     dest = make_destination
@@ -374,6 +399,7 @@ class TestClient < Test::Unit::TestCase
     assert_not_nil msg
   end unless RUBY_ENGINE =~ /jruby/
 
+  # Test subscribe from multiple worker threads.
   def test_thread_multi_subscribe
     #
     lock = Mutex.new
@@ -424,6 +450,7 @@ class TestClient < Test::Unit::TestCase
     assert_equal @max_msgs, msg_ctr
   end
 
+  # Test that methods detect no client connection is present.
   def test_closed_checks_client
     @client.close
     #
