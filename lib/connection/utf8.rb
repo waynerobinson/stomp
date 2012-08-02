@@ -225,6 +225,7 @@ module Stomp
       valid
     end # of _valid_utf8?
 
+    # Stomp 1.1+ header check for UTF8 validity. Raises Stomp::Error::UTF8ValidationError if header data is not valid UTF8.
     def _headerCheck(h)
       return if @protocol == Stomp::SPL_10 # Do nothing for this environment
       #
@@ -241,14 +242,14 @@ module Stomp
           end
         else
           vs = v.to_s + "" # Values are usually Strings, but could be TrueClass or Symbol
-          # The + "" forces an 'unfreeze' if necessary
+          # The + "" above forces an 'unfreeze' if necessary
           vs.force_encoding(Stomp::UTF8) if vs.respond_to?(:force_encoding)
           raise Stomp::Error::UTF8ValidationError unless valid_utf8?(vs)
         end
       end
     end
 
-    #
+    # encode returns a Hash of encoded headers per the Stomp 1.1 specification.
     def _encodeHeaders(h)
       eh = {}
       h.each_pair do |k,v|
@@ -268,7 +269,7 @@ module Stomp
       eh
     end
 
-    #
+    # decode returns a Hash of decoded headers per the Stomp 1.1 specification.
     def _decodeHeaders(h)
       dh = {}
       h.each_pair do |k,v|

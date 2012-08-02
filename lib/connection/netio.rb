@@ -87,7 +87,7 @@ module Stomp
       end
     end
 
-    # transmit puts a Message on the wire.
+    # transmit logically puts a Message on the wire.
     def transmit(command, headers = {}, body = '')
       # The transmit may fail so we may need to retry.
       while TRUE
@@ -162,7 +162,7 @@ module Stomp
       end
 
       Timeout::timeout(@connect_timeout, Stomp::Error::SocketOpenTimeout) do
-        tcp_socket = TCPSocket.open @host, @port
+        tcp_socket = TCPSocket.open(@host, @port)
       end
 
       tcp_socket
@@ -213,8 +213,8 @@ module Stomp
             ctx.cert_store = truststores
           end
 
-          # Client authentication parameters
-          # Both cert file and key file must be present or not, it can not be a mix
+          # Client authentication parameters.
+          # Both cert file and key file must be present or not, it can not be a mix.
           raise Stomp::Error::SSLClientParamsError if @ssl.cert_file.nil? && !@ssl.key_file.nil?
           raise Stomp::Error::SSLClientParamsError if !@ssl.cert_file.nil? && @ssl.key_file.nil?
           if @ssl.cert_file # Any check will do here

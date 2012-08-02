@@ -1,8 +1,8 @@
 # -*- encoding: utf-8 -*-
 
 module Stomp
-  #
-  # Stomp gem error classes.
+
+  # Module level container for Stomp gem error classes.
   module Error
 
     # InvalidFormat is raised if:

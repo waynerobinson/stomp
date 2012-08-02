@@ -21,55 +21,73 @@ module Stomp
 
     def _init_heartbeats()
       return if @connect_headers[:"heart-beat"] == "0,0" # Caller does not want heartbeats.  OK.
+
+      # Init.
+
       #
       @cx = @cy = @sx = @sy = 0, # Variable names as in spec
+
       #
       @hbsend_interval = @hbrecv_interval = 0.0 # Send/Receive ticker interval.
+
       #
       @hbsend_count = @hbrecv_count = 0 # Send/Receive ticker counts.
+
       #
       @ls = @lr = -1.0 # Last send/receive time (from Time.now.to_f)
+
       #
       @st = @rt = nil # Send/receive ticker thread
+
+      # Handle current client / server capabilities.
+
       #
       cfh = @connection_frame.headers.symbolize_keys
       return if cfh[:"heart-beat"] == "0,0" # Server does not want heartbeats
-      #
+
+      # Conect header parts.
       parts = @connect_headers[:"heart-beat"].split(",")
       @cx = parts[0].to_i
       @cy = parts[1].to_i
-      #
+
+      # Connected frame header parts.
       parts = cfh[:"heart-beat"].split(",")
       @sx = parts[0].to_i
       @sy = parts[1].to_i
-      # Catch odd situations like someone has used => heart-beat:000,00000
+
+      # Catch odd situations like server has used => heart-beat:000,00000
       return if (@cx == 0 && @cy == 0) || (@sx == 0 && @sy == 0)
+
+      # See if we are doing anything at all.
+
       #
       @hbs = @hbr = true # Sending/Receiving heartbeats. Assume yes at first.
-      # Check for sending
+      # Check if sending is possible.
       @hbs = false if @cx == 0 || @sy == 0
-      # Check for receiving
+      # Check if receiving is possible.
       @hbr = false if @sx == 0 || @cy == 0
       # Should not do heartbeats at all
       return if (!@hbs && !@hbr)
+
       # If sending
       if @hbs
-        sm = @cx >= @sy ? @cx : @sy # ticker interval, ms
-        @hbsend_interval = 1000.0 * sm # ticker interval, μs
-        @ls = Time.now.to_f # best guess at start
+        sm = @cx >= @sy ? @cx : @sy     # ticker interval, ms
+        @hbsend_interval = 1000.0 * sm  # ticker interval, μs
+        @ls = Time.now.to_f             # best guess at start
         _start_send_ticker()
       end
 
       # If receiving
       if @hbr
-        rm = @sx >= @cy ? @sx : @cy # ticker interval, ms
-        @hbrecv_interval = 1000.0 * rm # ticker interval, μs
-        @lr = Time.now.to_f # best guess at start
+        rm = @sx >= @cy ? @sx : @cy     # ticker interval, ms
+        @hbrecv_interval = 1000.0 * rm  # ticker interval, μs
+        @lr = Time.now.to_f             # best guess at start
         _start_receive_ticker()
       end
 
     end
 
+    # _start_send_ticker starts a thread to send heartbeats when required.
     def _start_send_ticker()
       sleeptime = @hbsend_interval / 1000000.0 # Sleep time secs
       @st = Thread.new {
@@ -88,7 +106,7 @@ module Stomp
             @transmit_semaphore.synchronize do
               begin
                 @socket.puts
-                @ls = curt # Update last send
+                @ls = curt      # Update last send
                 @hb_sent = true # Reset if necessary
                 @hbsend_count += 1
               rescue Exception => sendex
@@ -106,6 +124,7 @@ module Stomp
       }
     end
 
+    # _start_receive_ticker starts a thread that receives heartbeats when required.
     def _start_receive_ticker()
       sleeptime = @hbrecv_interval / 1000000.0 # Sleep time secs
       @rt = Thread.new {

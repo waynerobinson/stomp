@@ -31,7 +31,7 @@ module Stomp
       id
     end
 
-    # e.g. login:passcode@host:port or host:port
+    # url_regex defines a regex for e.g. login:passcode@host:port or host:port
     def url_regex
       '(([\w\.\-]*):(\w*)@)?([\w\.\-]+):(\d+)'
     end
@@ -55,12 +55,15 @@ module Stomp
       hosts
     end
 
+    # A very basic check of required arguments.
+    # *NOTE* This method will be made private in the next release.
     def check_arguments!()
       raise ArgumentError if @host.nil? || @host.empty?
       raise ArgumentError if @port.nil? || @port == '' || @port < 1 || @port > 65535
       raise ArgumentError unless @reliable.is_a?(TrueClass) || @reliable.is_a?(FalseClass)
     end
 
+    # filter_options returns a new Hash of filtered options.
     def filter_options(options)
       new_options = {}
       new_options[:initial_reconnect_delay] = (options["initialReconnectDelay"] || 10).to_f / 1000 # In ms
@@ -75,6 +78,7 @@ module Stomp
       new_options
     end
 
+    # find_listener returns the listener for a given subscription in a given message.
     def find_listener(message)
       subscription_id = message.headers['subscription']
       if subscription_id == nil
@@ -86,6 +90,7 @@ module Stomp
       @listeners[subscription_id]
     end
 
+    # Start a single listener thread.  Misnamed I think.
     def start_listeners()
       @listeners = {}
       @receipt_listeners = {}

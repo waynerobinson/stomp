@@ -11,6 +11,7 @@ module Stomp
 
     private
 
+    # Support multi-homed servers.  
     def _expand_hosts(hash)
       new_hash = hash.clone
       new_hash[:hosts_cloned] = hash[:hosts].clone
@@ -35,10 +36,12 @@ module Stomp
       return new_hash
     end
 
+    # Handle 1.9+ character representation.
     def parse_char(char)
       RUBY_VERSION > '1.9' ? char : char.chr
     end
 
+    # Create parameters for any callback logger.
     def log_params()
       lparms = @parameters.clone if @parameters
       lparms = {} unless lparms
@@ -55,6 +58,7 @@ module Stomp
       lparms
     end
 
+    # _pre_connect handles low level logic just prior to a physical connect.
     def _pre_connect()
       @connect_headers = @connect_headers.symbolize_keys
       raise Stomp::Error::ProtocolErrorConnect if (@connect_headers[:"accept-version"] && !@connect_headers[:host])
@@ -75,6 +79,7 @@ module Stomp
       _validate_hbheader()
     end
 
+    # _post_connect handles low level logic just post a physical connect.
     def _post_connect()
       return unless (@connect_headers[:"accept-version"] && @connect_headers[:host])
       return if @connection_frame.command == Stomp::CMD_ERROR

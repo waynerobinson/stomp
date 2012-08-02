@@ -34,26 +34,7 @@ module Stomp
 
     # A new Client object can be initialized using three forms:
     #
-    # Standard positional parameters:
-    #   login     (String,  default : '')
-    #   passcode  (String,  default : '')
-    #   host      (String,  default : 'localhost')
-    #   port      (Integer, default : 61613)
-    #   reliable  (Boolean, default : false)
-    #
-    #   e.g. c = Stomp::Client.new('login', 'passcode', 'localhost', 61613, true)
-    #
-    # Stomp URL :
-    #   A Stomp URL must begin with 'stomp://' and can be in one of the following forms:
-    #
-    #   stomp://host:port
-    #   stomp://host.domain.tld:port
-    #   stomp://login:passcode@host:port
-    #   stomp://login:passcode@host.domain.tld:port
-    #
-    #   e.g. c = Stomp::Client.new(urlstring)
-    #
-    # Hash (the recommended Client initialization):
+    # Hash (this is the recommended Client initialization method):
     #
     #   hash = {
     #     :hosts => [
@@ -75,6 +56,25 @@ module Stomp
     #   }
     #
     #   e.g. c = Stomp::Client.new(hash)
+    #
+    # Positional parameters:
+    #   login     (String,  default : '')
+    #   passcode  (String,  default : '')
+    #   host      (String,  default : 'localhost')
+    #   port      (Integer, default : 61613)
+    #   reliable  (Boolean, default : false)
+    #
+    #   e.g. c = Stomp::Client.new('login', 'passcode', 'localhost', 61613, true)
+    #
+    # Stomp URL :
+    #   A Stomp URL must begin with 'stomp://' and can be in one of the following forms:
+    #
+    #   stomp://host:port
+    #   stomp://host.domain.tld:port
+    #   stomp://login:passcode@host:port
+    #   stomp://login:passcode@host.domain.tld:port
+    #
+    #   e.g. c = Stomp::Client.new(urlstring)
     #
     def initialize(login = '', passcode = '', host = 'localhost', port = 61613, reliable = false, autoflush = false)
 
@@ -125,9 +125,9 @@ module Stomp
         @reliable = reliable
       end
 
-      check_arguments!
+      check_arguments!()
 
-      @id_mutex = Mutex.new
+      @id_mutex = Mutex.new()
       @ids = 1
 
       if @parameters
@@ -137,7 +137,7 @@ module Stomp
         @connection.autoflush = autoflush
       end
 
-      start_listeners
+      start_listeners()
 
     end
 
@@ -146,7 +146,7 @@ module Stomp
       Client.new(login, passcode, host, port, reliable)
     end
 
-    # Join the listener thread for this client,
+    # join the listener thread for this client,
     # generally used to wait for a quit signal.
     def join(limit = nil)
       @listener_thread.join(limit)
@@ -244,7 +244,8 @@ module Stomp
     end
 
     # :TODO: This should not be used.  Currently only referenced in the 
-    # spec tests.  This will be removed in the next release.
+    # spec tests.
+    # *NOTE* This will be removed in the next release.
     def obj_send(*args)
       __send__(*args)
     end

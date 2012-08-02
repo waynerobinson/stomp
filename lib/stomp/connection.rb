@@ -25,10 +25,10 @@ module Stomp
     # A unique session ID, assigned by the broker.
     attr_reader   :session
 
-    # Heartbeat has been received on time.
+    # Heartbeat receive has been on time.
     attr_reader   :hb_received # Heartbeat received on time
 
-    # Heartbeat send is successful.
+    # Heartbeat send has been successful.
     attr_reader   :hb_sent # Heartbeat sent successfully
 
     # Autoflush forces a flush on each transmit.  This may be changed
@@ -42,18 +42,7 @@ module Stomp
 
     # A new Connection object can be initialized using two forms:
     #
-    # Standard positional parameters:
-    #
-    #   login             (String,  default : '')
-    #   passcode          (String,  default : '')
-    #   host              (String,  default : 'localhost')
-    #   port              (Integer, default : 61613)
-    #   reliable          (Boolean, default : false)
-    #   reconnect_delay   (Integer, default : 5)
-    #
-    #   e.g. c = Stomp::Connection.new("username", "password", "localhost", 61613, true)
-    #
-    # Hash (the recommended connection initialization):
+    # Hash (this is the recommended Connection initialization method:
     #
     #   hash = {
     #     :hosts => [
@@ -75,6 +64,17 @@ module Stomp
     #   }
     #
     #   e.g. c = Stomp::Connection.new(hash)
+    #
+    # Positional parameters:
+    #
+    #   login             (String,  default : '')
+    #   passcode          (String,  default : '')
+    #   host              (String,  default : 'localhost')
+    #   port              (Integer, default : 61613)
+    #   reliable          (Boolean, default : false)
+    #   reconnect_delay   (Integer, default : 5)
+    #
+    #   e.g. c = Stomp::Connection.new("username", "password", "localhost", 61613, true)
     #
     def initialize(login = '', passcode = '', host = 'localhost', port = 61613, reliable = false, reconnect_delay = 5, connect_headers = {})
       @received_messages = []
@@ -131,7 +131,7 @@ module Stomp
       change_host
     end
 
-    # Syntactic sugar for 'Connection.new' See 'initialize' for usage.
+    # open is syntactic sugar for 'Connection.new' See 'initialize' for usage.
     def Connection.open(login = '', passcode = '', host = 'localhost', port = 61613, reliable = false, reconnect_delay = 5, connect_headers = {})
       Connection.new(login, passcode, host, port, reliable, reconnect_delay, connect_headers)
     end
@@ -440,7 +440,7 @@ module Stomp
 
     # poll returns a pending message if one is available, otherwise
     # returns nil.
-    def poll
+    def poll()
       raise Stomp::Error::NoCurrentConnection if closed?
       # No need for a read lock here.  The receive method eventually fulfills
       # that requirement.

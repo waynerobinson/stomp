@@ -31,8 +31,8 @@ require 'client/utils'          # private Client Utility methods
 # Private methods in #Connection
 require 'connection/utils'      # private Connection Utility methods
 require 'connection/netio'      # private Network io methods
-require 'connection/heartbeats' # private 1.1+ heartbeat methods
-require 'connection/utf8'       # private 1.1+ utf8 methods
+require 'connection/heartbeats' # private 1.1+ heartbeat related methods
+require 'connection/utf8'       # private 1.1+ UTF8 related methods
 
 module Stomp
 end

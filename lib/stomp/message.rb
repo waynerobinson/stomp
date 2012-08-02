@@ -19,8 +19,7 @@ module Stomp
     # The original input(s).
     attr_accessor :original
 
-
-    # Commands that are allowed from the wire.
+    # Commands that are allowed from the wire per the specifications.
     @@allowed_commands = [ Stomp::CMD_CONNECTED, Stomp::CMD_MESSAGE, Stomp::CMD_RECEIPT, Stomp::CMD_ERROR ]
 
     # initialize returns a Message from a raw physical frame.

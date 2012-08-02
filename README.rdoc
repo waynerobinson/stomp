@@ -10,35 +10,15 @@ An implementation of the Stomp protocol for Ruby. See:
 
 ===New
 
-* Gem version 1.2.4.  Stomp 1.1 heartbeat fix, autoflush capability, miscellaneous fixes
-* Gem version 1.2.3.  Miscellaneous fixes, see changelog for details.
-* Gem version 1.2.2.  Performance and more SSL enhancements.
+* Gem version 1.2.4. Stomp 1.1 heartbeat fix, autoflush capability, miscellaneous fixes.
+* Gem version 1.2.3. Miscellaneous fixes, see changelog for details.
+* Gem version 1.2.2. Performance and more SSL enhancements.
 * Full support of SSL certificates is announced as of gem version 1.2.1.
 * Support of Stomp protocol level 1.1 is announced as of gem version 1.2.0.
 
 See _CHANGELOG.rdoc_ for details.
 
-===Example Usage
-
-    client = Stomp::Client.new("test", "user", "localhost", 61613)
-    client.send("/queue/mine", "hello world!")
-    client.subscribe("/queue/mine") do |msg|
-      p msg
-    end
-
-===Failover + SSL Example URL Usage
-
-    options = "initialReconnectDelay=5000&randomize=false&useExponentialBackOff=false"
-    
-    # remotehost1 uses SSL, remotehost2 doesn't
-    client = Stomp::Client.new("failover:(stomp+ssl://login1:passcode1@remotehost1:61612,stomp://login2:passcode2@remotehost2:61613)?#{options}")
-    
-    client.publish("/queue/mine", "hello world!")
-    client.subscribe("/queue/mine") do |msg|
-      p msg
-    end
-
-===Hash Login Example Usage (the recommended login technique)
+===Hash Login Example Usage (this is the recommended login technique)
 
   hash = {
       :hosts => [
@@ -67,6 +47,37 @@ See _CHANGELOG.rdoc_ for details.
     # for connection
     connection = Stomp::Connection.new(hash)
     
+===Positional Parameter Usage
+
+    client = Stomp::Client.new("test", "user", "localhost", 61613)
+    client.send("/queue/mine", "hello world!")
+    client.subscribe("/queue/mine") do |msg|
+      p msg
+    end
+
+===Stomp URL Usage
+
+    # Stomp URL :
+    A Stomp URL must begin with 'stomp://' and can be in one of the following forms:
+
+    stomp://host:port
+    stomp://host.domain.tld:port
+    stomp://login:passcode@host:port
+    stomp://login:passcode@host.domain.tld:port
+   
+    e.g. c = Stomp::Client.new(urlstring)
+
+===Failover + SSL Example URL Usage
+
+    options = "initialReconnectDelay=5000&randomize=false&useExponentialBackOff=false"
+    
+    # remotehost1 uses SSL, remotehost2 doesn't
+    client = Stomp::Client.new("failover:(stomp+ssl://login1:passcode1@remotehost1:61612,stomp://login2:passcode2@remotehost2:61613)?#{options}")
+    
+    client.publish("/queue/mine", "hello world!")
+    client.subscribe("/queue/mine") do |msg|
+      p msg
+    end
 
 ===Historical Information
 
