@@ -2,49 +2,47 @@
 
 require 'logger'	# use the standard Ruby logger .....
 
-=begin
-
-Example STOMP call back logger class.
-
-Optional callback methods:
-
-    on_connecting: connection starting
-    on_connected: successful connect
-    on_connectfail: unsuccessful connect (will usually be retried)
-    on_disconnect: successful disconnect
-
-    on_miscerr: on miscellaneous xmit/recv errors
-
-    on_publish: publish called
-    on_subscribe: subscribe called
-    on_receive: receive called and successful
-
-    on_ssl_connecting: SSL connection starting
-    on_ssl_connected: successful SSL connect
-    on_ssl_connectfail: unsuccessful SSL connect (will usually be retried)
-
-    on_hbread_fail: unsuccessful Heartbeat read
-    on_hbwrite_fail: unsuccessful Heartbeat write
-
-All methods are optional, at the user's requirements.
-
-If a method is not provided, it is not called (of course.)
-
-IMPORTANT NOTE:  in general, call back logging methods *SHOULD* not raise exceptions, 
-otherwise the underlying STOMP connection may fail in mysterious ways.
-
-There are two useful exceptions to this rule for:
-
-    on_connectfail
-    on_ssl_connectfail
-
-These two methods can raise a Stomp::Errors::LoggerConnectionError.  If this
-exception is raised, it is passed up the chain to the caller.
-
-Callback parameters: are a copy of the @parameters instance variable for
-the Stomp::Connection.
-
-=end
+# == Example STOMP call back logger class.
+#
+# Optional callback methods:
+#
+# *    on_connecting: connection starting
+# *    on_connected: successful connect
+# *    on_connectfail: unsuccessful connect (will usually be retried)
+# *    on_disconnect: successful disconnect
+#
+# *    on_miscerr: on miscellaneous xmit/recv errors
+#
+# *    on_publish: publish called
+# *    on_subscribe: subscribe called
+# *    on_receive: receive called and successful
+#
+# *    on_ssl_connecting: SSL connection starting
+# *    on_ssl_connected: successful SSL connect
+# *    on_ssl_connectfail: unsuccessful SSL connect (will usually be retried)
+#
+# *    on_hbread_fail: unsuccessful Heartbeat read
+# *    on_hbwrite_fail: unsuccessful Heartbeat write
+# *    on_hbfire: on any send or receive heartbeat
+#
+# All methods are optional, at the user's requirements.
+#
+# If a method is not provided, it is not called (of course.)
+# 
+# IMPORTANT NOTE:  in general, call back logging methods *SHOULD* not raise exceptions, 
+# otherwise the underlying STOMP connection may fail in mysterious ways.
+#
+# There are two useful exceptions to this rule for:
+#
+# *    on_connectfail
+# *    on_ssl_connectfail
+#
+# These two methods can raise a Stomp::Errors::LoggerConnectionError.  If this
+# exception is raised, it is passed up the chain to the caller.
+#
+# Callback parameters: are a copy of the @parameters instance variable for
+# the Stomp::Connection.
+#
 class Slogger
 
   # Initialize a new callback logger instance.
@@ -187,6 +185,16 @@ class Slogger
     @log.debug "SSL Connect Fail, will raise"
     raise Stomp::Error::LoggerConnectionError.new("quit from SSL connect")
 =end
+  end
+
+  # Log heart beat fires
+  def on_hbfire(parms, srind, curt)
+    begin
+      @log.debug "HeartBeat Fire Parms #{info(parms)}"
+      @log.debug "HeartBeat Fire Send/Receive #{srind}"
+    rescue
+      @log.debug "HeartBeat Fire oops"
+    end
   end
 
   private

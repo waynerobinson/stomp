@@ -11,9 +11,9 @@ else
   require "stomp11_common"
 end
 include Stomp11Common
+
 #
-# Stomp 1.1 Connection Example 1
-# ==============================
+# == Stomp 1.1 Connection Example 1
 #
 # Purpose: to demonstrate a connect and disconnect sequence using Stomp 1.1.
 #
@@ -51,54 +51,62 @@ include Stomp11Common
 # parameter or a paramaterized connection request.  This example uses a
 # parameterized request.
 #
-# So .........
+class Connection11Example1
+  # Initialize
+  def initialize
+  end
+  # Run example
+  def run
+    #
+    # Create connection headers
+    # =========================
+    #
+    # The two headers used here are _required_ by the specification.
+    #
+    conn_hdrs = {"accept-version" => "1.1",    # Demand a 1.1 connection (use a CSV list if you will consider multiple versions)
+      "host" => virt_host,                 # The 1.1 vhost (could be different than connection host)
+    }                                      # No heartbeats here:  there will be none for this connection
+    #
+    # Get a connection
+    # ================
+    #
+    conn = Stomp::Connection.new(login, passcode, host, port,   # Normal connect parms
+      false,      # Not reliable, the default for a parameter connection
+      5,          # Connect redelay, the default
+      conn_hdrs)  # The 1.1 connection parameters
+    puts "Connection connect complete"
+    #
+    # Let's just do some sanity checks, and look around.
+    #
+    raise "Connection failed!!" unless conn.open?
+    #
+    # Is this really a 1.1 conection? ('protocol' is a read only connection
+    # instance variable. The value will be '1.0' for those types of connections.)
+    #
+    raise "Unexpected protocol level" if conn.protocol != Stomp::SPL_11
+    #
+    # The broker _could_ have returned an ERROR frame (unlikely).
+    #
+    raise "Connect error: #{conn.connection_frame.body}" if conn.connection_frame.command == Stomp::CMD_ERROR
+    #
+    # Examine the CONNECT response (the connection_frame).
+    #
+    puts "Connected Headers required to be present:"
+    puts "Connect version - \t#{conn.connection_frame.headers['version']}"
+    puts
+    puts "Connected Headers that are optional:"
+    puts "Connect server - \t\t#{conn.connection_frame.headers['server']}"
+    puts "Session ID - \t\t\t#{conn.connection_frame.headers['session']}"
+    puts "Server requested heartbeats - \t#{conn.connection_frame.headers['heart-beat']}"
+    #
+    # Finally disconnect
+    # ==================
+    #
+    conn.disconnect   # Business as usual, just like 1.0
+    puts "Connection disconnect complete"
+  end
+end
 #
-# Create connection headers
-# =========================
-#
-# The two headers used here are _required_ by the specification.
-#
-conn_hdrs = {"accept-version" => "1.1",    # Demand a 1.1 connection (use a CSV list if you will consider multiple versions)
-  "host" => virt_host,                 # The 1.1 vhost (could be different than connection host)
-}                                      # No heartbeats here:  there will be none for this connection
-#
-# Get a connection
-# ================
-#
-conn = Stomp::Connection.new(login, passcode, host, port,   # Normal connect parms
-  false,      # Not reliable, the default for a parameter connection
-  5,          # Connect redelay, the default
-  conn_hdrs)  # The 1.1 connection parameters
-puts "Connection connect complete"
-#
-# Let's just do some sanity checks, and look around.
-#
-raise "Connection failed!!" unless conn.open?
-#
-# Is this really a 1.1 conection? ('protocol' is a read only connection
-# instance variable. The value will be '1.0' for those types of connections.)
-#
-raise "Unexpected protocol level" if conn.protocol != Stomp::SPL_11
-#
-# The broker _could_ have returned an ERROR frame (unlikely).
-#
-raise "Connect error: #{conn.connection_frame.body}" if conn.connection_frame.command == Stomp::CMD_ERROR
-#
-# Examine the CONNECT response (the connection_frame).
-#
-puts "Connected Headers required to be present:"
-puts "Connect version - \t#{conn.connection_frame.headers['version']}"
-puts
-puts "Connected Headers that are optional:"
-puts "Connect server - \t\t#{conn.connection_frame.headers['server']}"
-puts "Session ID - \t\t\t#{conn.connection_frame.headers['session']}"
-puts "Server requested heartbeats - \t#{conn.connection_frame.headers['heart-beat']}"
-#
-# Finally disconnect
-# ==================
-#
-conn.disconnect   # Business as usual, just like 1.0
-puts "Connection disconnect complete"
-
-
+e = Connection11Example1.new
+e.run
 

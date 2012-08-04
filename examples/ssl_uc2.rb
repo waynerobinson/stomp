@@ -6,7 +6,7 @@
 require "rubygems"
 require "stomp"
 #
-# SSL Use Case 2 - server does *not* authenticate client, client *does* authenticate server
+# == SSL Use Case 2 - server does *not* authenticate client, client *does* authenticate server
 #
 # Subcase 2.A - Message broker configuration does *not* require client authentication
 #
@@ -18,21 +18,31 @@ require "stomp"
 #
 # - Expect connection failure (broker must be sent a valid client certificate)
 #
-ts_flist = []
-ts_flist << "/home/gmallard/sslwork/twocas_tj/serverCA/ServerTJCA.crt"
-ssl_opts = Stomp::SSLParams.new(:ts_files => ts_flist.join(","))
+class ExampleSSL2
+  # Initialize.
+  def initialize
+  end
+  # Run example.
+  def run
+    ts_flist = []
+    ts_flist << "/home/gmallard/sslwork/twocas_tj/serverCA/ServerTJCA.crt"
+    ssl_opts = Stomp::SSLParams.new(:ts_files => ts_flist.join(","))
+    #
+    hash = { :hosts => [
+        {:login => 'guest', :passcode => 'guest', :host => 'localhost', :port => 61612, :ssl => ssl_opts},
+      ],
+      :reliable => false, # YMMV, to test this in a sane manner
+    }
+    #
+    puts "Connect starts, SSL Use Case 2"
+    c = Stomp::Connection.new(hash)
+    puts "Connect completed"
+    puts "SSL Verify Result: #{ssl_opts.verify_result}"
+    # puts "SSL Peer Certificate:\n#{ssl_opts.peer_cert}"
+    c.disconnect
+  end
+end
 #
-hash = { :hosts => [
-    {:login => 'guest', :passcode => 'guest', :host => 'localhost', :port => 61612, :ssl => ssl_opts},
-  ],
-  :reliable => false, # YMMV, to test this in a sane manner
-}
-#
-puts "Connect starts, SSL Use Case 2"
-c = Stomp::Connection.new(hash)
-puts "Connect completed"
-puts "SSL Verify Result: #{ssl_opts.verify_result}"
-# puts "SSL Peer Certificate:\n#{ssl_opts.peer_cert}"
-c.disconnect
-
+e = ExampleSSL2.new
+e.run
 
