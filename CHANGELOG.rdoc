@@ -1,3 +1,14 @@
+== 1.2.5 20120804
+
+* Issue #48 any forks with modifications will be affected!
+* Source code restructured into individual files
+* Common indentation used throughout the source
+* Many method comments have been added
+* See notes in source regarding making methods private in the next release
+* See notes in source regarding removal of methods in the next release
+* Include examples and tests in rdoc generated during install
+* Issue #47 socket is open during retries
+
 == 1.2.4 20120625
 
 * Add ability for client to request flush on write to the connection (Issue #45)
