@@ -37,6 +37,9 @@ begin
     gem.authors = ["Brian McCallister", 'Marius Mathiesen', 'Thiago Morello',
         'Guy M. Allard']
     gem.add_development_dependency "rspec", '>= 2.3'
+    gem.extra_rdoc_files = [ "README.rdoc", "CHANGELOG.rdoc", "LICENSE",
+      "lib/**/*.rb", "examples/**/*.rb",
+      "test/**/*.rb" ]
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError
