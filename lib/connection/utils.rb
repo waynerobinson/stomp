@@ -79,7 +79,7 @@ module Stomp
       _validate_hbheader()
     end
 
-    # _post_connect handles low level logic just post a physical connect.
+    # _post_connect handles low level logic just after a physical connect.
     def _post_connect()
       return unless (@connect_headers[:"accept-version"] && @connect_headers[:host])
       return if @connection_frame.command == Stomp::CMD_ERROR
@@ -98,7 +98,7 @@ module Stomp
       _init_heartbeats()
     end
 
-  end # class
+  end # class Connection
 
-end # module
+end # module Stomp
 

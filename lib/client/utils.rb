@@ -72,8 +72,7 @@ module Stomp
       new_options[:back_off_multiplier] = (options["backOffMultiplier"] || 2 ).to_i
       new_options[:max_reconnect_attempts] = (options["maxReconnectAttempts"] || 0 ).to_i
       new_options[:randomize] = options["randomize"] == "true" # Default: false
-      new_options[:backup] = false # Not implemented yet: I'm using a master X slave solution
-      new_options[:timeout] = -1 # Not implemented yet: a "timeout(5) do ... end" would do the trick, feel free
+      new_options[:connect_timeout] = 0
 
       new_options
     end
@@ -108,9 +107,11 @@ module Stomp
               listener.call(message)
             end
           end
-        end
+        end # while true
       end
-    end
-  end
-end
+    end # method start_listeners
+
+  end # class Client
+
+end # module Stomp
 

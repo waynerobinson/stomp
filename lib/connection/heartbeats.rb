@@ -25,7 +25,7 @@ module Stomp
       # Init.
 
       #
-      @cx = @cy = @sx = @sy = 0, # Variable names as in spec
+      @cx = @cy = @sx = @sy = 0   # Variable names as in spec
 
       #
       @hbsend_interval = @hbrecv_interval = 0.0 # Send/Receive ticker interval.
@@ -60,13 +60,13 @@ module Stomp
 
       # See if we are doing anything at all.
 
-      #
       @hbs = @hbr = true # Sending/Receiving heartbeats. Assume yes at first.
       # Check if sending is possible.
-      @hbs = false if @cx == 0 || @sy == 0
+      @hbs = false if @cx == 0 || @sy == 0  # Reset if neither side wants
       # Check if receiving is possible.
-      @hbr = false if @sx == 0 || @cy == 0
-      # Should not do heartbeats at all
+      @hbr = false if @sx == 0 || @cy == 0  # Reset if neither side wants
+
+      # Check if we should not do heartbeats at all
       return if (!@hbs && !@hbr)
 
       # If sending
@@ -167,7 +167,7 @@ module Stomp
       }
     end
 
-  end # class
+  end # class Connection
 
-end # module
+end # module Stomp
 

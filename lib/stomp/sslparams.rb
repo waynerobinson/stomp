@@ -41,7 +41,7 @@ module Stomp
   # Client wants file existance check on initialize. true/value or false/nil.
   attr_reader :fsck #
 
-  # initialize returns a valid set of SSLParams or raises an error.
+  # initialize returns a valid instance of SSLParams or raises an error.
   def initialize(opts={})
 
    # Server authentication parameters

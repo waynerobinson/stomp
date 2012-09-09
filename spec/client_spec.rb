@@ -236,8 +236,7 @@ describe Stomp::Client do
         :back_off_multiplier => 2,
         :max_reconnect_attempts => 0,
         :randomize => false,
-        :backup => false,
-        :timeout => -1
+        :connect_timeout => 0
       }
     end
     it "should properly parse a URL with failover://" do
@@ -311,8 +310,7 @@ describe Stomp::Client do
         :back_off_multiplier => 3,
         :max_reconnect_attempts => 4,
         :randomize => true,
-        :backup => false,
-        :timeout => -1
+        :connect_timeout => 0
       }
       
       @parameters[:hosts] = [

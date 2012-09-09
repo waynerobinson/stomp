@@ -42,7 +42,7 @@ module Stomp
 
     # A new Connection object can be initialized using two forms:
     #
-    # Hash (this is the recommended Connection initialization method:
+    # Hash (this is the recommended Connection initialization method):
     #
     #   hash = {
     #     :hosts => [
@@ -56,7 +56,6 @@ module Stomp
     #     :back_off_multiplier => 2,
     #     :max_reconnect_attempts => 0,
     #     :randomize => false,
-    #     :backup => false,
     #     :connect_timeout => 0,
     #     :connect_headers => {},
     #     :parse_timeout => 5,
@@ -79,9 +78,9 @@ module Stomp
     def initialize(login = '', passcode = '', host = 'localhost', port = 61613, reliable = false, reconnect_delay = 5, connect_headers = {})
       @received_messages = []
       @protocol = Stomp::SPL_10 # Assumed at first
-      @hb_received = true # Assumed at first
-      @hb_sent = true # Assumed at first
-      @hbs = @hbr = false # Sending/Receiving heartbeats. Assume no for now.
+      @hb_received = true       # Assumed at first
+      @hb_sent = true           # Assumed at first
+      @hbs = @hbr = false       # Sending/Receiving heartbeats. Assume no for now.
 
       if login.is_a?(Hash)
         hashed_initialize(login)
@@ -102,8 +101,8 @@ module Stomp
         warn "login looks like a URL, do you have the correct parameters?" if @login =~ /:\/\//
       end
 
-      # Use Mutexes:  only one lock per each thread
-      # Revert to original implementation attempt
+      # Use Mutexes:  only one lock per each thread.
+      # Reverted to original implementation attempt using Mutex.
       @transmit_semaphore = Mutex.new
       @read_semaphore = Mutex.new
       @socket_semaphore = Mutex.new
@@ -131,7 +130,7 @@ module Stomp
       change_host
     end
 
-    # open is syntactic sugar for 'Connection.new' See 'initialize' for usage.
+    # open is syntactic sugar for 'Connection.new', see 'initialize' for usage.
     def Connection.open(login = '', passcode = '', host = 'localhost', port = 61613, reliable = false, reconnect_delay = 5, connect_headers = {})
       Connection.new(login, passcode, host, port, reliable, reconnect_delay, connect_headers)
     end
@@ -147,8 +146,7 @@ module Stomp
           @failure = nil
           begin
             used_socket = open_socket()
-            # Open complete
-
+            # Open is complete
             connect(used_socket)
             if @logger && @logger.respond_to?(:on_connected)
               @logger.on_connected(log_params)
@@ -200,7 +198,6 @@ module Stomp
         :back_off_multiplier => 2,
         :max_reconnect_attempts => 0,
         :randomize => false,
-        :backup => false,
         :connect_timeout => 0,
         # Parse Timeout
         :parse_timeout => 5,
@@ -314,7 +311,7 @@ module Stomp
     end
 
     # Subscribe subscribes to a destination.  A subscription name is required.
-    # For Stomp 1.1 a session unique subscription ID is required.
+    # For Stomp 1.1+ a session unique subscription ID is also required.
     def subscribe(name, headers = {}, subId = nil)
       raise Stomp::Error::NoCurrentConnection if closed?
       headers = headers.symbolize_keys
@@ -328,7 +325,7 @@ module Stomp
         @logger.on_subscribe(log_params, headers)
       end
 
-      # Store the sub so that we can replay if we reconnect.
+      # Store the subscription so that we can replay if we reconnect.
       if @reliable
         subId = name if subId.nil?
         raise Stomp::Error::DuplicateSubscription if @subscriptions[subId]
@@ -339,7 +336,7 @@ module Stomp
     end
 
     # Unsubscribe from a destination.   A subscription name is required.
-    # For Stomp 1.1 a session unique subscription ID is required.
+    # For Stomp 1.1+ a session unique subscription ID is also required.
     def unsubscribe(dest, headers = {}, subId = nil)
       raise Stomp::Error::NoCurrentConnection if closed?
       headers = headers.symbolize_keys
@@ -421,7 +418,7 @@ module Stomp
     end
 
     # disconnect closes this connection.  If requested, a disconnect RECEIPT 
-    # is received.
+    # will be received.
     def disconnect(headers = {})
       raise Stomp::Error::NoCurrentConnection if closed?
       headers = headers.symbolize_keys

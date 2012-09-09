@@ -94,7 +94,7 @@ module Stomp
       self.body = work_body[0..body_length]
     end
 
-    # to_s returns a string prepresentation of this Message
+    # to_s returns a string prepresentation of this Message.
     def to_s
       "<Stomp::Message headers=#{headers.inspect} body='#{body}' command='#{command}' >"
     end
@@ -111,7 +111,7 @@ module Stomp
       is_blank?(command) && is_blank?(headers) && is_blank?(body)
     end
 
-  end
+  end # class Message
 
-end
+end # module Stomp
 

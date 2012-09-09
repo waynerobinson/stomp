@@ -27,4 +27,5 @@ class ::Hash
 
     symbolized
   end unless self.method_defined?(:symbolize_keys)
-end
+
+end # class Hash

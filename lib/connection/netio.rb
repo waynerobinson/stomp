@@ -316,7 +316,7 @@ module Stomp
       @subscriptions.each { |k,v| _transmit(used_socket, Stomp::CMD_SUBSCRIBE, v) }
     end
 
-  end # class
+  end # class Connection
 
-end # module
+end # module Stomp
 

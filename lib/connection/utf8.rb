@@ -288,7 +288,7 @@ module Stomp
       dh
     end
 
-  end # class
+  end # class Connection
 
-end # module
+end # module Stomp
 

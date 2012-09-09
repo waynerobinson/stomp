@@ -48,7 +48,6 @@ module Stomp
     #     :back_off_multiplier => 2,
     #     :max_reconnect_attempts => 0,
     #     :randomize => false,
-    #     :backup => false,
     #     :connect_timeout => 0,
     #     :connect_headers => {},
     #     :parse_timeout => 5,
@@ -141,7 +140,7 @@ module Stomp
 
     end
 
-    # open is syntactic sugar for 'Client.new' See 'initialize' for usage.
+    # open is syntactic sugar for 'Client.new', see 'initialize' for usage.
     def self.open(login = '', passcode = '', host = 'localhost', port = 61613, reliable = false)
       Client.new(login, passcode, host, port, reliable)
     end
@@ -161,7 +160,7 @@ module Stomp
     def abort(name, headers = {})
       @connection.abort(name, headers)
 
-      # lets replay any ack'd messages in this transaction
+      # replay any ack'd messages in this transaction
       replay_list = @replay_messages_by_txn[name]
       if replay_list
         replay_list.each do |message|

@@ -2,7 +2,7 @@
 
 module Stomp
 
-  # Client side
+  # Client generated frames
   CMD_CONNECT     = "CONNECT"
   CMD_STOMP       = "STOMP"
   CMD_DISCONNECT  = "DISCONNECT"
@@ -15,7 +15,7 @@ module Stomp
   CMD_COMMIT      = "COMMIT"
   CMD_ABORT       = "ABORT"
 
-  # Server side
+  # Server generated names
   CMD_CONNECTED = "CONNECTED"
   CMD_MESSAGE   = "MESSAGE"
   CMD_RECEIPT   = "RECEIPT"
@@ -75,6 +75,7 @@ module Stomp
     "\\c", ":",
   ]
 
+  # A fairly safe and generally supported ciphers list.
   DEFAULT_CIPHERS = [
     ["DHE-RSA-AES256-SHA", "TLSv1/SSLv3", 256, 256], 
     ["DHE-DSS-AES256-SHA", "TLSv1/SSLv3", 256, 256], 
@@ -97,4 +98,4 @@ module Stomp
     ["EXP-RC4-MD5", "TLSv1/SSLv3", 40, 128],
   ]
 
-end
+end # Module Stomp

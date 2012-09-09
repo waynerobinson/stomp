@@ -189,5 +189,6 @@ module Stomp
     end
 
   end # module Error
+
 end # module Stomp
 

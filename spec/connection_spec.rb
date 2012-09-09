@@ -17,7 +17,6 @@ describe Stomp::Connection do
       :back_off_multiplier => 2,
       :max_reconnect_attempts => 0,
       :randomize => false,
-      :backup => false,
       :connect_timeout => 0,
       :parse_timeout => 5,
       :connect_headers => {},
@@ -52,7 +51,6 @@ describe Stomp::Connection do
         "backOffMultiplier" => 2,
         "maxReconnectAttempts" => 0,
         "randomize" => false,
-        "backup" => false,
         "connect_timeout" => 0,
         "parse_timeout" => 5,
       }
@@ -85,7 +83,6 @@ describe Stomp::Connection do
         "backOffMultiplier" => 2,
         "maxReconnectAttempts" => 0,
         "randomize" => false,
-        "backup" => false,
         "connect_timeout" => 0,
         "parse_timeout" => 5
       }
@@ -329,7 +326,6 @@ describe Stomp::Connection do
           :back_off_multiplier => 2,
           :max_reconnect_attempts => 0,
           :randomize => false,
-          :backup => false,
           :connect_timeout => 0,
           :parse_timeout => 5,
           :connect_headers => {},
@@ -372,7 +368,7 @@ describe Stomp::Connection do
         @connection = Stomp::Connection.new(used_hash)
         received_hash = @connection.instance_variable_get(:@parameters)
         
-        #Using randomize we can't assure the hosts order
+        # Using randomize we can't assure the hosts order
         received_hash.delete(:hosts)
         used_hash.delete(:hosts)
         
