@@ -369,12 +369,6 @@ module Stomp
       transmit(Stomp::CMD_SEND, headers, message)
     end
 
-    # :TODO: Remove this method.
-    # *NOTE* This method will be removed in the next release.
-    def obj_send(*args)
-      __send__(*args)
-    end
-
     # Send a message back to the source or to the dead letter queue.
     # Accepts a dead letter queue option ( :dead_letter_queue => "/queue/DLQ" ).
     # Accepts a limit number of redeliveries option ( :max_redeliveries => 6 ).

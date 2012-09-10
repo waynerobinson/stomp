@@ -385,11 +385,11 @@ describe Stomp::Connection do
   describe "when closing a socket" do
     it "should close the tcp connection" do
       @tcp_socket.should_receive(:close)
-      @connection.obj_send(:close_socket).should be_true
+      @connection.__send__(:close_socket).should be_true # Use Object.__send__
     end
     it "should ignore exceptions" do
       @tcp_socket.should_receive(:close).and_raise "exception"
-      @connection.obj_send(:close_socket).should be_true
+      @connection.__send__(:close_socket).should be_true # Use Object.__send__
     end
   end
 

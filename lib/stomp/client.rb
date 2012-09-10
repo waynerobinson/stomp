@@ -242,13 +242,6 @@ module Stomp
       @connection.publish(destination, message, headers)
     end
 
-    # :TODO: This should not be used.  Currently only referenced in the 
-    # spec tests.
-    # *NOTE* This will be removed in the next release.
-    def obj_send(*args)
-      __send__(*args)
-    end
-
     # Return the broker's CONNECTED frame to the client.  Misnamed.
     def connection_frame()
       @connection.connection_frame
