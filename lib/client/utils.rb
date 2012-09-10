@@ -56,7 +56,6 @@ module Stomp
     end
 
     # A very basic check of required arguments.
-    # *NOTE* This method will be made private in the next release.
     def check_arguments!()
       raise ArgumentError if @host.nil? || @host.empty?
       raise ArgumentError if @port.nil? || @port == '' || @port < 1 || @port > 65535

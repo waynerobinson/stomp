@@ -97,7 +97,7 @@ describe Stomp::Connection do
     end
     
     it "should change host to next one with randomize false" do
-      @connection.change_host
+      @connection.send(:change_host) # use .send(:name) to test a private method!
       @connection.instance_variable_get(:@host).should == "remotehost"
     end
     
@@ -285,21 +285,21 @@ describe Stomp::Connection do
 
     describe "when called to increase reconnect delay" do
       it "should exponentialy increase when use_exponential_back_off is true" do
-        @connection.increase_reconnect_delay.should == 0.02
-        @connection.increase_reconnect_delay.should == 0.04
-        @connection.increase_reconnect_delay.should == 0.08
+        @connection.send(:increase_reconnect_delay).should == 0.02
+        @connection.send(:increase_reconnect_delay).should == 0.04
+        @connection.send(:increase_reconnect_delay).should == 0.08
       end
       it "should not increase when use_exponential_back_off is false" do
         @parameters[:use_exponential_back_off] = false
         @connection = Stomp::Connection.new(@parameters)
-        @connection.increase_reconnect_delay.should == 0.01
-        @connection.increase_reconnect_delay.should == 0.01
+        @connection.send(:increase_reconnect_delay).should == 0.01
+        @connection.send(:increase_reconnect_delay).should == 0.01
       end
       it "should not increase when max_reconnect_delay is reached" do
         @parameters[:initial_reconnect_delay] = 8.0
         @connection = Stomp::Connection.new(@parameters)
-        @connection.increase_reconnect_delay.should == 16.0
-        @connection.increase_reconnect_delay.should == 30.0
+        @connection.send(:increase_reconnect_delay).should == 16.0
+        @connection.send(:increase_reconnect_delay).should == 30.0
       end
       
       it "should change to next host on socket error" do
@@ -309,7 +309,7 @@ describe Stomp::Connection do
         #tries the new host
         TCPSocket.should_receive(:open).and_return @tcp_socket
 
-        @connection.socket
+        @connection.send(:socket)
         @connection.instance_variable_get(:@host).should == "remotehost"
       end
       
@@ -398,11 +398,11 @@ describe Stomp::Connection do
       host = @parameters[:hosts][0]
       @connection = Stomp::Connection.new(host[:login], host[:passcode], host[:host], host[:port], reliable = true, 5, connect_headers = {})
       @connection.instance_variable_set(:@connection_attempts, 10000)
-      @connection.max_reconnect_attempts?.should be_false
+      @connection.send(:max_reconnect_attempts?).should be_false
     end
     it "should return false if max_reconnect_attempts = 0" do
       @connection.instance_variable_set(:@connection_attempts, 10000)
-      @connection.max_reconnect_attempts?.should be_false
+      @connection.send(:max_reconnect_attempts?).should be_false
     end
     it "should return true if connection attempts > max_reconnect_attempts" do
       limit = 10000
@@ -410,10 +410,10 @@ describe Stomp::Connection do
       @connection = Stomp::Connection.new(@parameters)
       
       @connection.instance_variable_set(:@connection_attempts, limit-1)
-      @connection.max_reconnect_attempts?.should be_false
+      @connection.send(:max_reconnect_attempts?).should be_false
       
       @connection.instance_variable_set(:@connection_attempts, limit)
-      @connection.max_reconnect_attempts?.should be_true
+      @connection.send(:max_reconnect_attempts?).should be_true
       
     end
   end
