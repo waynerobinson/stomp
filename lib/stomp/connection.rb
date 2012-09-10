@@ -76,7 +76,6 @@ module Stomp
     #   e.g. c = Stomp::Connection.new("username", "password", "localhost", 61613, true)
     #
     def initialize(login = '', passcode = '', host = 'localhost', port = 61613, reliable = false, reconnect_delay = 5, connect_headers = {})
-      @received_messages = []
       @protocol = Stomp::SPL_10 # Assumed at first
       @hb_received = true       # Assumed at first
       @hb_sent = true           # Assumed at first
