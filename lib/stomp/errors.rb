@@ -48,6 +48,7 @@ module Stomp
 
     # NoCurrentConnection is raised if:
     # * Any method is called when a current connection does not exist.
+    # * And @closed_check is true (the default).
     class NoCurrentConnection < RuntimeError
       def message
         "no current connection exists"

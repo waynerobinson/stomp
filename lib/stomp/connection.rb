@@ -97,6 +97,7 @@ module Stomp
         @connect_timeout = 0	# To override, use hashed parameters
         @logger = nil     		# To override, use hashed parameters
         @autoflush = false    # To override, use hashed parameters or setter
+        @closed_check = true  # Run closed check in each protocol method
         warn "login looks like a URL, do you have the correct parameters?" if @login =~ /:\/\//
       end
 
@@ -125,6 +126,7 @@ module Stomp
       @connect_timeout =  @parameters[:connect_timeout]
       @logger =  @parameters[:logger]
       @autoflush = @parameters[:autoflush]
+      @closed_check = @parameters[:closed_check]
       #sets the first host to connect
       change_host
     end
@@ -201,6 +203,8 @@ module Stomp
         # Parse Timeout
         :parse_timeout => 5,
         :dmh => false,
+        # Closed check logic
+        :closed_check => true,
       }
 
       res_params = default_params.merge(params)
@@ -257,7 +261,7 @@ module Stomp
 
     # Begin starts a transaction, and requires a name for the transaction
     def begin(name, headers = {})
-      raise Stomp::Error::NoCurrentConnection if closed?
+      raise Stomp::Error::NoCurrentConnection if @closed_check && closed?
       headers = headers.symbolize_keys
       headers[:transaction] = name
       _headerCheck(headers)
@@ -268,7 +272,7 @@ module Stomp
     # client acknowledgement i.e. connection.subscribe("/queue/a", :ack => 'client').
     # Accepts a transaction header ( :transaction => 'some_transaction_id' )
     def ack(message_id, headers = {})
-      raise Stomp::Error::NoCurrentConnection if closed?
+      raise Stomp::Error::NoCurrentConnection if @closed_check && closed?
       raise Stomp::Error::MessageIDRequiredError if message_id.nil? || message_id == ""
       headers = headers.symbolize_keys
       headers[:'message-id'] = message_id
@@ -281,7 +285,7 @@ module Stomp
 
     # STOMP 1.1+ NACK.
     def nack(message_id, headers = {})
-      raise Stomp::Error::NoCurrentConnection if closed?
+      raise Stomp::Error::NoCurrentConnection if @closed_check && closed?
       raise Stomp::Error::UnsupportedProtocolError if @protocol == Stomp::SPL_10
       raise Stomp::Error::MessageIDRequiredError if message_id.nil? || message_id == ""
       headers = headers.symbolize_keys
@@ -293,7 +297,7 @@ module Stomp
 
     # Commit commits a transaction by name.
     def commit(name, headers = {})
-      raise Stomp::Error::NoCurrentConnection if closed?
+      raise Stomp::Error::NoCurrentConnection if @closed_check && closed?
       headers = headers.symbolize_keys
       headers[:transaction] = name
       _headerCheck(headers)
@@ -302,7 +306,7 @@ module Stomp
 
     # Abort aborts a transaction by name.
     def abort(name, headers = {})
-      raise Stomp::Error::NoCurrentConnection if closed?
+      raise Stomp::Error::NoCurrentConnection if @closed_check && closed?
       headers = headers.symbolize_keys
       headers[:transaction] = name
       _headerCheck(headers)
@@ -312,7 +316,7 @@ module Stomp
     # Subscribe subscribes to a destination.  A subscription name is required.
     # For Stomp 1.1+ a session unique subscription ID is also required.
     def subscribe(name, headers = {}, subId = nil)
-      raise Stomp::Error::NoCurrentConnection if closed?
+      raise Stomp::Error::NoCurrentConnection if @closed_check && closed?
       headers = headers.symbolize_keys
       headers[:destination] = name
       if @protocol >= Stomp::SPL_11
@@ -337,7 +341,7 @@ module Stomp
     # Unsubscribe from a destination.   A subscription name is required.
     # For Stomp 1.1+ a session unique subscription ID is also required.
     def unsubscribe(dest, headers = {}, subId = nil)
-      raise Stomp::Error::NoCurrentConnection if closed?
+      raise Stomp::Error::NoCurrentConnection if @closed_check && closed?
       headers = headers.symbolize_keys
       headers[:destination] = dest
       if @protocol >= Stomp::SPL_11
@@ -355,7 +359,7 @@ module Stomp
     # To disable content length header use header ( :suppress_content_length => true ).
     # Accepts a transaction header ( :transaction => 'some_transaction_id' ).
     def publish(destination, message, headers = {})
-      raise Stomp::Error::NoCurrentConnection if closed?
+      raise Stomp::Error::NoCurrentConnection if @closed_check && closed?
       headers = headers.symbolize_keys
       headers[:destination] = destination
       _headerCheck(headers)
@@ -376,7 +380,7 @@ module Stomp
     # Accepts a limit number of redeliveries option ( :max_redeliveries => 6 ).
     # Accepts a force client acknowledgement option (:force_client_ack => true).
     def unreceive(message, options = {})
-      raise Stomp::Error::NoCurrentConnection if closed?
+      raise Stomp::Error::NoCurrentConnection if @closed_check && closed?
       options = { :dead_letter_queue => "/queue/DLQ", :max_redeliveries => 6 }.merge(options)
       # Lets make sure all keys are symbols
       message.headers = message.headers.symbolize_keys
@@ -419,7 +423,7 @@ module Stomp
     # disconnect closes this connection.  If requested, a disconnect RECEIPT 
     # will be received.
     def disconnect(headers = {})
-      raise Stomp::Error::NoCurrentConnection if closed?
+      raise Stomp::Error::NoCurrentConnection if @closed_check && closed?
       headers = headers.symbolize_keys
       _headerCheck(headers)
       if @protocol >= Stomp::SPL_11
@@ -437,7 +441,7 @@ module Stomp
     # poll returns a pending message if one is available, otherwise
     # returns nil.
     def poll()
-      raise Stomp::Error::NoCurrentConnection if closed?
+      raise Stomp::Error::NoCurrentConnection if @closed_check && closed?
       # No need for a read lock here.  The receive method eventually fulfills
       # that requirement.
       return nil if @socket.nil? || !@socket.ready?
@@ -467,7 +471,7 @@ module Stomp
 
     # receive returns the next Message off of the wire.
     def receive()
-      raise Stomp::Error::NoCurrentConnection if closed?
+      raise Stomp::Error::NoCurrentConnection if @closed_check && closed?
       super_result = __old_receive
       if super_result.nil? && @reliable && !closed?
         errstr = "connection.receive returning EOF as nil - resetting connection.\n"
