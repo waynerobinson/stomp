@@ -42,6 +42,7 @@ See _CHANGELOG.rdoc_ for details.
       :logger => nil,                     # user suplied callback logger instance
       :dmh => false,                      # do not support multihomed IPV4 / IPV6 hosts during failover
       :closed_check => true,              # check first if closed in each protocol method
+      :hbser => false,                    # raise on heartbeat send exception
     }
     
     # for client

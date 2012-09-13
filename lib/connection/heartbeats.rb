@@ -115,7 +115,9 @@ module Stomp
                   @logger.on_hbwrite_fail(log_params, {"ticker_interval" => @hbsend_interval,
                   "exception" => sendex})
                 end
-                raise # Re-raise.  What else could be done here?
+                if @hbser
+                  raise # Re-raise if user requested this, otherwise ignore
+                end
               end
             end
           end

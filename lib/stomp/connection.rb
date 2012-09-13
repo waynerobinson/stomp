@@ -60,6 +60,9 @@ module Stomp
     #     :connect_headers => {},
     #     :parse_timeout => 5,
     #     :logger => nil,
+    #     :dmh => false,
+    #     :closed_check => true,
+    #     :hbser => false,
     #   }
     #
     #   e.g. c = Stomp::Connection.new(hash)
@@ -98,6 +101,7 @@ module Stomp
         @logger = nil     		# To override, use hashed parameters
         @autoflush = false    # To override, use hashed parameters or setter
         @closed_check = true  # Run closed check in each protocol method
+        @hbser = false        # Raise if heartbeat send exception
         warn "login looks like a URL, do you have the correct parameters?" if @login =~ /:\/\//
       end
 
@@ -127,6 +131,7 @@ module Stomp
       @logger =  @parameters[:logger]
       @autoflush = @parameters[:autoflush]
       @closed_check = @parameters[:closed_check]
+      @hbser = @parameters[:hbser]
       #sets the first host to connect
       change_host
     end

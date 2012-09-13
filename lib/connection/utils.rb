@@ -165,6 +165,7 @@ module Stomp
         :dmh => false,
         # Closed check logic
         :closed_check => true,
+        :hbser => false,
       }
 
       res_params = default_params.merge(params)
