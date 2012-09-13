@@ -244,11 +244,11 @@ module Stomp
 
         Timeout::timeout(@connect_timeout, Stomp::Error::SocketOpenTimeout) do
           ssl = OpenSSL::SSL::SSLSocket.new(open_tcp_socket, ctx)
+          ssl.connect
         end
         def ssl.ready?
           ! @rbuffer.empty? || @io.ready?
         end
-        ssl.connect
         if @ssl != true
           # Pass back results if possible
           if RUBY_VERSION =~ /1\.8\.[56]/
