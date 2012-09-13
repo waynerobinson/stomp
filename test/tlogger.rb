@@ -93,16 +93,6 @@ class Tlogger
     end
   end
 
-  # Stomp 1.1+ - heart beat read (receive) failed
-  def on_hbread_fail(parms, ticker_data)
-    begin
-      @log.debug "Hbreadf Parms #{info(parms)}"
-      @log.debug "Hbreadf Result #{ticker_data}"
-    rescue
-      @log.debug "Hbreadf oops"
-    end
-  end
-
   # Stomp 1.1+ - heart beat send (transmit) failed
   def on_hbwrite_fail(parms, ticker_data)
     begin
