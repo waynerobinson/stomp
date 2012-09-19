@@ -1,3 +1,11 @@
+== 1.2.6 20120913
+
+* Provide ability to eliminate checks for closed in protocol methods
+* Cover ssl.connect with connection timeout parameter
+* If heartbeat send raises, do not reraise unless client requests that
+* Remove methods that invoke __send__
+* Move internal methods to 'private'
+
 == 1.2.5 20120804
 
 * Issue #48 any forks with modifications will be affected!
