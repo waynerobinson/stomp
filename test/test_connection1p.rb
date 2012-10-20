@@ -357,5 +357,5 @@ private
     assert conn.hbrecv_count > 0
   end
 
-end if ENV['STOMP_TEST11']
+end if ENV['STOMP_TEST11p']
 

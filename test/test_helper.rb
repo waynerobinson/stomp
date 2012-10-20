@@ -96,12 +96,14 @@ module TestBase
   # Get a connection headers hash.
   def get_conn_headers()
     ch = {}
-    if ENV['STOMP_TEST11']
+    if ENV['STOMP_TEST11p']
       #
-      if Stomp::SUPPORTED.index(ENV['STOMP_TEST11'])
-        ch['accept-version'] = ENV['STOMP_TEST11']
+      raise "Invalid 1.1 plus test protocol" if ENV['STOMP_TEST11p'] == Stomp::SPL_10
+      #
+      if Stomp::SUPPORTED.index(ENV['STOMP_TEST11p'])
+        ch['accept-version'] = ENV['STOMP_TEST11p']
       else
-        ch['accept-version'] = Stomp::SPL_11
+        ch['accept-version'] = Stomp::SPL_11 # Just use 1.1
       end
       #
       ch['host'] = ENV['STOMP_RABBIT'] ? "/" : host
