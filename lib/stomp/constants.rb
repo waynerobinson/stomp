@@ -40,6 +40,11 @@ module Stomp
   NL = "\n"
   NL_ASCII = 0x0a
   #
+  # New line
+  #
+  CR = "\r"
+  CR_ASCII = 0x0d
+  #
   # Back Slash
   #
   BACK_SLASH = "\\"
@@ -65,6 +70,7 @@ module Stomp
   ENCODE_VALUES = [
     "\\\\", "\\", # encoded, decoded
     "\\" + "n", "\n",
+    "\\" + "r", "\r",
     "\\c", ":",
   ]
 
@@ -72,6 +78,7 @@ module Stomp
   DECODE_VALUES = [
     "\\\\\\\\", "\\", # encoded, decoded
     "\\" + "n", "\n",
+    "\\" + "r", "\r",
     "\\c", ":",
   ]
 

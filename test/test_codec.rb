@@ -50,12 +50,16 @@ class TestCodec < Test::Unit::TestCase
     test_data = [
     	[ "\\\\", "\\" ],
     	["\\n", "\n"],
+    	["\\r", "\r"],
 	    ["\\c", ":"],
 	    ["\\\\\\n\\c", "\\\n:"],
+	    ["\\\\\\r\\c", "\\\r:"],
 	    ["\\c\\n\\\\", ":\n\\"],
+	    ["\\c\\r\\\\", ":\r\\"],
 	    ["\\\\\\c", "\\:"],
 	    ["c\\cc", "c:c"],
 	    ["n\\nn", "n\nn"],
+	    ["r\\rr", "r\rr"],
       ]
     #
     test_data.each do |s|
@@ -73,6 +77,8 @@ class TestCodec < Test::Unit::TestCase
     test_data = [
     	[ "a\\\\b", "a\\b" ],
       [ "\\\\\\n\\c", "\\\n:" ],
+      [ "\\\\\\r\\c", "\\\r:" ],
+      [ "\\rr\\\\\\n\\c", "\rr\\\n:" ],
       ]
     #
     test_data.each do |s|
