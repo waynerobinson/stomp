@@ -3,4 +3,5 @@ doc/*
 coverage/*
 *.gem
 *~
+temp*
 
