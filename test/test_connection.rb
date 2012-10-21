@@ -80,22 +80,58 @@ class TestConnection < Test::Unit::TestCase
     }
   end
 
-  # Test ACKs using symbols for header keys.
-  def test_client_ack_with_symbol
-    if @conn.protocol == Stomp::SPL_10
-      @conn.subscribe make_destination, :ack => :client
-    else
-      sid = @conn.uuid()
-      @conn.subscribe make_destination, :ack => :client, :id => sid
+  # Test ACKs for Stomp 1.0
+  def test_client_ack_with_symbol_10
+    if @conn.protocol != Stomp::SPL_10
+      assert true
+      return
     end
-    @conn.publish make_destination, "test_stomp#test_client_ack_with_symbol"
+    queue = make_destination()
+    @conn.subscribe queue, :ack => :client
+    @conn.publish queue, "test_stomp#test_client_ack_with_symbol_10"
     msg = @conn.receive
     assert_nothing_raised {
-      if @conn.protocol == Stomp::SPL_10
-        @conn.ack msg.headers['message-id']
-      else
-        @conn.ack msg.headers['message-id'], :subscription => sid
-      end
+      # ACK has one required header, message-id, which must contain a value 
+      # matching the message-id for the MESSAGE being acknowledged.
+      @conn.ack msg.headers['message-id']
+    }
+  end
+
+  # Test ACKs for Stomp 1.1
+  def test_client_ack_with_symbol_11
+    if @conn.protocol != Stomp::SPL_11
+      assert true
+      return
+    end
+    sid = @conn.uuid()
+    queue = make_destination()
+    @conn.subscribe queue, :ack => :client, :id => sid
+    @conn.publish queue, "test_stomp#test_client_ack_with_symbol_11"
+    msg = @conn.receive
+    assert_nothing_raised {
+      # ACK has two REQUIRED headers: message-id, which MUST contain a value 
+      # matching the message-id for the MESSAGE being acknowledged and 
+      # subscription, which MUST be set to match the value of the subscription's 
+      # id header.
+      @conn.ack msg.headers['message-id'], :subscription => sid
+    }
+  end
+
+  # Test ACKs for Stomp 1.2
+  def test_client_ack_with_symbol_12
+    if @conn.protocol != Stomp::SPL_12
+      assert true
+      return
+    end
+    sid = @conn.uuid()
+    queue = make_destination()
+    @conn.subscribe queue, :ack => :client, :id => sid
+    @conn.publish queue, "test_stomp#test_client_ack_with_symbol_11"
+    msg = @conn.receive
+    assert_nothing_raised {
+      # The ACK frame MUST include an id header matching the ack header 
+      # of the MESSAGE being acknowledged.
+      @conn.ack msg.headers['ack']
     }
   end
 
@@ -391,18 +427,29 @@ class TestConnection < Test::Unit::TestCase
         @conn.nack "dummy msg-id"
       end
     else
-      sid = @conn.uuid()
       dest = make_destination
-      @conn.subscribe dest, :ack => :client, :id => sid
       smsg = "test_stomp#test_nack01: #{Time.now.to_f}"
-      @conn.publish make_destination, smsg
+      @conn.publish dest, smsg
+      #
+      sid = @conn.uuid()
+      @conn.subscribe dest, :ack => :client, :id => sid
       msg = @conn.receive
       assert_equal smsg, msg.body
-      assert_nothing_raised {
-        @conn.nack msg.headers["message-id"], :subscription => sid
-        sleep 0.05 # Give racy brokers a chance to handle the last nack before unsubscribe
-        @conn.unsubscribe dest, :id => sid
-      }
+      case @conn.protocol
+        when Stomp::SPL_12
+          assert_nothing_raised {
+            @conn.nack msg.headers["ack"]
+            sleep 0.05 # Give racy brokers a chance to handle the last nack before unsubscribe
+            @conn.unsubscribe dest, :id => sid
+          }
+        else # Stomp::SPL_11
+          assert_nothing_raised {
+            @conn.nack msg.headers["message-id"], :subscription => sid
+            sleep 0.05 # Give racy brokers a chance to handle the last nack before unsubscribe
+            @conn.unsubscribe dest, :id => sid
+          }
+      end
+
       # phase 2
       teardown()
       setup()
@@ -443,5 +490,6 @@ class TestConnection < Test::Unit::TestCase
     }
     c.disconnect if c
   end
+
 end
 

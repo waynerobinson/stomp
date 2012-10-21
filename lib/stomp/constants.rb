@@ -24,9 +24,10 @@ module Stomp
   # Protocols
   SPL_10 = "1.0"
   SPL_11 = "1.1"
+  SPL_12 = "1.2"
 
   # Stomp 1.0 and 1.1
-  SUPPORTED = [SPL_10, SPL_11]
+  SUPPORTED = [SPL_10, SPL_11, SPL_12]
 
   # 1.9 Encoding Name
   UTF8 = "UTF-8"

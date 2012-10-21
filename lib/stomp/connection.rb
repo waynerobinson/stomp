@@ -162,14 +162,29 @@ module Stomp
 
     # Acknowledge a message, used when a subscription has specified
     # client acknowledgement i.e. connection.subscribe("/queue/a", :ack => 'client').
-    # Accepts a transaction header ( :transaction => 'some_transaction_id' )
+    # Accepts an optional transaction header ( :transaction => 'some_transaction_id' )
+    # Behavior is protocol level dependent, see the specifications or comments below.
     def ack(message_id, headers = {})
       raise Stomp::Error::NoCurrentConnection if @closed_check && closed?
       raise Stomp::Error::MessageIDRequiredError if message_id.nil? || message_id == ""
       headers = headers.symbolize_keys
-      headers[:'message-id'] = message_id
-      if @protocol >= Stomp::SPL_11
-        raise Stomp::Error::SubscriptionRequiredError unless headers[:subscription]
+
+      case @protocol
+        when Stomp::SPL_12
+          # The ACK frame MUST include an id header matching the ack header 
+          # of the MESSAGE being acknowledged.
+          headers[:id] = message_id
+        when Stomp::SPL_11
+          # ACK has two REQUIRED headers: message-id, which MUST contain a value 
+          # matching the message-id for the MESSAGE being acknowledged and 
+          # subscription, which MUST be set to match the value of the subscription's 
+          # id header.
+          headers[:'message-id'] = message_id
+          raise Stomp::Error::SubscriptionRequiredError unless headers[:subscription]
+        else # Stomp::SPL_10
+          # ACK has one required header, message-id, which must contain a value 
+          # matching the message-id for the MESSAGE being acknowledged.
+          headers[:'message-id'] = message_id
       end
       _headerCheck(headers)
       transmit(Stomp::CMD_ACK, headers)
@@ -181,8 +196,19 @@ module Stomp
       raise Stomp::Error::UnsupportedProtocolError if @protocol == Stomp::SPL_10
       raise Stomp::Error::MessageIDRequiredError if message_id.nil? || message_id == ""
       headers = headers.symbolize_keys
-      headers[:'message-id'] = message_id
-      raise Stomp::Error::SubscriptionRequiredError unless headers[:subscription]
+      case @protocol
+        when Stomp::SPL_12
+          # The ACK frame MUST include an id header matching the ack header 
+          # of the MESSAGE being acknowledged.
+          headers[:id] = message_id
+        else # Stomp::SPL_11 only
+          # ACK has two REQUIRED headers: message-id, which MUST contain a value 
+          # matching the message-id for the MESSAGE being acknowledged and 
+          # subscription, which MUST be set to match the value of the subscription's 
+          # id header.
+          headers[:'message-id'] = message_id
+          raise Stomp::Error::SubscriptionRequiredError unless headers[:subscription]
+      end
       _headerCheck(headers)
       transmit(Stomp::CMD_NACK, headers)
     end
