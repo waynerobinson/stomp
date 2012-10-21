@@ -65,11 +65,13 @@ module Stomp
       raise Stomp::Error::ProtocolErrorConnect if (!@connect_headers[:"accept-version"] && @connect_headers[:host])
       return unless (@connect_headers[:"accept-version"] && @connect_headers[:host]) # 1.0
       # Try 1.1 or greater
+      @hhas10 = false
       okvers = []
       avers = @connect_headers[:"accept-version"].split(",")
       avers.each do |nver|
         if Stomp::SUPPORTED.index(nver)
           okvers << nver
+          @hhas10 = true if nver == Stomp::SPL_10
         end
       end
       raise Stomp::Error::UnsupportedProtocolError if okvers == []

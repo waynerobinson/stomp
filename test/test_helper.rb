@@ -64,7 +64,14 @@ module TestBase
   # Get a Stomp Connection.
   def get_connection()
     ch = get_conn_headers()
-    conn = Stomp::Connection.open(user, passcode, host, port, false, 5, ch)
+    hash = { :hosts => [ 
+      {:login => user, :passcode => passcode, :host => host, :port => port, :ssl => nil},
+      ],
+      :reliable => false,
+      :connect_headers => ch,
+      :stompconn => get_stomp_conn(),
+    }
+    conn = Stomp::Connection.open(hash)
     conn
   end
 
@@ -75,7 +82,8 @@ module TestBase
     hash = { :hosts => [ 
       {:login => user, :passcode => passcode, :host => host, :port => ssl_port, :ssl => ssl_params},
       ],
-      :connect_headers => ch
+      :connect_headers => ch,
+      :stompconn => get_stomp_conn(),
     }
     conn = Stomp::Connection.new(hash)
     conn
@@ -86,7 +94,8 @@ module TestBase
     hash = { :hosts => [ 
           {:login => user, :passcode => passcode, :host => host, :port => port},
           ],
-          :connect_headers => get_conn_headers()
+          :connect_headers => get_conn_headers(),
+          :stompconn => get_stomp_conn(),
         }
 
     client = Stomp::Client.new(hash)
@@ -109,6 +118,13 @@ module TestBase
       ch['host'] = ENV['STOMP_RABBIT'] ? "/" : host
     end
     ch
+  end
+
+  # Determine if tests should use STOMP instead of CONNECT
+  def get_stomp_conn()
+    usc = false
+    usc = true if ENV['STOMP_TEST11p'] && Stomp::SUPPORTED.index(ENV['STOMP_TEST11p']) && ENV['STOMP_TEST11p'] >= Stomp::SPL_11 && ENV['STOMP_CONN']
+    usc
   end
 
   # Subscribe to a destination.

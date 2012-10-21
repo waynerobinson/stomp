@@ -63,6 +63,7 @@ module Stomp
     #     :dmh => false,
     #     :closed_check => true,
     #     :hbser => false,
+    #     :stompconn => false,
     #   }
     #
     #   e.g. c = Stomp::Connection.new(hash)
@@ -102,6 +103,7 @@ module Stomp
         @autoflush = false    # To override, use hashed parameters or setter
         @closed_check = true  # Run closed check in each protocol method
         @hbser = false        # Raise if heartbeat send exception
+        @stompconn = false    # If true, use STOMP rather than CONNECT
         warn "login looks like a URL, do you have the correct parameters?" if @login =~ /:\/\//
       end
 
@@ -132,6 +134,7 @@ module Stomp
       @autoflush = @parameters[:autoflush]
       @closed_check = @parameters[:closed_check]
       @hbser = @parameters[:hbser]
+      @stompconn = @parameters[:stompconn]
       #sets the first host to connect
       change_host
     end

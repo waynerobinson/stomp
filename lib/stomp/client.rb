@@ -52,6 +52,10 @@ module Stomp
     #     :connect_headers => {},
     #     :parse_timeout => 5,
     #     :logger => nil,
+    #     :dmh => false,
+    #     :closed_check => true,
+    #     :hbser => false,
+    #     :stompconn => false,
     #   }
     #
     #   e.g. c = Stomp::Client.new(hash)

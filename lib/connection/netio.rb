@@ -307,7 +307,11 @@ module Stomp
       headers[:login] = @login
       headers[:passcode] = @passcode
       _pre_connect
-      _transmit(used_socket, "CONNECT", headers)
+      if !@hhas10 && @stompconn
+        _transmit(used_socket, Stomp::CMD_STOMP, headers)
+      else
+        _transmit(used_socket, Stomp::CMD_CONNECT, headers)
+      end
       @connection_frame = _receive(used_socket)
       _post_connect
       @disconnect_receipt = nil
