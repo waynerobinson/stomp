@@ -218,7 +218,11 @@ module Stomp
       if block_given?
         headers['receipt'] = register_receipt_listener lambda {|r| yield r}
       end
-      @connection.ack(message.headers['message-id'], headers)
+      if protocol() == Stomp::SPL_12
+        @connection.ack(message.headers['ack'], headers)
+      else
+        @connection.ack(message.headers['message-id'], headers)
+      end
     end
 
     # Stomp 1.1+ NACK.

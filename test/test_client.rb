@@ -40,13 +40,13 @@ class TestClient < Test::Unit::TestCase
     assert_equal message_text, received.body
     receipt = nil
     ack_headers = {}
-    if @client.protocol > Stomp::SPL_10
+    if @client.protocol == Stomp::SPL_11 # 1.1 only
       ack_headers["subscription"] = received.headers["subscription"]
     end
     @client.acknowledge(received, ack_headers) {|r| receipt = r}
     sleep 0.01 until receipt
     assert_not_nil receipt.headers['receipt-id']
-  end unless ENV['STOMP_RABBIT']
+  end unless ENV['STOMP_RABBIT'] # TODO: why does Rabbit 1.1 fail ?
 
   # Test Client subscribe
   def test_asynch_subscribe
@@ -323,13 +323,15 @@ class TestClient < Test::Unit::TestCase
     assert_not_nil message
     assert_equal message_text, message.body
 
-    @client.begin 'tx2'
-    if @client.protocol() == Stomp::SPL_10
-      @client.acknowledge message, :transaction => 'tx2'
-    else
-      @client.acknowledge message, :transaction => 'tx2', :subscription => sid
-    end
-    @client.commit 'tx2'
+    assert_nothing_raised {
+      @client.begin 'tx2'
+      if @client.protocol() == Stomp::SPL_10
+        @client.acknowledge message, :transaction => 'tx2'
+      else
+        @client.acknowledge message, :transaction => 'tx2', :subscription => sid
+      end
+      @client.commit 'tx2'
+    }
   end
 
   # Test that a connection frame is received.
