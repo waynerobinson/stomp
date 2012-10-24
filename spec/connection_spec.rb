@@ -23,6 +23,7 @@ describe Stomp::Connection do
       :dmh => false,
       :closed_check => true,
       :hbser => false,
+      :stompconn => false,
     }
         
     #POG:
@@ -70,7 +71,7 @@ describe Stomp::Connection do
       @connection.publish "/queue", "message", :suppress_content_length => false
     end    
   end
-  
+
   describe "(created using a hash)" do
     it "should uncamelize and symbolize the main hash keys" do
       used_hash = {
@@ -148,7 +149,7 @@ describe Stomp::Connection do
         @connection.publish "/queue", "сообщение"  # 'сообщение' is 'message' in Russian
       end
     end
-    
+
     describe "when unacknowledging a message" do
       
       before :each do
@@ -237,7 +238,7 @@ describe Stomp::Connection do
       end
     
     end
-    
+
     describe "when sending a nil message body" do
       it "should should not raise an error" do
         @connection = Stomp::Connection.new("niluser", "nilpass", "localhost", 61613)
@@ -334,6 +335,7 @@ describe Stomp::Connection do
           :dmh => false,
           :closed_check => true,
           :hbser => false,
+          :stompconn => false,
         }
         
         used_hash =  {
@@ -369,6 +371,7 @@ describe Stomp::Connection do
           :dmh => false,
           :closed_check => true,
           :hbser => false,
+          :stompconn => false,
         }
         
         @connection = Stomp::Connection.new(used_hash)
@@ -420,5 +423,6 @@ describe Stomp::Connection do
       
     end
   end
+
 end
 

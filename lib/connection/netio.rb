@@ -295,7 +295,9 @@ module Stomp
       close_socket
 
       @closed = false
-      @reconnect_delay = @parameters[:initial_reconnect_delay] ? @parameters[:initial_reconnect_delay] : 0.01
+      if @parameters # nil in some rspec tests
+        @reconnect_delay = @parameters[:initial_reconnect_delay] ? @parameters[:initial_reconnect_delay] : 0.01
+      end
       # Use keepalive
       used_socket.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)
       used_socket
