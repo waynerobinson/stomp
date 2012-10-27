@@ -88,7 +88,8 @@ describe Stomp::Connection do
         "maxReconnectAttempts" => 0,
         "randomize" => false,
         "connect_timeout" => 0,
-        "parse_timeout" => 5
+        "parse_timeout" => 5,
+        "usecrlf" => false,
       }
       
       @connection = Stomp::Connection.new(used_hash)
@@ -337,7 +338,6 @@ describe Stomp::Connection do
           :closed_check => true,
           :hbser => false,
           :stompconn => false,
-          :usecrlf => false,
         }
         
         used_hash =  {
