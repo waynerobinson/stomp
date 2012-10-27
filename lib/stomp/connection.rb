@@ -64,6 +64,7 @@ module Stomp
     #     :closed_check => true,
     #     :hbser => false,
     #     :stompconn => false,
+    #     :usecrlf => false,
     #   }
     #
     #   e.g. c = Stomp::Connection.new(hash)
@@ -104,6 +105,7 @@ module Stomp
         @closed_check = true  # Run closed check in each protocol method
         @hbser = false        # Raise if heartbeat send exception
         @stompconn = false    # If true, use STOMP rather than CONNECT
+        @usecrlf = false      # If true, use \r\n as line ends (1.2 only)
         warn "login looks like a URL, do you have the correct parameters?" if @login =~ /:\/\//
       end
 
@@ -135,6 +137,7 @@ module Stomp
       @closed_check = @parameters[:closed_check]
       @hbser = @parameters[:hbser]
       @stompconn = @parameters[:stompconn]
+      @usecrlf = @parameters[:usecrlf]
       #sets the first host to connect
       change_host
     end

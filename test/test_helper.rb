@@ -70,6 +70,7 @@ module TestBase
       :reliable => false,
       :connect_headers => ch,
       :stompconn => get_stomp_conn(),
+      :usecrlf => get_crlf(),
     }
     conn = Stomp::Connection.open(hash)
     conn
@@ -84,6 +85,7 @@ module TestBase
       ],
       :connect_headers => ch,
       :stompconn => get_stomp_conn(),
+      :usecrlf => get_crlf(),
     }
     conn = Stomp::Connection.new(hash)
     conn
@@ -96,6 +98,7 @@ module TestBase
           ],
           :connect_headers => get_conn_headers(),
           :stompconn => get_stomp_conn(),
+          :usecrlf => get_crlf(),
         }
 
     client = Stomp::Client.new(hash)
@@ -125,6 +128,13 @@ module TestBase
     usc = false
     usc = true if ENV['STOMP_TEST11p'] && Stomp::SUPPORTED.index(ENV['STOMP_TEST11p']) && ENV['STOMP_TEST11p'] >= Stomp::SPL_11 && ENV['STOMP_CONN']
     usc
+  end
+
+  # Determine if tests should \r\n as line ends
+  def get_crlf()
+    ucr = false
+    ucr = true if ENV['STOMP_TEST11p'] && Stomp::SUPPORTED.index(ENV['STOMP_TEST11p']) && ENV['STOMP_TEST11p'] >= Stomp::SPL_12 && ENV['STOMP_CRLF']
+    ucr
   end
 
   # Subscribe to a destination.

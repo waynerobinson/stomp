@@ -41,6 +41,11 @@ module Stomp
   NL = "\n"
   NL_ASCII = 0x0a
   #
+  # Line Feed (New Line)
+  #
+  LF = "\n"
+  LF_ASCII = 0x0a
+  #
   # New line
   #
   CR = "\r"

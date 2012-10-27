@@ -24,6 +24,7 @@ describe Stomp::Connection do
       :closed_check => true,
       :hbser => false,
       :stompconn => false,
+      :usecrlf => false,
     }
         
     #POG:
@@ -336,6 +337,7 @@ describe Stomp::Connection do
           :closed_check => true,
           :hbser => false,
           :stompconn => false,
+          :usecrlf => false,
         }
         
         used_hash =  {
@@ -372,6 +374,7 @@ describe Stomp::Connection do
           :closed_check => true,
           :hbser => false,
           :stompconn => false,
+          :usecrlf => false,
         }
         
         @connection = Stomp::Connection.new(used_hash)

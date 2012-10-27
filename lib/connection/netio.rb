@@ -26,6 +26,9 @@ module Stomp
           end
         end
         return nil if line.nil?
+        # p [ "wiredatain_01", line ]
+        line = _normalize_line_end(line) if @protocol >= Stomp::SPL_12
+
         # If the reading hangs for more than X seconds, abort the parsing process.
         # X defaults to 5.  Override allowed in connection hash parameters.
         Timeout::timeout(@parse_timeout, Stomp::Error::PacketParsingTimeout) do
@@ -34,7 +37,9 @@ module Stomp
           begin
             message_header += line
             line = read_socket.gets
+            # p [ "wiredatain_02", line ]
             raise Stomp::Error::StompServerError if line.nil?
+            line = _normalize_line_end(line) if @protocol >= Stomp::SPL_12
           end until line =~ /^\s?\n$/
 
           # Checks if it includes content_length header
@@ -87,6 +92,19 @@ module Stomp
       end
     end
 
+    # Normalize line ends because 1.2+ brokers can send 'mixed mode' headers, i.e.:
+    # - Some headers end with '\n'
+    # - Other headers end with '\r\n'
+    def _normalize_line_end(line)
+      return line unless @usecrlf
+      # p [ "nleln", line ]
+      line_len = line.respond_to?(:bytesize) ? line.bytesize : line.length
+      last2 = line[line_len-2...line_len]
+      # p [ "nlel2", last2 ]
+      return line unless last2 == "\r\n"
+      return line[0...line_len-2] + "\n"
+    end
+
     # transmit logically puts a Message on the wire.
     def transmit(command, headers = {}, body = '')
       # The transmit may fail so we may need to retry.
@@ -131,17 +149,17 @@ module Stomp
         # Lets send this header in the message, so it can maintain state when using unreceive
         headers[:'content-length'] = "#{body_length_bytes}" unless headers[:suppress_content_length]
         headers[:'content-type'] = "text/plain; charset=UTF-8" unless headers[:'content-type']
-        used_socket.puts command
+        _wire_write(used_socket,command)
         headers.each do |k,v|
           if v.is_a?(Array)
             v.each do |e|
-              used_socket.puts "#{k}:#{e}"
+              _wire_write(used_socket,"#{k}:#{e}")
             end
           else
-            used_socket.puts "#{k}:#{v}"
+            _wire_write(used_socket,"#{k}:#{v}")
           end
         end
-        used_socket.puts
+        _wire_write(used_socket,"")
         used_socket.write body
         used_socket.write "\0"
         used_socket.flush if autoflush
@@ -150,6 +168,19 @@ module Stomp
           @ls = Time.now.to_f if @hbs
         end
 
+      end
+    end
+
+    # Use CRLF if protocol is >= 1.2, and the client requested CRLF
+    def _wire_write(sock, data)
+      # p [ "debug_01", @protocol, @usecrlf ]
+      if @protocol >= Stomp::SPL_12 && @usecrlf
+        wiredata = "#{data}#{Stomp::CR}#{Stomp::LF}"
+        # p [ "wiredataout_01:", wiredata ]
+        sock.write(wiredata)
+      else
+        # p [ "wiredataout_02:", "#{data}\n" ]
+        sock.puts data
       end
     end
 
