@@ -360,7 +360,7 @@ class TestClient < Test::Unit::TestCase
     if @client.protocol() == Stomp::SPL_10
       client.unsubscribe dest
     else
-      client.unsubscribe dest, :subscription => sid
+      client.unsubscribe dest, :id => sid
     end
     client.close
     #  Same message should remain on the queue.  Receive it again with ack=>auto.
