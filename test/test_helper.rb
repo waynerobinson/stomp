@@ -151,5 +151,13 @@ module TestBase
     qname = ENV['STOMP_DOTQUEUE'] ? "/queue/test.ruby.stomp." + name : "/queue/test/ruby/stomp/" + name
   end
 
+  #
+  def checkEmsg(cc)
+    m = cc.poll
+    if m
+      assert m.command != Stomp::CMD_ERROR
+    end
+  end
+
 end
 

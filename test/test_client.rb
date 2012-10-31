@@ -46,6 +46,7 @@ class TestClient < Test::Unit::TestCase
     @client.acknowledge(received, ack_headers) {|r| receipt = r}
     sleep 0.01 until receipt
     assert_not_nil receipt.headers['receipt-id']
+    checkEmsg(@client)
   end unless ENV['STOMP_RABBIT'] # TODO: why does Rabbit 1.1 fail ?
 
   # Test Client subscribe
@@ -56,6 +57,7 @@ class TestClient < Test::Unit::TestCase
     sleep 0.01 until received
 
     assert_equal message_text, received.body
+    checkEmsg(@client)
   end
 
   # Test not ACKing messages.
@@ -78,6 +80,7 @@ class TestClient < Test::Unit::TestCase
     assert_equal message_text, received2.body
     assert_equal received.body, received2.body
     assert_equal received.headers['message-id'], received2.headers['message-id'] unless ENV['STOMP_RABBIT']
+    checkEmsg(@client)
   end unless RUBY_ENGINE =~ /jruby/
 
   # Test obtaining a RECEIPT via a listener.
@@ -90,6 +93,7 @@ class TestClient < Test::Unit::TestCase
     @client.subscribe(make_destination) {|m| message = m}
     sleep 0.1 until message
     assert_equal message_text, message.body
+    checkEmsg(@client)
   end
 
   # Test requesting a receipt on disconnect.
@@ -110,6 +114,7 @@ class TestClient < Test::Unit::TestCase
     sleep 0.01 until message
 
     assert_equal message_text, message.body
+    checkEmsg(@client)
   end
 
   # Test that Client subscribe requires a block.
@@ -117,6 +122,7 @@ class TestClient < Test::Unit::TestCase
     assert_raise(RuntimeError) do
       @client.subscribe make_destination
     end
+    checkEmsg(@client)
   end unless RUBY_ENGINE =~ /jruby/
 
   # Test transaction publish.
@@ -130,6 +136,7 @@ class TestClient < Test::Unit::TestCase
     sleep 0.01 until message
 
     assert_equal message_text, message.body
+    checkEmsg(@client)
   end
 
   # Test transaction publish and abort.
@@ -146,6 +153,7 @@ class TestClient < Test::Unit::TestCase
     @client.subscribe(make_destination) {|m| message = m}
     sleep 0.01 until message
     assert_equal "second_message", message.body
+    checkEmsg(@client)
   end unless RUBY_ENGINE =~ /jruby/
 
   # Test transaction publish and abort, receive with new client.
@@ -172,7 +180,7 @@ class TestClient < Test::Unit::TestCase
       message = nil
       @client.abort 'tx1'
     }
-
+    checkEmsg(@client)
     # lets recreate the connection
     teardown
     setup
@@ -203,6 +211,7 @@ class TestClient < Test::Unit::TestCase
       end
       @client.commit 'tx2'
     }
+    checkEmsg(@client)
   end
 
   # Test that subscription destinations must be unique for a Client.
@@ -212,6 +221,7 @@ class TestClient < Test::Unit::TestCase
     assert_raise(RuntimeError) do
       @client.subscribe(subscribe_dest) {|m| nil }
     end
+    checkEmsg(@client)
   end
 
   # Test that subscription IDs must be unique for a Client.
@@ -221,6 +231,7 @@ class TestClient < Test::Unit::TestCase
     assert_raise(RuntimeError) do
       @client.subscribe(subscribe_dest, {'id' => 'myid'}) {|m| nil }
     end
+    checkEmsg(@client)
   end
 
   # Test that subscription IDs must be unique for a Client, mixed id specification.
@@ -230,6 +241,7 @@ class TestClient < Test::Unit::TestCase
     assert_raise(RuntimeError) do
       @client.subscribe(subscribe_dest, {:id => 'myid'}) {|m| nil }
     end
+    checkEmsg(@client)
   end
 
   # Test wildcard subscribe.  Primarily for AMQ.
@@ -260,7 +272,7 @@ class TestClient < Test::Unit::TestCase
       end
     end
     assert results.all?{|a| a == true }
-
+    checkEmsg(@client)
   end unless ENV['STOMP_NOWILD']
 
   # Test wildcard subscribe with >.  Primarily for AMQ.
@@ -295,6 +307,7 @@ class TestClient < Test::Unit::TestCase
       end
     end
     assert results.all?{|a| a == true }
+    checkEmsg(@client)
   end unless ENV['STOMP_NOWILD'] || ENV['STOMP_DOTQUEUE']
 
   # Test transaction with client side redilivery.
@@ -340,11 +353,13 @@ class TestClient < Test::Unit::TestCase
       end
       @client.commit 'tx2'
     }
+    checkEmsg(@client)
   end
 
   # Test that a connection frame is received.
   def test_connection_frame
   	assert_not_nil @client.connection_frame
+    checkEmsg(@client)
   end unless RUBY_ENGINE =~ /jruby/
 
   # Test basic unsubscribe.
@@ -385,6 +400,7 @@ class TestClient < Test::Unit::TestCase
     end
     assert_equal to_send, message_copy.body, "second body check"
     assert_equal message.headers['message-id'], message_copy.headers['message-id'], "header check" unless ENV['STOMP_RABBIT']
+    checkEmsg(@client)
   end
 
   # Test subscribe from a worker thread.
@@ -407,6 +423,7 @@ class TestClient < Test::Unit::TestCase
     @client.publish(dest, message_text)
     sleep 1
     assert_not_nil msg
+    checkEmsg(@client)
   end unless RUBY_ENGINE =~ /jruby/
 
   # Test subscribe from multiple worker threads.
@@ -458,6 +475,7 @@ class TestClient < Test::Unit::TestCase
       sleep sleep_incr
     end
     assert_equal @max_msgs, msg_ctr
+    checkEmsg(@client)
   end
 
   # Test that methods detect no client connection is present.

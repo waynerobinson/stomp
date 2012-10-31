@@ -53,6 +53,7 @@ class TestConnection < Test::Unit::TestCase
     else
       assert_equal "test_stomp#test_\000_length", msg2.body
     end
+    checkEmsg(@conn)
   end unless ENV['STOMP_RABBIT']
 
   # Test direct / explicit receive.
@@ -68,6 +69,7 @@ class TestConnection < Test::Unit::TestCase
     conn_subscribe make_destination, :receipt => "abc"
     msg = @conn.receive
     assert_equal "abc", msg.headers['receipt-id']
+    checkEmsg(@conn)
   end
 
   # Test asking for a receipt on disconnect.
@@ -95,6 +97,7 @@ class TestConnection < Test::Unit::TestCase
       # matching the message-id for the MESSAGE being acknowledged.
       @conn.ack msg.headers['message-id']
     }
+    checkEmsg(@conn)
   end
 
   # Test ACKs for Stomp 1.1
@@ -115,6 +118,7 @@ class TestConnection < Test::Unit::TestCase
       # id header.
       @conn.ack msg.headers['message-id'], :subscription => sid
     }
+    checkEmsg(@conn)
   end
 
   # Test ACKs for Stomp 1.2
@@ -133,6 +137,7 @@ class TestConnection < Test::Unit::TestCase
       # of the MESSAGE being acknowledged.
       @conn.ack msg.headers['ack']
     }
+    checkEmsg(@conn)
   end
 
   # Test a message with 0x00 embedded in the body.
@@ -141,6 +146,7 @@ class TestConnection < Test::Unit::TestCase
     @conn.publish make_destination, "a\0"
     msg = @conn.receive
     assert_equal "a\0" , msg.body
+    checkEmsg(@conn)
   end
 
   # Test connection open checking.
@@ -212,6 +218,7 @@ class TestConnection < Test::Unit::TestCase
     @conn.publish make_destination, "a\0"
     msg = @conn.receive
     assert_instance_of Stomp::Message , msg
+    checkEmsg(@conn)
   end
 
   # Test converting a Message to a string.
@@ -220,6 +227,7 @@ class TestConnection < Test::Unit::TestCase
     @conn.publish make_destination, "a\0"
     msg = @conn.receive
     assert_match /^<Stomp::Message headers=/ , msg.to_s
+    checkEmsg(@conn)
   end
   
   # Test that a connection frame is present.
@@ -238,6 +246,7 @@ class TestConnection < Test::Unit::TestCase
 
     assert_equal "a\n\n", msg_a.body
     assert_equal "b\n\na\n\n", msg_b.body
+    checkEmsg(@conn)
   end
 
   # Test publishing multiple messages.
@@ -250,6 +259,7 @@ class TestConnection < Test::Unit::TestCase
 
     assert_equal "a\0", msg_a.body
     assert_equal "b\0", msg_b.body
+    checkEmsg(@conn)
   end
 
   def test_thread_hang_one
@@ -266,6 +276,7 @@ class TestConnection < Test::Unit::TestCase
     sleep 1
     assert_not_nil received
     assert_equal message, received.body
+    checkEmsg(@conn)
   end
 
   # Test polling with a single thread.
@@ -287,6 +298,7 @@ class TestConnection < Test::Unit::TestCase
     sleep max_sleep+1
     assert_not_nil received
     assert_equal message, received.body
+    checkEmsg(@conn)
   end
 
   # Test receiving with multiple threads.
@@ -325,6 +337,7 @@ class TestConnection < Test::Unit::TestCase
       sleep sleep_incr
     end
     assert_equal @max_msgs, msg_ctr
+    checkEmsg(@conn)
   end unless RUBY_ENGINE =~ /jruby/
 
   # Test polling with multiple threads.
@@ -369,6 +382,7 @@ class TestConnection < Test::Unit::TestCase
       sleep sleep_incr
     end
     assert_equal @max_msgs, msg_ctr
+    checkEmsg(@conn)
   end unless RUBY_ENGINE =~ /jruby/
 
   # Test using a nil body.
@@ -379,7 +393,8 @@ class TestConnection < Test::Unit::TestCase
     }
     conn_subscribe dest
     msg = @conn.receive
-    assert_equal "", msg.body    
+    assert_equal "", msg.body
+    checkEmsg(@conn)
   end
 
   # Test transaction message sequencing.
@@ -397,6 +412,7 @@ class TestConnection < Test::Unit::TestCase
     @conn.commit "txA"
     msg = @conn.receive
     assert_equal "txn message", msg.body
+    checkEmsg(@conn)
   end
 
   # Test duplicate subscriptions.
@@ -409,6 +425,7 @@ class TestConnection < Test::Unit::TestCase
     assert_raise Stomp::Error::DuplicateSubscription do
       conn_subscribe dest
     end
+    checkEmsg(@conn)
   end
 
   # Test nil 1.1 connection parameters.
@@ -418,6 +435,7 @@ class TestConnection < Test::Unit::TestCase
     assert_nothing_raised do
       @conn = Stomp::Connection.open(user, passcode, host, port, false, 5, nil)
     end
+    checkEmsg(@conn)
   end
 
   # Basic NAK test.
@@ -457,6 +475,7 @@ class TestConnection < Test::Unit::TestCase
       @conn.subscribe dest, :ack => :auto, :id => sid
       msg2 = @conn.receive
       assert_equal smsg, msg2.body
+      checkEmsg(@conn)
     end
   end unless ENV['STOMP_AMQ11'] # AMQ sends NACK'd messages to a DLQ
 
