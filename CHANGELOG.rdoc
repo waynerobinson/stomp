@@ -1,3 +1,9 @@
+== 1.2.7 20121102
+
+* Stomp 1.2 support (see http://stomp.github.com)
+* Reset reconnect_delay to default value upon successful reconnect
+* Enhance tests for Stomp 1.2
+
 == 1.2.6 20120913
 
 * Provide ability to eliminate checks for closed in protocol methods

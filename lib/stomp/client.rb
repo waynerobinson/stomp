@@ -56,6 +56,7 @@ module Stomp
     #     :closed_check => true,
     #     :hbser => false,
     #     :stompconn => false,
+    #     :usecrlf => false,
     #   }
     #
     #   e.g. c = Stomp::Client.new(hash)

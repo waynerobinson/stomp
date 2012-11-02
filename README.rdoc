@@ -6,10 +6,11 @@
 
 An implementation of the Stomp protocol for Ruby. See:
 
-* [STOMP 1.0 and 1.1] (http://stomp.github.com/index.html)
+* [STOMP 1.0, 1.1, and 1.2] (http://stomp.github.com/index.html)
 
 ===New
 
+* Gem version 1.2.7. Stomp 1.2 support and miscellaneous fixes. See _CHANGELOG.rdoc_ for details.
 * Gem version 1.2.6. Miscellaneous fixes and changes. See _CHANGELOG.rdoc_ for details.
 * Gem version 1.2.5. Restructure. Forks with modifcations will be affected. See _CHANGELOG.rdoc_ for details.
 * Gem version 1.2.4. Stomp 1.1 heartbeat fix, autoflush capability, miscellaneous fixes.
@@ -38,12 +39,15 @@ See _CHANGELOG.rdoc_ for details.
       :back_off_multiplier => 2,          # next delay multiplier
       :max_reconnect_attempts => 0,       # retry forever, use # for maximum attempts
       :randomize => false,                # do not radomize hosts hash before reconnect
+      :connect_timeout => 0,              # Timeout for TCP/TLS connects, use # for max seconds
       :connect_headers => {},             # user supplied CONNECT headers (req'd for Stomp 1.1+)
       :parse_timeout => 5,                # receive / read timeout, secs
       :logger => nil,                     # user suplied callback logger instance
       :dmh => false,                      # do not support multihomed IPV4 / IPV6 hosts during failover
       :closed_check => true,              # check first if closed in each protocol method
       :hbser => false,                    # raise on heartbeat send exception
+      :stompconn => false,                # Use STOMP instead of CONNECT
+      :usecrlf => false,                  # Use CRLF command and header line ends (1.2+)
     }
     
     # for client
