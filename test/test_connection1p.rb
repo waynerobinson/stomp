@@ -244,7 +244,7 @@ class TestConnection1P < Test::Unit::TestCase
   # - RabbitMQ does not emit repeated headers under any circumstances
   # - AMQ 5.6 does not emit repeated headers under any circumstances
   # Pure luck that this runs against AMQ at present.
-  def test_conn_1p_0120
+  def test_conn_1p_0124
     dest = make_destination
     msg = "payload: #{Time.now.to_f}"
     shdrs = { "key1" => "val1", "key2" => "val2",
@@ -259,7 +259,7 @@ class TestConnection1P < Test::Unit::TestCase
     received = @conn.receive
     assert_equal msg, received.body
     if @conn.protocol != Stomp::SPL_10
-      assert_equal shdrs["key3"], received.headers["key3"] unless ENV['STOMP_RABBIT']
+      assert_equal shdrs["key3"], received.headers["key3"] unless ENV['STOMP_RABBIT'] || ENV['STOMP_AMQ11']
     else
       assert_equal "kv3", received.headers["key3"]
     end
@@ -268,7 +268,7 @@ class TestConnection1P < Test::Unit::TestCase
   end
 
   # Test frozen headers.
-  def test_conn_1p_0120
+  def test_conn_1p_0127
     dest = make_destination
     sid = @conn.uuid()
     sid.freeze
@@ -297,7 +297,7 @@ class TestConnection1P < Test::Unit::TestCase
   end if ENV['STOMP_HB11LONG']
 
   # Test heartbeats with send and receive.
-  def test_conn_1p_0130
+  def test_conn_1p_0135
     #
     cha = {:host => "localhost", "accept-version" => "1.1"}
     cha[:host] = "/" if ENV['STOMP_RABBIT']
