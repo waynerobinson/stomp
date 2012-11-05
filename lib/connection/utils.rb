@@ -109,7 +109,7 @@ module Stomp
         while used_socket.nil? || !@failure.nil?
           @failure = nil
           begin
-            used_socket = open_socket()
+            used_socket = open_socket() # sets @closed = false if OK
             # Open is complete
             connect(used_socket)
             if @logger && @logger.respond_to?(:on_connected)
@@ -222,7 +222,7 @@ module Stomp
           raise unless @reliable
           errstr = "receive failed: #{$!}"
           if @logger && @logger.respond_to?(:on_miscerr)
-            @logger.on_miscerr(log_params, errstr)
+            @logger.on_miscerr(log_params, "es_oldrecv: " + errstr)
           else
             $stderr.print errstr
           end

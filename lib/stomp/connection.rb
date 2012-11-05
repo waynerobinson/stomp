@@ -373,7 +373,7 @@ module Stomp
       if super_result.nil? && @reliable && !closed?
         errstr = "connection.receive returning EOF as nil - resetting connection.\n"
         if @logger && @logger.respond_to?(:on_miscerr)
-          @logger.on_miscerr(log_params, errstr)
+          @logger.on_miscerr(log_params, "es_recv: " + errstr)
         else
           $stderr.print errstr
         end
