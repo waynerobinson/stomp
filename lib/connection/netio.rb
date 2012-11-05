@@ -110,7 +110,7 @@ module Stomp
       # The transmit may fail so we may need to retry.
       while TRUE
         begin
-          used_socket = socket
+          used_socket = socket()
           _transmit(used_socket, command, headers, body)
           return
         rescue Stomp::Error::MaxReconnectAttempts => e

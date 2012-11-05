@@ -215,7 +215,7 @@ module Stomp
       # The receive may fail so we may need to retry.
       while TRUE
         begin
-          used_socket = socket
+          used_socket = socket()
           return _receive(used_socket)
         rescue
           @failure = $!
