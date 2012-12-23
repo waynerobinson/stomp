@@ -21,8 +21,8 @@ module Stomp
       return in_string unless in_string
       ev = Stomp::ENCODE_VALUES # avoid typing below
       os = in_string + ""
-      0.step(ev.length-2,2) do |i|
-        os.gsub!(ev[i], ev[i+1])
+      0.step(ev.length-2,2) do |i| # [encoded, decoded]
+        os.gsub!(ev[i+1], ev[i])
       end
       os
     end
@@ -32,8 +32,8 @@ module Stomp
       return in_string unless in_string
       ev = Stomp::DECODE_VALUES # avoid typing below
       os = in_string + ""
-      0.step(ev.length-2,2) do |i|
-        os.gsub!(ev[i+1], ev[i])
+      0.step(ev.length-2,2) do |i| # [encoded, decoded]
+        os.gsub!(ev[i], ev[i+1])
       end
       os
     end

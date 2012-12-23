@@ -56,11 +56,11 @@ module Stomp
       end
       self.command = work_command
       work_headers.split("\n").map do |value|
-        parsed_value = value.match /^([\r|\w|-]*):(.*)$/
-        raise Stomp::Error::InvalidFormat, 'parsed header value' unless parsed_value
+        fc = value.index(":")
+        raise Stomp::Error::InvalidFormat, 'parsed header value' unless fc
         #
-        pk = parsed_value[1]
-        pv = parsed_value[2]
+        pk = value[0...fc]
+        pv = value[fc+1..-1]
         #
         if protocol11p
           pk.force_encoding(Stomp::UTF8) if pk.respond_to?(:force_encoding)

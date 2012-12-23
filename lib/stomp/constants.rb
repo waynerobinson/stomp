@@ -74,7 +74,7 @@ module Stomp
   # Codec from/to values.
   #
   ENCODE_VALUES = [
-    "\\\\", "\\", # encoded, decoded
+    "\\\\\\\\", "\\", # encoded, decoded
     "\\" + "n", "\n",
     "\\" + "r", "\r",
     "\\c", ":",
@@ -82,7 +82,7 @@ module Stomp
 
   #
   DECODE_VALUES = [
-    "\\\\\\\\", "\\", # encoded, decoded
+    "\\\\", "\\", # encoded, decoded
     "\\" + "n", "\n",
     "\\" + "r", "\r",
     "\\c", ":",

@@ -83,8 +83,11 @@ module Stomp
 
     # _post_connect handles low level logic just after a physical connect.
     def _post_connect()
-      return unless (@connect_headers[:"accept-version"] && @connect_headers[:host])
-      return if @connection_frame.command == Stomp::CMD_ERROR
+      return unless (@connect_headers[:"accept-version"] && @connect_headers[:host]) # 1.0
+      if @connection_frame.command == Stomp::CMD_ERROR
+        @connection_frame.headers = _decodeHeaders(@connection_frame.headers)
+        return
+      end
       # We are CONNECTed
       cfh = @connection_frame.headers.symbolize_keys
       @protocol = cfh[:version]
