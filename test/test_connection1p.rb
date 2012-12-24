@@ -349,6 +349,36 @@ class TestConnection1P < Test::Unit::TestCase
     hb_asserts_both(conn)
   end if ENV['STOMP_HB11LONG']
 
+  # Test very encoding / decoding of headers
+  def test_conn_1p_0200
+    @conn.disconnect
+    #
+    cha = {:host => "localhost", "accept-version" => "1.2,1.1"}
+    conn = Stomp::Connection.open(user, passcode, host, port, false, 5, cha)
+    msg = "payload: #{Time.now.to_f}"
+    dest = make_destination
+    shdrs = { "ab:cd" => "ef:gh", "a\nb" => "c\nd", "x\\y" => "z\\s" }
+    if conn.protocol >= Stomp::SPL_12
+      shdrs["bb\rcc"] = "dd\ree"
+    end
+    assert_nothing_raised {
+      conn.publish dest, msg, shdrs
+    }
+    #
+    sid = conn.uuid()
+    conn.subscribe dest, :id => sid
+    #
+    received = conn.receive
+    assert_equal msg, received.body
+    #
+    shdrs.each_pair {|k,v|
+      assert received.headers.has_key?(k), "Key not found: #{k}"
+      assert received.headers.has_value?(v), "Value not found: #{v}"
+      assert received.headers[k] == v, "Mismatch: #{k},#{v}"
+    }
+    conn.disconnect
+  end unless ENV['STOMP_RABBIT']
+
 private
 
   def hb_asserts_both(conn)
