@@ -6,11 +6,16 @@
 # as UTF-8 encoded.
 #
 
-$:.unshift(File.dirname(__FILE__))
+if Kernel.respond_to?(:require_relative)
+  require_relative("test_helper")
+else
+  $:.unshift(File.dirname(__FILE__))
+  require 'test_helper'
+end
+
 #
 # Test Ruby 1.8 with $KCODE='U'
 #
-require 'test_helper'
 
 =begin
 

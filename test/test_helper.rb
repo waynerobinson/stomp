@@ -1,11 +1,16 @@
 # -*- encoding: utf-8 -*-
 
-$:.unshift(File.join(File.dirname(__FILE__), "..", "lib"))
-
 require 'test/unit'
 require 'timeout'
-require 'stomp'
-require 'tlogger'
+
+if Kernel.respond_to?(:require_relative)
+  require_relative("../lib/stomp")
+  require_relative("tlogger")
+else
+  $:.unshift(File.join(File.dirname(__FILE__), "..", "lib"))
+  require 'stomp'
+  require 'tlogger'
+end
 
 begin
   dummy = RUBY_ENGINE

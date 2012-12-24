@@ -1,8 +1,11 @@
 # -*- encoding: utf-8 -*-
 
-$:.unshift(File.dirname(__FILE__))
-
-require 'test_helper'
+if Kernel.respond_to?(:require_relative)
+  require_relative("test_helper")
+else
+  $:.unshift(File.dirname(__FILE__))
+  require 'test_helper'
+end
 
 =begin
 
