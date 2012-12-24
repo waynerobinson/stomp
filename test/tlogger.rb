@@ -4,52 +4,17 @@ require 'logger'	# use the standard Ruby logger .....
 
 =begin
 
-Callback logger for Stomp 1.1 heartbeat tests.
+Callback logger for Stomp 1.1+ heartbeat tests.
 
 =end
 class Tlogger
 
   # Initialize a callback logger class.
   def initialize(init_parms = nil)
+    puts
     @log = Logger::new(STDOUT)		# User preference
     @log.level = Logger::DEBUG		# User preference
     @log.info("Logger initialization complete.")
-  end
-
-  # Log connecting events.
-  def on_connecting(parms)
-    begin
-      @log.debug "Connecting: #{info(parms)}"
-    rescue
-      @log.debug "Connecting oops"
-    end
-  end
-
-  # Log connected events.
-  def on_connected(parms)
-    begin
-      @log.debug "Connected: #{info(parms)}"
-    rescue
-      @log.debug "Connected oops"
-    end
-  end
-
-  # Log connectfail events.
-  def on_connectfail(parms)
-    begin
-      @log.debug "Connect Fail #{info(parms)}"
-    rescue
-      @log.debug "Connect Fail oops"
-    end
-  end
-
-  # Log disconnect events.
-  def on_disconnect(parms)
-    begin
-      @log.debug "Disconnected #{info(parms)}"
-    rescue
-      @log.debug "Disconnected oops"
-    end
   end
 
   # Log miscellaneous errors.
@@ -59,37 +24,6 @@ class Tlogger
       @log.debug "Miscellaneous Error String #{errstr}"
     rescue
       @log.debug "Miscellaneous Error oops"
-    end
-  end
-
-  # Log subscribes.
-  def on_subscribe(parms, headers)
-    begin
-      @log.debug "Subscribe Parms #{info(parms)}"
-      @log.debug "Subscribe Headers #{headers}"
-    rescue
-      @log.debug "Subscribe oops"
-    end
-  end
-
-  # Log publishes.
-  def on_publish(parms, message, headers)
-    begin
-      @log.debug "Publish Parms #{info(parms)}"
-      @log.debug "Publish Message #{message}"
-      @log.debug "Publish Headers #{headers}"
-    rescue
-      @log.debug "Publish oops"
-    end
-  end
-
-  # Log receives.
-  def on_receive(parms, result)
-    begin
-      @log.debug "Receive Parms #{info(parms)}"
-      @log.debug "Receive Result #{result}"
-    rescue
-      @log.debug "Receive oops"
     end
   end
 
