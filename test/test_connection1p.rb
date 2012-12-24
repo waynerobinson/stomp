@@ -27,6 +27,7 @@ class TestConnection1P < Test::Unit::TestCase
 
   # Test missing connect headers.
   def test_conn_1p_0010
+    @conn.disconnect
     #
     cha = {:host => "localhost"}
     assert_raise Stomp::Error::ProtocolErrorConnect do
@@ -41,6 +42,7 @@ class TestConnection1P < Test::Unit::TestCase
 
   # Test requesting only a 1.0 connection.
   def test_conn_1p_0020
+    @conn.disconnect
     #
     cha = {:host => "localhost", "accept-version" => "1.0"}
     cha[:host] = "/" if ENV['STOMP_RABBIT']
@@ -54,6 +56,7 @@ class TestConnection1P < Test::Unit::TestCase
 
   # Test requesting only a 1.1 connection.
   def test_conn_1p_0030
+    @conn.disconnect
     #
     cha = {:host => "localhost", "accept-version" => "1.1"}
     cha[:host] = "/" if ENV['STOMP_RABBIT']
@@ -67,6 +70,7 @@ class TestConnection1P < Test::Unit::TestCase
 
   # Test basic request for no heartbeats.
   def test_conn_1p_0040
+    @conn.disconnect
     #
     cha = {:host => "localhost", "accept-version" => "1.1"}
     cha[:host] = "/" if ENV['STOMP_RABBIT']
@@ -81,6 +85,7 @@ class TestConnection1P < Test::Unit::TestCase
 
   # Test malformed heartbeat header.
   def test_conn_1p_0050
+    @conn.disconnect
     #
     cha = {:host => "localhost", "accept-version" => "1.1"}
     cha[:host] = "/" if ENV['STOMP_RABBIT']
@@ -93,6 +98,7 @@ class TestConnection1P < Test::Unit::TestCase
 
   # Test malformed heartbeat header.
   def test_conn_11h_0060
+    @conn.disconnect
     #
     cha = {:host => "localhost", "accept-version" => "1.1"}
     cha[:host] = "/" if ENV['STOMP_RABBIT']
@@ -105,6 +111,7 @@ class TestConnection1P < Test::Unit::TestCase
 
   # Test a valid heartbeat header.
   def test_conn_1p_0070
+    @conn.disconnect
     #
     cha = {:host => "localhost", "accept-version" => "1.1"}
     cha[:host] = "/" if ENV['STOMP_RABBIT']
@@ -120,6 +127,7 @@ class TestConnection1P < Test::Unit::TestCase
 
   # Test only sending heartbeats.
   def test_conn_1p_0080
+    @conn.disconnect
     #
     cha = {:host => "localhost", "accept-version" => "1.1"}
     cha[:host] = "/" if ENV['STOMP_RABBIT']
@@ -138,6 +146,7 @@ class TestConnection1P < Test::Unit::TestCase
 
   # Test only receiving heartbeats.
   def test_conn_1p_0090
+    @conn.disconnect
     #
     cha = {:host => "localhost", "accept-version" => "1.1"}
     cha[:host] = "/" if ENV['STOMP_RABBIT']
@@ -157,6 +166,7 @@ class TestConnection1P < Test::Unit::TestCase
 
   # Test sending and receiving heartbeats.
   def test_conn_1p_0100
+    @conn.disconnect
     #
     cha = {:host => "localhost", "accept-version" => "1.1"}
     cha[:host] = "/" if ENV['STOMP_RABBIT']
@@ -176,6 +186,7 @@ class TestConnection1P < Test::Unit::TestCase
 
   # Test valid UTF8 data.
   def test_conn_1p_0110
+    @conn.disconnect
     #
     cha = {:host => "localhost", "accept-version" => "1.1"}
     cha[:host] = "/" if ENV['STOMP_RABBIT']
@@ -207,6 +218,7 @@ class TestConnection1P < Test::Unit::TestCase
 
   # Test invalid UTF8 data.
   def test_conn_1p_0120
+    @conn.disconnect
     #
     cha = {:host => "localhost", "accept-version" => "1.1"}
     cha[:host] = "/" if ENV['STOMP_RABBIT']
@@ -279,6 +291,7 @@ class TestConnection1P < Test::Unit::TestCase
 
   # Test heartbeats with send and receive.
   def test_conn_1p_0130
+    @conn.disconnect
     #
     cha = {:host => "localhost", "accept-version" => "1.1"}
     cha[:host] = "/" if ENV['STOMP_RABBIT']
@@ -298,6 +311,7 @@ class TestConnection1P < Test::Unit::TestCase
 
   # Test heartbeats with send and receive.
   def test_conn_1p_0135
+    @conn.disconnect
     #
     cha = {:host => "localhost", "accept-version" => "1.1"}
     cha[:host] = "/" if ENV['STOMP_RABBIT']
@@ -317,6 +331,7 @@ class TestConnection1P < Test::Unit::TestCase
 
   # Test heartbeats with send and receive.
   def test_conn_1p_0140
+    @conn.disconnect
     #
     cha = {:host => "localhost", "accept-version" => "1.1"}
     cha[:host] = "/" if ENV['STOMP_RABBIT']
