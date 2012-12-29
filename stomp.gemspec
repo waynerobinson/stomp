@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{stomp}
-  s.version = "1.2.7"
+  s.version = "1.2.8"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Brian McCallister", "Marius Mathiesen", "Thiago Morello", "Guy M. Allard"]
-  s.date = %q{2012-11-02}
+  s.date = %q{2012-12-28}
   s.description = %q{Ruby client for the Stomp messaging protocol.  Note that this gem is no longer supported on rubyforge.}
   s.email = ["brianm@apache.org", "marius@stones.com", "morellon@gmail.com", "allard.guy.m@gmail.com"]
   s.executables = ["catstomp", "stompcat"]
