@@ -97,13 +97,15 @@ module Stomp
       @listener_thread = Thread.start do
         while true
           message = @connection.receive
-          if message.command == Stomp::CMD_MESSAGE
-            if listener = find_listener(message)
-              listener.call(message)
-            end
-          elsif message.command == Stomp::CMD_RECEIPT
-            if listener = @receipt_listeners[message.headers['receipt-id']]
-              listener.call(message)
+          if message # AMQ specific?, nil message on multiple reconnects
+            if message.command == Stomp::CMD_MESSAGE
+              if listener = find_listener(message)
+                listener.call(message)
+              end
+            elsif message.command == Stomp::CMD_RECEIPT
+              if listener = @receipt_listeners[message.headers['receipt-id']]
+                listener.call(message)
+              end
             end
           end
         end # while true
