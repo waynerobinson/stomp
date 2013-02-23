@@ -339,7 +339,7 @@ class TestConnection1P < Test::Unit::TestCase
     hb_asserts_both(conn)
   end if ENV['STOMP_HB11LONG']
 
-  # Test very encoding / decoding of headers
+  # Test very basic encoding / decoding of headers
   def test_conn_1p_0200
     @conn.disconnect
     #
@@ -368,6 +368,24 @@ class TestConnection1P < Test::Unit::TestCase
     }
     conn.disconnect
   end unless ENV['STOMP_RABBIT']
+
+  # Test that 1.1+ connections do not break suppress_content_length
+  # (Issue #52)
+  def test_conn_1p_0210
+    msg = "payload: #{Time.now.to_f}"
+    dest = make_destination
+    shdrs = { :suppress_content_length => true }
+    assert_nothing_raised {
+      @conn.publish dest, msg, shdrs
+    }
+    #
+    sid = @conn.uuid()
+    @conn.subscribe dest, :id => sid
+    #
+    received = @conn.receive
+    assert_equal msg, received.body
+    assert_nil received.headers["content-length"], "No content length expected."
+  end if ENV['STOMP_AMQ11']
 
 private
 
