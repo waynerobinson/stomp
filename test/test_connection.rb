@@ -51,11 +51,7 @@ class TestConnection < Test::Unit::TestCase
     @conn.publish make_destination, "test_stomp#test_\000_length",
       { :suppress_content_length => true }
     msg2 = @conn.receive
-    if @conn.protocol == Stomp::SPL_10
-      assert_equal "test_stomp#test_", msg2.body
-    else
-      assert_equal "test_stomp#test_\000_length", msg2.body
-    end
+    assert_equal "test_stomp#test_", msg2.body
     checkEmsg(@conn)
   end unless ENV['STOMP_RABBIT']
 
