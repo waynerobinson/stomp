@@ -1,9 +1,12 @@
+# -*- encoding: us-ascii -*-
+
 #
 # !!!!
 #
 # This can *NOT* currently be marked as UTF-8 encoded. It uses invalid UTF-8
 # sequences for testing.  Tests will fail under 1.9.x+ if this file is marked
-# as UTF-8 encoded.
+# as UTF-8 encoded.  Tests will fail under 2.0.0 if this file is *NOT* marked 
+# as US-ASCII.
 #
 
 if Kernel.respond_to?(:require_relative)
