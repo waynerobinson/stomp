@@ -10,6 +10,7 @@ An implementation of the Stomp protocol for Ruby. See:
 
 ===New
 
+* Gem version 1.2.9. Miscellaneous fixes and changes. See _CHANGELOG.rdoc_ for details.
 * Gem version 1.2.8. Stomp 1.1+ header codec inversion fix, test refactoring. See _CHANGELOG.rdoc_ for details.
 * Gem version 1.2.7. Stomp 1.2 support and miscellaneous fixes. See _CHANGELOG.rdoc_ for details.
 * Gem version 1.2.6. Miscellaneous fixes and changes. See _CHANGELOG.rdoc_ for details.
@@ -129,5 +130,6 @@ The following people have contributed to Stomp:
 * Craig
 * Tommy Bishop
 * Jeremy Gailor
+* JP Hastings-Spital
 * Glenn Roberts
 

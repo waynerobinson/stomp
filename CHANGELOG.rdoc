@@ -1,3 +1,12 @@
+== 1.2.9 20130328
+
+* Refactoring and documentation updates (glennr)
+* Fix test encoding for Ruby 2.0+
+* Fixes to tests due to :suppress_content_length fix
+* Issue #50 Stomp::Client reconnects fail
+* Correctly honor :suppress_content_length with 1.1 (JP Hastings-Spital)
+* Fix reference to client.publish rather than client.send (JP Hastings-Spital)
+
 == 1.2.8 20121228
 
 * Fix inverted encode / decode logic (fairly major 1.1+ bug)
