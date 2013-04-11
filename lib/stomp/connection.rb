@@ -163,6 +163,9 @@ module Stomp
       headers = headers.symbolize_keys
       headers[:transaction] = name
       _headerCheck(headers)
+      if @logger && @logger.respond_to?(:on_begin)
+        @logger.on_begin(log_params, headers)
+      end
       transmit(Stomp::CMD_BEGIN, headers)
     end
 
@@ -193,6 +196,9 @@ module Stomp
           headers[:'message-id'] = message_id
       end
       _headerCheck(headers)
+      if @logger && @logger.respond_to?(:on_ack)
+        @logger.on_ack(log_params, headers)
+      end
       transmit(Stomp::CMD_ACK, headers)
     end
 
@@ -216,6 +222,9 @@ module Stomp
           raise Stomp::Error::SubscriptionRequiredError unless headers[:subscription]
       end
       _headerCheck(headers)
+      if @logger && @logger.respond_to?(:on_nack)
+        @logger.on_nack(log_params, headers)
+      end
       transmit(Stomp::CMD_NACK, headers)
     end
 
@@ -225,6 +234,9 @@ module Stomp
       headers = headers.symbolize_keys
       headers[:transaction] = name
       _headerCheck(headers)
+      if @logger && @logger.respond_to?(:on_commit)
+        @logger.on_commit(log_params, headers)
+      end
       transmit(Stomp::CMD_COMMIT, headers)
     end
 
@@ -234,6 +246,9 @@ module Stomp
       headers = headers.symbolize_keys
       headers[:transaction] = name
       _headerCheck(headers)
+      if @logger && @logger.respond_to?(:on_abort)
+        @logger.on_abort(log_params, headers)
+      end
       transmit(Stomp::CMD_ABORT, headers)
     end
 
@@ -272,6 +287,9 @@ module Stomp
         raise Stomp::Error::SubscriptionRequiredError if (headers[:id].nil? && subId.nil?)
       end
       _headerCheck(headers)
+      if @logger && @logger.respond_to?(:on_unsubscribe)
+        @logger.on_unsubscribe(log_params, headers)
+      end
       transmit(Stomp::CMD_UNSUBSCRIBE, headers)
       if @reliable
         subId = dest if subId.nil?

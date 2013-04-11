@@ -15,6 +15,14 @@ require 'logger'	# use the standard Ruby logger .....
 #
 # *    on_publish: publish called
 # *    on_subscribe: subscribe called
+# *    on_unsubscribe: unsubscribe called
+#
+# *    on_begin: begin called
+# *    on_ack: ack called
+# *    on_nack: nack called
+# *    on_commit: commit called
+# *    on_abort: abort called
+#
 # *    on_receive: receive called and successful
 #
 # *    on_ssl_connecting: SSL connection starting
@@ -113,6 +121,16 @@ class Slogger
     end
   end
 
+  # Log UnSubscribe
+  def on_unsubscribe(parms, headers)
+    begin
+      @log.debug "UnSubscribe Parms #{info(parms)}"
+      @log.debug "UnSubscribe Headers #{headers}"
+    rescue
+      @log.debug "UnSubscribe oops"
+    end
+  end
+
   # Log Publish
   def on_publish(parms, message, headers)
     begin
@@ -131,6 +149,56 @@ class Slogger
       @log.debug "Receive Result #{result}"
     rescue
       @log.debug "Receive oops"
+    end
+  end
+
+  # Log Begin
+  def on_begin(parms, headers)
+    begin
+      @log.debug "Begin Parms #{info(parms)}"
+      @log.debug "Begin Result #{headers}"
+    rescue
+      @log.debug "Begin oops"
+    end
+  end
+
+  # Log Ack
+  def on_ack(parms, headers)
+    begin
+      @log.debug "Ack Parms #{info(parms)}"
+      @log.debug "Ack Result #{headers}"
+    rescue
+      @log.debug "Ack oops"
+    end
+  end
+
+  # Log NAck
+  def on_nack(parms, headers)
+    begin
+      @log.debug "NAck Parms #{info(parms)}"
+      @log.debug "NAck Result #{headers}"
+    rescue
+      @log.debug "NAck oops"
+    end
+  end
+
+  # Log Commit
+  def on_commit(parms, headers)
+    begin
+      @log.debug "Commit Parms #{info(parms)}"
+      @log.debug "Commit Result #{headers}"
+    rescue
+      @log.debug "Commit oops"
+    end
+  end
+
+  # Log Abort
+  def on_abort(parms, headers)
+    begin
+      @log.debug "Abort Parms #{info(parms)}"
+      @log.debug "Abort Result #{headers}"
+    rescue
+      @log.debug "Abort oops"
     end
   end
 
