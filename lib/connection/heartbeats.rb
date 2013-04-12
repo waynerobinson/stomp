@@ -93,6 +93,7 @@ module Stomp
       @st = Thread.new {
         while true do
           sleep sleeptime
+          next unless @socket # nil under some circumstances ??
           curt = Time.now.to_f
           if @logger && @logger.respond_to?(:on_hbfire)
             @logger.on_hbfire(log_params, "send_fire", curt)
@@ -132,6 +133,7 @@ module Stomp
       @rt = Thread.new {
         while true do
           sleep sleeptime
+          next unless @socket # nil under some circumstances ??
           curt = Time.now.to_f
           if @logger && @logger.respond_to?(:on_hbfire)
             @logger.on_hbfire(log_params, "receive_fire", curt)
