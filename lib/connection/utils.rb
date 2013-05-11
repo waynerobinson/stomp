@@ -122,9 +122,15 @@ module Stomp
           rescue
             @failure = $!
             used_socket = nil
+            @closed = true
+
             raise unless @reliable
             raise if @failure.is_a?(Stomp::Error::LoggerConnectionError)
-            @closed = true
+            # Catch errors which are:
+            # a) emitted from corrupted 1.1+ 'connect' (caller programming error)
+            # b) should never be retried
+            raise if @failure.is_a?(Stomp::Error::ProtocolError11p)
+
             if @logger && @logger.respond_to?(:on_connectfail)
               # on_connectfail may raise
               begin

@@ -71,17 +71,24 @@ module Stomp
       end
     end
 
-    # ProtocolErrorConnect is raised if:
-    # * Incomplete Stomp 1.1 headers are detectd during a connect.
-    class ProtocolErrorConnect < RuntimeError
+    # ProtocolError11p - base class of 1.1 CONNECT errors
+    class ProtocolError11p < RuntimeError
       def message
-        "protocol error on CONNECT"
+        "STOMP 1.1+ CONNECT error"
+      end
+    end
+
+    # ProtocolErrorConnect is raised if:
+    # * Incomplete Stomp 1.1 headers are detected during a connect.
+    class ProtocolErrorConnect < ProtocolError11p
+      def message
+        "STOMP 1.1+ CONNECT error, missing/incorrect CONNECT headers"
       end
     end
 
     # UnsupportedProtocolError is raised if:
     # * No supported Stomp protocol levels are detected during a connect.
-    class UnsupportedProtocolError < RuntimeError
+    class UnsupportedProtocolError < ProtocolError11p
       def message
         "unsupported protocol level(s)"
       end
@@ -89,7 +96,7 @@ module Stomp
 
     # InvalidHeartBeatHeaderError is raised if:
     # * A "heart-beat" header is present, but the values are malformed.
-    class InvalidHeartBeatHeaderError < RuntimeError
+    class InvalidHeartBeatHeaderError < ProtocolError11p
       def message
         "heart-beat header value is malformed"
       end

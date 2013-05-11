@@ -28,7 +28,7 @@ class TestConnection1P < Test::Unit::TestCase
     assert @conn.open?
   end
 
-  # Test missing connect headers.
+  # Test missing connect headers - part 1.
   def test_conn_1p_0010
     @conn.disconnect
     #
@@ -41,6 +41,33 @@ class TestConnection1P < Test::Unit::TestCase
     assert_raise Stomp::Error::ProtocolErrorConnect do
       conn = Stomp::Connection.open(user, passcode, host, port, false, 5, chb)
     end    
+  end
+
+  # Test missing connect headers - part 2.
+  def test_conn_1p_0015
+    @conn.disconnect
+    #
+    cha = {:host => "localhost"}
+    hash = { :hosts => [ 
+      {:login => user, :passcode => passcode, :host => host, :port => port, :ssl => nil},
+      ],
+      :reliable => true, # Note, issue #57 discussion
+      :connect_headers => cha,
+      :stompconn => get_stomp_conn(),
+      :usecrlf => get_crlf(),
+      :initial_reconnect_delay => 0.1,
+      :max_reconnect_delay => 30,
+      :use_exponential_back_off => true,
+      :back_off_multiplier => 2,
+      :max_reconnect_attempts => 10,
+    }
+    assert_raise Stomp::Error::ProtocolErrorConnect do
+      conn = Stomp::Connection.open(hash)
+    end
+    hash[:connect_headers] = {"accept-version" => "1.1"}
+    assert_raise Stomp::Error::ProtocolErrorConnect do
+      conn = Stomp::Connection.open(hash)
+    end
   end
 
   # Test requesting only a 1.0 connection.
