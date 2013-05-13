@@ -125,12 +125,7 @@ module Stomp
             $stderr.print errstr
           end
           # !!! This loop initiates a re-connect !!!
-          if @parameters
-            change_host()
-          end
-          @st.kill if @st # Kill ticker thread if any
-          @rt.kill if @rt # Kill ticker thread if any
-          @socket = nil
+          _reconn_prep()
         end
       end
     end

@@ -239,6 +239,16 @@ module Stomp
       end
     end
 
+    # _reconn_prep prepares for a reconnect retry
+    def _reconn_prep()
+      if @parameters
+        change_host()
+      end
+      @st.kill if @st # Kill ticker thread if any
+      @rt.kill if @rt # Kill ticker thread if any
+      @socket = nil
+    end
+
   end # class Connection
 
 end # module Stomp

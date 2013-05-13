@@ -400,12 +400,8 @@ module Stomp
         # The call to __old_receive() will in turn call socket().  Before
         # that we should change the target host, otherwise the host that
         # just failed may be attempted first.
-        if @parameters
-          change_host()
-        end
-        @st.kill if @st # Kill ticker thread if any
-        @rt.kill if @rt # Kill ticker thread if any
-        @socket = nil
+        _reconn_prep()
+        #
         super_result = __old_receive()
       end
       #
