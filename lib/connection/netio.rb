@@ -124,6 +124,11 @@ module Stomp
           else
             $stderr.print errstr
           end
+          # !!! This loop initiates a re-connect !!!
+          if @parameters
+            change_host()
+          end
+          @socket = nil
         end
       end
     end
@@ -351,7 +356,9 @@ module Stomp
       @disconnect_receipt = nil
       @session = @connection_frame.headers["session"] if @connection_frame
       # replay any subscriptions.
-      @subscriptions.each { |k,v| _transmit(used_socket, Stomp::CMD_SUBSCRIBE, v) }
+      @subscriptions.each {|k,v| 
+        _transmit(used_socket, Stomp::CMD_SUBSCRIBE, v)
+      }
     end
 
   end # class Connection

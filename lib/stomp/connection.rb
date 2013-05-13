@@ -388,7 +388,7 @@ module Stomp
     # receive returns the next Message off of the wire.
     def receive()
       raise Stomp::Error::NoCurrentConnection if @closed_check && closed?
-      super_result = __old_receive
+      super_result = __old_receive()
       if super_result.nil? && @reliable && !closed?
         errstr = "connection.receive returning EOF as nil - resetting connection.\n"
         if @logger && @logger.respond_to?(:on_miscerr)
@@ -396,8 +396,15 @@ module Stomp
         else
           $stderr.print errstr
         end
+        # !!! This initiates a re-connect !!!
+        # The call to __old_receive() will in turn call socket().  Before
+        # that we should change the target host, otherwise the host that
+        # just failed may be attempted first.
+        if @parameters
+          change_host()
+        end
         @socket = nil
-        super_result = __old_receive
+        super_result = __old_receive()
       end
       #
       if @logger && @logger.respond_to?(:on_receive)
