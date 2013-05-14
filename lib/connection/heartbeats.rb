@@ -90,6 +90,7 @@ module Stomp
     # _start_send_ticker starts a thread to send heartbeats when required.
     def _start_send_ticker()
       sleeptime = @hbsend_interval / 1000000.0 # Sleep time secs
+      reconn = false
       @st = Thread.new {
         while true do
           sleep sleeptime
@@ -99,7 +100,7 @@ module Stomp
             @logger.on_hbfire(log_params, "send_fire", curt)
           end
           delta = curt - @ls
-          if delta > (@hbsend_interval - (@hbsend_interval/5.0)) / 1000000.0 # Be tolerant (minus)
+          if delta > sleeptime
             if @logger && @logger.respond_to?(:on_hbfire)
               @logger.on_hbfire(log_params, "send_heartbeat", curt)
             end
@@ -107,8 +108,9 @@ module Stomp
             @transmit_semaphore.synchronize do
               begin
                 @socket.puts
-                @ls = curt      # Update last send
-                @hb_sent = true # Reset if necessary
+                @socket.flush       # Do not buffer heartbeats
+                @ls = Time.now.to_f # Update last send
+                @hb_sent = true     # Reset if necessary
                 @hbsend_count += 1
               rescue Exception => sendex
                 @hb_sent = false # Set the warning flag
@@ -119,7 +121,18 @@ module Stomp
                 if @hbser
                   raise # Re-raise if user requested this, otherwise ignore
                 end
+                if @reliable
+                  reconn = true
+                  break # exit the synchronize do
+                end
               end
+            end # of the synchronize
+            if reconn
+              # Attempt a fail over reconnect.  This is 'safe' here because
+              # this thread no longer holds the @transmit_semaphore lock.
+              @rt.kill if @rt   # Kill the receiver thread if one exists
+              _reconn_prep_hb() # Drive reconnection logic
+              Thread.exit       # This sender thread is done
             end
           end
           Thread.pass
@@ -169,6 +182,15 @@ module Stomp
           Thread.pass
         end
       }
+    end
+
+    # _reconn_prep_hb prepares for a reconnect retry
+    def _reconn_prep_hb()
+      if @parameters
+        change_host()
+      end
+      @socket = nil
+      used_socket = socket()
     end
 
   end # class Connection

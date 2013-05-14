@@ -53,6 +53,7 @@ module Stomp
       lparms[:cur_recondelay] = @reconnect_delay
       lparms[:cur_parseto] = @parse_timeout
       lparms[:cur_conattempts] = @connection_attempts
+      lparms[:cur_failure] = @failure # To assist in debugging
       lparms[:openstat] = open?
       #
       lparms
