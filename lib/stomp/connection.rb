@@ -65,6 +65,7 @@ module Stomp
     #     :hbser => false,
     #     :stompconn => false,
     #     :usecrlf => false,
+    #     :max_hbread_fails => 0,
     #   }
     #
     #   e.g. c = Stomp::Connection.new(hash)
@@ -106,6 +107,7 @@ module Stomp
         @hbser = false        # Raise if heartbeat send exception
         @stompconn = false    # If true, use STOMP rather than CONNECT
         @usecrlf = false      # If true, use \r\n as line ends (1.2 only)
+        @max_hbread_fails = 0 # 0 means never retry for HB read failures
         warn "login looks like a URL, do you have the correct parameters?" if @login =~ /:\/\//
       end
 
@@ -138,6 +140,7 @@ module Stomp
       @hbser = @parameters[:hbser]
       @stompconn = @parameters[:stompconn]
       @usecrlf = @parameters[:usecrlf]
+      @max_hbread_fails = @parameters[:max_hbread_fails]
       #sets the first host to connect
       change_host
     end

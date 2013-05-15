@@ -115,7 +115,7 @@ module Stomp
               rescue Exception => sendex
                 @hb_sent = false # Set the warning flag
                 if @logger && @logger.respond_to?(:on_hbwrite_fail)
-                  @logger.on_hbwrite_fail(log_params, {"ticker_interval" => @hbsend_interval,
+                  @logger.on_hbwrite_fail(log_params, {"ticker_interval" => sleeptime,
                   "exception" => sendex})
                 end
                 if @hbser
@@ -143,45 +143,79 @@ module Stomp
     # _start_receive_ticker starts a thread that receives heartbeats when required.
     def _start_receive_ticker()
       sleeptime = @hbrecv_interval / 1000000.0 # Sleep time secs
+      fail_count = 0
+      fail_hard = false
       @rt = Thread.new {
+
+        #
         while true do
           sleep sleeptime
           next unless @socket # nil under some circumstances ??
+          rdrdy = @socket.ready? ? true : false
           curt = Time.now.to_f
           if @logger && @logger.respond_to?(:on_hbfire)
             @logger.on_hbfire(log_params, "receive_fire", curt)
           end
-          delta = curt - @lr
-          if delta > ((@hbrecv_interval + (@hbrecv_interval/5.0)) / 1000000.0) # Be tolerant (plus)
-            if @logger && @logger.respond_to?(:on_hbfire)
-              @logger.on_hbfire(log_params, "receive_heartbeat", curt)
-            end
-            # Client code could be off doing something else (that is, no reading of
-            # the socket has been requested by the caller).  Try to  handle that case.
-            lock = @read_semaphore.try_lock
-            if lock
-              last_char = @socket.getc
-              plc = parse_char(last_char)
-              if plc == "\n" # Server Heartbeat
-                @lr = Time.now.to_f
-              else
-                @socket.ungetc(last_char)
+
+          #
+          begin
+            delta = curt - @lr
+            if delta > sleeptime
+              if @logger && @logger.respond_to?(:on_hbfire)
+                @logger.on_hbfire(log_params, "receive_heartbeat", curt)
               end
-              @read_semaphore.unlock
-              @hbrecv_count += 1
-            else
-              # Shrug.  Have not received one.  Just set warning flag.
-              @hb_received = false
-              if @logger && @logger.respond_to?(:on_hbread_fail)
-                @logger.on_hbread_fail(log_params, {"ticker_interval" => @hbrecv_interval})
-              end
-            end
-          else
-            @hb_received = true # Reset if necessary
+
+              # Client code could be off doing something else (that is, no reading of
+              # the socket has been requested by the caller).  Try to  handle that case.
+              lock = @read_semaphore.try_lock
+              if lock
+                rdrdy = @socket.ready? ? true : false # This logic will be bad for JRuby I think
+                if rdrdy
+                  last_char = @socket.getc
+                  plc = parse_char(last_char)
+                  if plc == "\n" # Server Heartbeat
+                    @lr = Time.now.to_f
+                    @hbrecv_count += 1
+                    fail_count = 0 # clear
+                  else
+                    @socket.ungetc(last_char)
+                  end
+                  @read_semaphore.unlock # Release read lock
+                else # Socket is not ready
+                  @read_semaphore.unlock # Release read lock
+                  @hb_received = false
+                  fail_count += 1
+                  if @logger && @logger.respond_to?(:on_hbread_fail)
+                    @logger.on_hbread_fail(log_params, {"ticker_interval" => sleeptime})
+                  end
+                end
+              else  # try_lock failed
+                # Shrug.  Could not get lock.  Client must be actually be reading.
+                # For this reason, failure to obtain the lock is not counted as a
+                # read failure.
+                @hb_received = false
+                if @logger && @logger.respond_to?(:on_hbread_fail)
+                  @logger.on_hbread_fail(log_params, {"ticker_interval" => sleeptime})
+                end
+              end # of the try_lock
+
+            else # delta <= sleeptime
+              @hb_received = true # Reset if necessary
+            end # of the if delta > sleeptime
+          rescue
+            fail_hard = true
           end
-          Thread.pass
-        end
-      }
+          #nv
+          if fail_hard || (@max_hbread_fails > 0 && fail_count > @max_hbread_fails)
+            # This is an attempt at a connection retry.
+            @st.kill if @st   # Kill the sender thread if one exists
+            _reconn_prep_hb() # Drive reconnection logic
+            Thread.exit       # This receiver thread is done            
+          end
+          Thread.pass         # Prior to next receive loop
+        #
+        end # of the "while true"
+      } # end of the Thread.new
     end
 
     # _reconn_prep_hb prepares for a reconnect retry

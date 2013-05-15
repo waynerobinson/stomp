@@ -50,6 +50,7 @@ See _CHANGELOG.rdoc_ for details.
       :hbser => false,                    # raise on heartbeat send exception
       :stompconn => false,                # Use STOMP instead of CONNECT
       :usecrlf => false,                  # Use CRLF command and header line ends (1.2+)
+      :max_hbread_fails => 0,             # Max HB read fails before retry.  0 => never retry
     }
 
     # for client

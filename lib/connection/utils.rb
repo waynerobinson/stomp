@@ -179,6 +179,7 @@ module Stomp
         :closed_check => true,
         :hbser => false,
         :stompconn => false,
+        :max_hbread_fails => 0,
       }
 
       res_params = default_params.merge(params)
