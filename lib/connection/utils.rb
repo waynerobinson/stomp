@@ -237,6 +237,8 @@ module Stomp
           else
             $stderr.print errstr
           end
+          # !!! This initiates a re-connect !!!
+          _reconn_prep()
         end
       end
     end
