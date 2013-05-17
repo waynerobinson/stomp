@@ -177,6 +177,7 @@ module Stomp
                     @lr = Time.now.to_f
                     @hbrecv_count += 1
                     fail_count = 0 # clear
+                    @hb_received = true # Reset if necessary
                   else
                     @socket.ungetc(last_char)
                   end
@@ -186,7 +187,8 @@ module Stomp
                   @hb_received = false
                   fail_count += 1
                   if @logger && @logger.respond_to?(:on_hbread_fail)
-                    @logger.on_hbread_fail(log_params, {"ticker_interval" => sleeptime})
+                    @logger.on_hbread_fail(log_params, {"ticker_interval" => sleeptime,
+                      "fail_count" => fail_count})
                   end
                 end
               else  # try_lock failed
@@ -194,18 +196,19 @@ module Stomp
                 # For this reason, failure to obtain the lock is not counted as a
                 # read failure.
                 @hb_received = false
-                if @logger && @logger.respond_to?(:on_hbread_fail)
-                  @logger.on_hbread_fail(log_params, {"ticker_interval" => sleeptime})
-                end
               end # of the try_lock
 
             else # delta <= sleeptime
               @hb_received = true # Reset if necessary
             end # of the if delta > sleeptime
-          rescue
+          rescue Exception => recvex
+            if @logger && @logger.respond_to?(:on_hbread_fail)
+              @logger.on_hbread_fail(log_params, {"ticker_interval" => sleeptime,
+                "exception" => recvex, "fail_count" => fail_count})
+            end
             fail_hard = true
           end
-          #nv
+          #
           if fail_hard || (@max_hbread_fails > 0 && fail_count > @max_hbread_fails)
             # This is an attempt at a connection retry.
             @st.kill if @st   # Kill the sender thread if one exists
