@@ -108,6 +108,7 @@ module Stomp
         @stompconn = false    # If true, use STOMP rather than CONNECT
         @usecrlf = false      # If true, use \r\n as line ends (1.2 only)
         @max_hbread_fails = 0 # 0 means never retry for HB read failures
+        @max_hbrlck_fails = 0 # 0 means never retry for HB read lock failures
         warn "login looks like a URL, do you have the correct parameters?" if @login =~ /:\/\//
       end
 
@@ -141,6 +142,7 @@ module Stomp
       @stompconn = @parameters[:stompconn]
       @usecrlf = @parameters[:usecrlf]
       @max_hbread_fails = @parameters[:max_hbread_fails]
+      @max_hbrlck_fails = @parameters[:max_hbrlck_fails]
       #sets the first host to connect
       change_host
     end

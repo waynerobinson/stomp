@@ -143,7 +143,8 @@ module Stomp
     # _start_receive_ticker starts a thread that receives heartbeats when required.
     def _start_receive_ticker()
       sleeptime = @hbrecv_interval / 1000000.0 # Sleep time secs
-      fail_count = 0
+      read_fail_count = 0
+      lock_fail_count = 0
       fail_hard = false
       @rt = Thread.new {
 
@@ -169,14 +170,15 @@ module Stomp
               # the socket has been requested by the caller).  Try to  handle that case.
               lock = @read_semaphore.try_lock
               if lock
+                lock_fail_count = 0 # clear
                 rdrdy = @socket.ready? ? true : false # This logic will be bad for JRuby I think
                 if rdrdy
+                  read_fail_count = 0 # clear
                   last_char = @socket.getc
+                  @lr = Time.now.to_f
                   plc = parse_char(last_char)
                   if plc == "\n" # Server Heartbeat
-                    @lr = Time.now.to_f
                     @hbrecv_count += 1
-                    fail_count = 0 # clear
                     @hb_received = true # Reset if necessary
                   else
                     @socket.ungetc(last_char)
@@ -185,36 +187,61 @@ module Stomp
                 else # Socket is not ready
                   @read_semaphore.unlock # Release read lock
                   @hb_received = false
-                  fail_count += 1
+                  read_fail_count += 1
                   if @logger && @logger.respond_to?(:on_hbread_fail)
                     @logger.on_hbread_fail(log_params, {"ticker_interval" => sleeptime,
-                      "fail_count" => fail_count})
+                      "read_fail_count" => read_fail_count, "lock_fail" => false,
+                      "lock_fail_count" => lock_fail_count})
                   end
                 end
               else  # try_lock failed
                 # Shrug.  Could not get lock.  Client must be actually be reading.
-                # For this reason, failure to obtain the lock is not counted as a
-                # read failure.
                 @hb_received = false
+                # But notify caller if possible
+                lock_fail_count += 1
+                if @logger && @logger.respond_to?(:on_hbread_fail)
+                  @logger.on_hbread_fail(log_params, {"ticker_interval" => sleeptime,
+                    "read_fail_count" => read_fail_count, "lock_fail" => true,
+                    "lock_fail_count" => lock_fail_count})
+                end
               end # of the try_lock
 
             else # delta <= sleeptime
               @hb_received = true # Reset if necessary
+              read_fail_count = 0 # reset
+              lock_fail_count = 0 # reset
             end # of the if delta > sleeptime
           rescue Exception => recvex
             if @logger && @logger.respond_to?(:on_hbread_fail)
               @logger.on_hbread_fail(log_params, {"ticker_interval" => sleeptime,
-                "exception" => recvex, "fail_count" => fail_count})
+                "exception" => recvex, "read_fail_count" => read_fail_count,
+                "lock_fail_count" => lock_fail_count})
             end
             fail_hard = true
           end
-          #
-          if fail_hard || (@max_hbread_fails > 0 && fail_count > @max_hbread_fails)
-            # This is an attempt at a connection retry.
-            @st.kill if @st   # Kill the sender thread if one exists
-            _reconn_prep_hb() # Drive reconnection logic
-            Thread.exit       # This receiver thread is done            
+
+          # Do we want to attempt a retry?
+          if @reliable
+            # Retry on hard fail or max read fails
+            if fail_hard ||
+              (@max_hbread_fails > 0 && read_fail_count > @max_hbread_fails)
+              # This is an attempt at a connection retry.
+              @st.kill if @st   # Kill the sender thread if one exists
+              _reconn_prep_hb() # Drive reconnection logic
+              Thread.exit       # This receiver thread is done            
+            end
+            # Retry on max lock fails.  Different logic in order to avoid a deadlock.
+            if (@max_hbrlck_fails > 0 && lock_fail_count > @max_hbrlck_fails)
+              # This is an attempt at a connection retry.
+              begin
+                @socket.close # Attempt a forced close
+              rescue
+              end
+              @st.kill if @st   # Kill the sender thread if one exists
+              Thread.exit       # This receiver thread is done            
+            end
           end
+
           Thread.pass         # Prior to next receive loop
         #
         end # of the "while true"

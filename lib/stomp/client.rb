@@ -56,6 +56,7 @@ module Stomp
     #     :stompconn => false,
     #     :usecrlf => false,
     #     :max_hbread_fails => 0,
+    #     :max_hbrlck_fails => 0,
     #   }
     #
     #   e.g. c = Stomp::Client.new(hash)
