@@ -25,7 +25,9 @@ describe Stomp::Connection do
       :hbser => false,
       :stompconn => false,
       :usecrlf => false,
-    }
+      :max_hbread_fails => 0,
+      :max_hbrlck_fails => 0,
+   }
         
     #POG:
     class Stomp::Connection
@@ -90,6 +92,8 @@ describe Stomp::Connection do
         "connect_timeout" => 0,
         "parse_timeout" => 5,
         "usecrlf" => false,
+        :max_hbread_fails => 0,
+        :max_hbrlck_fails => 0,
       }
       
       @connection = Stomp::Connection.new(used_hash)
@@ -338,6 +342,8 @@ describe Stomp::Connection do
           :closed_check => true,
           :hbser => false,
           :stompconn => false,
+          :max_hbread_fails => 0,
+          :max_hbrlck_fails => 0,
         }
         
         used_hash =  {
@@ -363,7 +369,6 @@ describe Stomp::Connection do
           :back_off_multiplier => 3,
           :max_reconnect_attempts => 10,
           :randomize => true,
-          :backup => false,
           :reliable => false,
           :connect_timeout => 0,
           :parse_timeout => 20,
@@ -372,9 +377,11 @@ describe Stomp::Connection do
           :max_redeliveries => 10,
           :dmh => false,
           :closed_check => true,
-          :hbser => false,
-          :stompconn => false,
-          :usecrlf => false,
+          :hbser => true,
+          :stompconn => true,
+          :usecrlf => true,
+          :max_hbread_fails => 123,
+          :max_hbrlck_fails => 456,
         }
         
         @connection = Stomp::Connection.new(used_hash)

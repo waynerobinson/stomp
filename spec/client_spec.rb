@@ -302,7 +302,7 @@ describe Stomp::Client do
       
       url = "failover:(stomp://login1:passcode1@localhost:61616,stomp://login2:passcode2@remotehost:61617)?#{query}"
       
-      #backup and timeout are not implemented yet
+      #
       @parameters = {  
         :initial_reconnect_delay => 5.0,
         :max_reconnect_delay => 60.0,
