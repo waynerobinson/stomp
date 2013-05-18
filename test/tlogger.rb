@@ -6,6 +6,8 @@ require 'logger'	# use the standard Ruby logger .....
 
 Callback logger for Stomp 1.1+ heartbeat tests.
 
+See the examples directory for a more robust logger example.
+
 =end
 class Tlogger
 
@@ -31,7 +33,7 @@ class Tlogger
   def on_hbwrite_fail(parms, ticker_data)
     begin
       @log.debug "Hbwritef Parms #{info(parms)}"
-      @log.debug "Hbwritef Result #{ticker_data}"
+      @log.debug "Hbwritef Result #{ticker_data.inspect}"
     rescue
       @log.debug "Hbwritef oops"
     end
@@ -42,7 +44,7 @@ class Tlogger
   def on_hbread_fail(parms, ticker_data)
     begin
       @log.debug "Hbreadf Parms #{info(parms)}"
-      @log.debug "Hbreadf Result #{ticker_data}"
+      @log.debug "Hbreadf Result #{ticker_data.inspect}"
     rescue
       @log.debug "Hbreadf oops"
     end
