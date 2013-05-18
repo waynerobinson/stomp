@@ -88,7 +88,7 @@ class Slogger
 =begin
     # An example LoggerConnectionError raise
     @log.debug "Connect Fail, will raise"
-    raise Stomp::Error::LoggerConnectionError.new("quit from connect")
+    raise Stomp::Error::LoggerConnectionError.new("quit from connect fail")
 =end
   end
 
@@ -206,7 +206,7 @@ class Slogger
   def on_hbread_fail(parms, ticker_data)
     begin
       @log.debug "Hbreadf Parms #{info(parms)}"
-      @log.debug "Hbreadf Result #{ticker_data}"
+      @log.debug "Hbreadf Result #{ticker_data.inspect}"
     rescue
       @log.debug "Hbreadf oops"
     end
@@ -216,7 +216,7 @@ class Slogger
   def on_hbwrite_fail(parms, ticker_data)
     begin
       @log.debug "Hbwritef Parms #{info(parms)}"
-      @log.debug "Hbwritef Result #{ticker_data}"
+      @log.debug "Hbwritef Result #{ticker_data.inspect}"
     rescue
       @log.debug "Hbwritef oops"
     end
