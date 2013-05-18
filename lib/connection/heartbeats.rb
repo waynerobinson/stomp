@@ -224,14 +224,14 @@ module Stomp
           if @reliable
             # Retry on hard fail or max read fails
             if fail_hard ||
-              (@max_hbread_fails > 0 && read_fail_count > @max_hbread_fails)
+              (@max_hbread_fails > 0 && read_fail_count >= @max_hbread_fails)
               # This is an attempt at a connection retry.
               @st.kill if @st   # Kill the sender thread if one exists
               _reconn_prep_hb() # Drive reconnection logic
               Thread.exit       # This receiver thread is done            
             end
             # Retry on max lock fails.  Different logic in order to avoid a deadlock.
-            if (@max_hbrlck_fails > 0 && lock_fail_count > @max_hbrlck_fails)
+            if (@max_hbrlck_fails > 0 && lock_fail_count >= @max_hbrlck_fails)
               # This is an attempt at a connection retry.
               begin
                 @socket.close # Attempt a forced close
