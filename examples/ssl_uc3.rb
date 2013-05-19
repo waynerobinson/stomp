@@ -26,8 +26,14 @@ class ExampleSSL3
   end
   # Run example.
   def run
-    ssl_opts = Stomp::SSLParams.new(:key_file => "/home/gmallard/sslwork/twocas_tj/clientCA/ClientTJ.key",
-    :cert_file => "/home/gmallard/sslwork/twocas_tj/clientCA/ClientTJ.crt")
+    # Change the following:
+    # * location of your client's signed certificate
+    # * location of tour client's private key.
+    ssl_opts = Stomp::SSLParams.new(
+      :key_file => "/home/gmallard/sslwork/2013/client.key", # the client's private key
+      :cert_file => "/home/gmallard/sslwork/2013/client.crt", # the client's signed certificate
+      :fsck => true # Check that the files exist first
+    )
 
     #
     hash = { :hosts => [

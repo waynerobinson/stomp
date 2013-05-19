@@ -26,9 +26,16 @@ class ExampleSSL4
   end
   # Run example.
   def run
-    ssl_opts = Stomp::SSLParams.new(:key_file => "/home/gmallard/sslwork/twocas_tj/clientCA/ClientTJ.key",
-    :cert_file => "/home/gmallard/sslwork/twocas_tj/clientCA/ClientTJ.crt",
-    :ts_files => "/home/gmallard/sslwork/twocas_tj/serverCA/ServerTJCA.crt")
+    # Change the following:
+    # * location of the client's private key
+    # * location of the client's signed certificate
+    # * location of the server's CA signed certificate
+    ssl_opts = Stomp::SSLParams.new(
+      :key_file => "/home/gmallard/sslwork/2013/client.key", # The client's private key
+      :cert_file => "/home/gmallard/sslwork/2013/client.crt", # The client's signed certificate
+      :ts_files => "/home/gmallard/sslwork/2013/TestCA.crt", # The CA's signed sertificate
+      :fsck => true # Check that files exist first
+    )
     #
     hash = { :hosts => [
         {:login => 'guest', :passcode => 'guest', :host => 'localhost', :port => 61612, :ssl => ssl_opts},

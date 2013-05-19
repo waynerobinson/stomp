@@ -25,8 +25,13 @@ class ExampleSSL2
   # Run example.
   def run
     ts_flist = []
-    ts_flist << "/home/gmallard/sslwork/twocas_tj/serverCA/ServerTJCA.crt"
-    ssl_opts = Stomp::SSLParams.new(:ts_files => ts_flist.join(","))
+
+    # Change the following to the location of your CA's signed certificate.
+    ts_flist << "/home/gmallard/sslwork/2013/TestCA.crt"
+
+    ssl_opts = Stomp::SSLParams.new(:ts_files => ts_flist.join(","), 
+      :fsck => true,
+    )
     #
     hash = { :hosts => [
         {:login => 'guest', :passcode => 'guest', :host => 'localhost', :port => 61612, :ssl => ssl_opts},
