@@ -277,6 +277,7 @@ module Stomp
 
         Timeout::timeout(@connect_timeout, Stomp::Error::SocketOpenTimeout) do
           ssl = OpenSSL::SSL::SSLSocket.new(open_tcp_socket, ctx)
+          ssl.sync_close = true # Sync ssl close with underlying TCP socket
           ssl.connect
         end
         def ssl.ready?
