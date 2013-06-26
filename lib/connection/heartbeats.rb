@@ -175,13 +175,17 @@ module Stomp
                 if rdrdy
                   read_fail_count = 0 # clear
                   last_char = @socket.getc
-                  @lr = Time.now.to_f
-                  plc = parse_char(last_char)
-                  if plc == "\n" # Server Heartbeat
-                    @hbrecv_count += 1
-                    @hb_received = true # Reset if necessary
+                  if last_char.nil? # EOF from broker?
+                    fail_hard = true
                   else
-                    @socket.ungetc(last_char)
+                    @lr = Time.now.to_f
+                    plc = parse_char(last_char)
+                    if plc == "\n" # Server Heartbeat
+                      @hbrecv_count += 1
+                      @hb_received = true # Reset if necessary
+                    else
+                      @socket.ungetc(last_char)
+                    end
                   end
                   @read_semaphore.unlock # Release read lock
                 else # Socket is not ready
