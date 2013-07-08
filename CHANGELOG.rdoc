@@ -1,3 +1,9 @@
+== 1.2.10 20130708
+
+* Issue #57, reconnect delays not honored if erroneous headers
+* Support fail overs when heartbeat send/receive fails
+* Update callback logger example
+
 == 1.2.9 20130328
 
 * Refactoring and documentation updates (glennr)
