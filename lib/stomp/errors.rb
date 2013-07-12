@@ -196,6 +196,15 @@ module Stomp
     class LoggerConnectionError < RuntimeError
     end
 
+    # NilMessageError is raised if:
+    # * Invalid (nil) data is received from the Stomp server in a client's
+    # listener thread, and the connection is not reliable.
+    class NilMessageError < RuntimeError
+      def message
+        "Received message is nil, and connection not reliable"
+      end
+    end
+
   end # module Error
 
 end # module Stomp
