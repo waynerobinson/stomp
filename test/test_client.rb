@@ -50,7 +50,7 @@ class TestClient < Test::Unit::TestCase
     sleep 0.01 until receipt
     assert_not_nil receipt.headers['receipt-id']
     checkEmsg(@client)
-  end unless ENV['STOMP_RABBIT'] # TODO: why does Rabbit 1.1 fail ?
+  end
 
   # Test Client subscribe
   def test_asynch_subscribe
