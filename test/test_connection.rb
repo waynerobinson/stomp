@@ -115,7 +115,7 @@ class TestConnection < Test::Unit::TestCase
       # matching the message-id for the MESSAGE being acknowledged and 
       # subscription, which MUST be set to match the value of the subscription's 
       # id header.
-      @conn.ack msg.headers['message-id'], :subscription => sid
+      @conn.ack msg.headers['message-id'], :subscription => msg.headers['subscription']
     }
     checkEmsg(@conn)
   end
