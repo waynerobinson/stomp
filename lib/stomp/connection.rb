@@ -31,6 +31,9 @@ module Stomp
     # Heartbeat send has been successful.
     attr_reader   :hb_sent # Heartbeat sent successfully
 
+    # JRuby detected
+    attr_reader   :jruby
+
     # Autoflush forces a flush on each transmit.  This may be changed
     # dynamically by calling code.
     attr_accessor :autoflush
@@ -87,7 +90,10 @@ module Stomp
       @hb_received = true       # Assumed at first
       @hb_sent = true           # Assumed at first
       @hbs = @hbr = false       # Sending/Receiving heartbeats. Assume no for now.
-
+      @jruby = false            # Assumed at first
+      if defined?(RUBY_ENGINE) && RUBY_ENGINE =~ /jruby/
+        @jruby = true
+      end
       if login.is_a?(Hash)
         hashed_initialize(login)
       else

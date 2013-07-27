@@ -509,5 +509,14 @@ class TestConnection < Test::Unit::TestCase
     c.disconnect if c
   end
 
+  # test JRuby detection
+  def test_jruby_presence
+    if defined?(RUBY_ENGINE) && RUBY_ENGINE =~ /jruby/
+      assert @conn.jruby
+    else
+      assert !@conn.jruby
+    end
+  end
+
 end
 

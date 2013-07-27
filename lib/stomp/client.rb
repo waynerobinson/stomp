@@ -233,6 +233,11 @@ module Stomp
       @connection.closed?()
     end
 
+    # jruby? tests if the connection has detcted a JRuby environment
+    def jruby?()
+      @connection.jruby
+    end
+
     # close frees resources in use by this client.  The listener thread is
     # terminated, and disconnect on the connection is called.
     def close(headers={})

@@ -152,7 +152,7 @@ module Stomp
         while true do
           sleep sleeptime
           next unless @socket # nil under some circumstances ??
-          rdrdy = @socket.ready? ? true : false
+          rdrdy = _is_ready?(@socket)
           curt = Time.now.to_f
           if @logger && @logger.respond_to?(:on_hbfire)
             @logger.on_hbfire(log_params, "receive_fire", curt)
@@ -171,7 +171,7 @@ module Stomp
               lock = @read_semaphore.try_lock
               if lock
                 lock_fail_count = 0 # clear
-                rdrdy = @socket.ready? ? true : false # This logic will be bad for JRuby I think
+                rdrdy = _is_ready?(@socket)
                 if rdrdy
                   read_fail_count = 0 # clear
                   last_char = @socket.getc

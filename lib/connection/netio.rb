@@ -16,7 +16,16 @@ module Stomp
       @read_semaphore.synchronize do
         line = ''
         if @protocol == Stomp::SPL_10 || (@protocol >= Stomp::SPL_11 && !@hbr)
-          line = read_socket.gets # The old way
+          if @jruby
+            # Handle JRuby specific behavior.
+            while true
+              line = read_socket.gets # Data from wire
+              break unless line == "\n"
+              line = ''
+            end
+          else
+            line = read_socket.gets # The old way
+          end
         else # We are >= 1.1 *AND* receiving heartbeats.
           while true
             line = read_socket.gets # Data from wire
@@ -28,7 +37,6 @@ module Stomp
         return nil if line.nil?
         # p [ "wiredatain_01", line ]
         line = _normalize_line_end(line) if @protocol >= Stomp::SPL_12
-
         # If the reading hangs for more than X seconds, abort the parsing process.
         # X defaults to 5.  Override allowed in connection hash parameters.
         Timeout::timeout(@parse_timeout, Stomp::Error::PacketParsingTimeout) do
@@ -58,15 +66,16 @@ module Stomp
 
           # If the buffer isn't empty, reads trailing new lines.
           #
-          # Note: experiments with JRuby seem to show that .ready? never
-          # returns true.  This means that this code to drain trailing new
-          # lines never runs using JRuby.
+          # Note: experiments with JRuby seem to show that socket.ready? never
+          # returns true.  It appears that in cases where Ruby returns true
+          # that JRuby returns a Fixnum.  We attempt to adjust for this
+          # in the _is_ready? method.
           #
           # Note 2: the draining of new lines must be done _after_ a message
           # is read.  Do _not_ leave them on the wire and attempt to drain them
           # at the start of the next read.  Attempting to do that breaks the
           # asynchronous nature of the 'poll' method.
-          while read_socket.ready?
+          while _is_ready?(read_socket)
             last_char = read_socket.getc
             break unless last_char
             if parse_char(last_char) != "\n"
@@ -74,9 +83,6 @@ module Stomp
               break
             end
           end
-          # And so, a JRuby hack.  Remove any new lines at the start of the
-          # next buffer.
-          message_header.gsub!(/^\n?/, "")
 
           if @protocol >= Stomp::SPL_11
             @lr = Time.now.to_f if @hbr
@@ -90,6 +96,15 @@ module Stomp
           msg
         end
       end
+    end
+
+    # Check if the socket is ready, i.e. there is data to read.
+    def _is_ready?(s)
+      rdy = s.ready?
+      if @jruby
+        rdy = rdy.class == Fixnum ? true : false
+      end
+      rdy
     end
 
     # Normalize line ends because 1.2+ brokers can send 'mixed mode' headers, i.e.:

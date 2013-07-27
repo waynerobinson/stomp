@@ -523,6 +523,15 @@ class TestClient < Test::Unit::TestCase
     end
   end
 
+  # test JRuby detection
+  def test_jruby_presence
+    if defined?(RUBY_ENGINE) && RUBY_ENGINE =~ /jruby/
+      assert @client.jruby?
+    else
+      assert !@client.jruby?
+    end
+  end
+
   private
     def message_text
       name = caller_method_name unless name
