@@ -1,3 +1,10 @@
+== 1.2.11 20130728
+
+* Issue #60, timeout/hang under JRuby
+* More generally support JRuby use and testing
+* Issue #58, nil message in Client on AMQ shutdown
+* More robust RabbitMQ tests
+
 == 1.2.10 20130708
 
 * Issue #57, reconnect delays not honored if erroneous headers
