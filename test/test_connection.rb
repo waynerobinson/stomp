@@ -484,10 +484,11 @@ class TestConnection < Test::Unit::TestCase
   def test_conn10_simple
     @conn.disconnect
     #
+    vhost = ENV['STOMP_RABBIT'] ? "/" : host
     hash = { :hosts => [ 
       {:login => user, :passcode => passcode, :host => host, :port => port, :ssl => false},
       ],
-      :connect_headers => {"accept-version" => "1.0", "host" => host},
+      :connect_headers => {"accept-version" => "1.0", "host" => vhost},
       :reliable => false,
     }
     c = nil
@@ -499,7 +500,7 @@ class TestConnection < Test::Unit::TestCase
     hash = { :hosts => [ 
       {:login => user, :passcode => passcode, :host => host, :port => port, :ssl => false},
       ],
-      :connect_headers => {"accept-version" => "3.14159,1.0,12.0", "host" => host},
+      :connect_headers => {"accept-version" => "3.14159,1.0,12.0", "host" => vhost},
       :reliable => false,
     }
     c = nil
