@@ -84,7 +84,7 @@ module TestBase
   # Get a Stomp SSL Connection.
   def get_ssl_connection()
     ch = get_conn_headers()
-    ssl_params = Stomp::SSLParams.new # S/B safe for all Ruby versions tested
+    ssl_params = Stomp::SSLParams.new(:use_ruby_ciphers => jruby?())
     hash = { :hosts => [ 
       {:login => user, :passcode => passcode, :host => host, :port => ssl_port, :ssl => ssl_params},
       ],
@@ -162,6 +162,11 @@ module TestBase
     if m
       assert m.command != Stomp::CMD_ERROR
     end
+  end
+
+  # Check for JRuby before a connection exists
+  def jruby?()
+    jr = defined?(RUBY_ENGINE) && RUBY_ENGINE =~ /jruby/ ? true : false
   end
 
 end
