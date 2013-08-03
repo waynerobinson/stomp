@@ -161,14 +161,16 @@ module Stomp
           if message.nil? && (!@reliable)
             raise Stomp::Error::NilMessageError
           end
+          if message # message can be nil on rapid AMQ stop / start sequences
           # OK, we have some real data
-          if message.command == Stomp::CMD_MESSAGE
-            if listener = find_listener(message)
-              listener.call(message)
-            end
-          elsif message.command == Stomp::CMD_RECEIPT
-            if listener = @receipt_listeners[message.headers['receipt-id']]
-              listener.call(message)
+            if message.command == Stomp::CMD_MESSAGE
+              if listener = find_listener(message)
+                listener.call(message)
+              end
+            elsif message.command == Stomp::CMD_RECEIPT
+              if listener = @receipt_listeners[message.headers['receipt-id']]
+                listener.call(message)
+              end
             end
           end
         end # while true
