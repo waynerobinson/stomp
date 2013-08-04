@@ -397,7 +397,10 @@ module Stomp
       receive()
     end
 
-    # receive returns the next Message off of the wire.
+    # receive returns the next Message off of the wire.  this can return nil
+    # in cases where:
+    # * the broker has closed the connection
+    # * the connection is not reliable
     def receive()
       raise Stomp::Error::NoCurrentConnection if @closed_check && closed?
       super_result = __old_receive()
@@ -417,6 +420,13 @@ module Stomp
         super_result = __old_receive()
       end
       #
+      if super_result.nil? && !@reliable
+        @st.kill if @st # Kill ticker thread if any
+        @rt.kill if @rt # Kill ticker thread if any
+        close_socket()
+        @closed = true
+        warn 'warning: broker sent EOF, and connection not reliable'
+      end
       if @logger && @logger.respond_to?(:on_receive)
         @logger.on_receive(log_params, super_result)
       end
