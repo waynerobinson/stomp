@@ -77,6 +77,18 @@ error).
 
 -----------------------------------------------------------
 
+General advice:
+
+Set your heartbeat intervals to the maximum possible to obtain your desired
+behavior.  Do *not* set them at extremely low values even if the broker allows
+that.  An absurd example:
+
+heart-beat:1,1
+
+which will likely not work well.
+
+-----------------------------------------------------------
+
 General notes:
 
 In your real world apps, think about whether one or both of these parameters 
@@ -98,6 +110,60 @@ We have done a variety of informal tests here, using both server kill and
 packet drop strategies as appropriate.  We believe more real world testing is
 required.
 
-We already know that the use of IO#ready? will diminish (probably break) JRuby 
-functionality.
+-----------------------------------------------------------
+
+08/07/2013
+
+Issue #63 related, specifically fast send heart beats are being used and 
+spurious fail overs occur in rapid succession.
+
+Background:
+
+Fail over from heartbeat failures was introduced in gem version 1.2.10.
+
+Subsequently:
+
+This issue has been observed and documented in the following environment:
+
+-- JRuby engine 1.7.4 *and*
+-- ActiveMQ 5.8.0 *and*
+-- 'fast' client send heartbeats
+
+Heartbeat sends were at 2000ms.
+
+At this point in time, fast send heart beats and spurious fail overs have 
+*not* been observed using:
+
+-- Any native RUBY_ENGINE and ActiveMQ
+-- Any native RUBY_ENGINE and Apollo (client send rates are limited by default)
+-- Any native RUBY_ENGINE and RabbitMQ
+-- JRuby and Apollo (client send rates are limited by default)
+-- JRuby and RabbitMQ
+
+Note that 'fast' will depend on your use case for heartbeats.  Observations
+are that sending heartbeat times less than 5000ms might be considered 'fast'
+in the targeted environment.
+
+The solution / bypass being put in place as of the above date was developed
+through experimentation and is as follows:
+
+- Add 'adjustment' logic to the heartbeat sender (thanks to ppaul for this idea).
+- Re-introduce tolerance logic removed in d922fa.
+- Add a new connection hash parameter to adjust heartbeat sends.
+
+The newly introduced connection hash parameter is:
+
+:fast_hbs_adjust => 0.0 # The default, no adjustment to sender sleep times (sec)
+
+Recommendation for gem users that:
+
+- Use fast send heartbeats
+- Actually notice spurious fail overs
+
+is to provide a very sender sleep time adjustment when connecting.  Examples:
+
+:fast_hbs_adjust => 0.05 # 50 milliseconds
+:fast_hbs_adjust => 0.10 # 100 milliseconds
+
+As usual, YMMV.
 

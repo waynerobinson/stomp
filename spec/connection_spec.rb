@@ -27,6 +27,7 @@ describe Stomp::Connection do
       :usecrlf => false,
       :max_hbread_fails => 0,
       :max_hbrlck_fails => 0,
+      :fast_hbs_adjust => 0.0,
    }
         
     #POG:
@@ -89,11 +90,12 @@ describe Stomp::Connection do
         "backOffMultiplier" => 2,
         "maxReconnectAttempts" => 0,
         "randomize" => false,
-        "connect_timeout" => 0,
-        "parse_timeout" => 5,
+        "connectTimeout" => 0,
+        "parseTimeout" => 5,
         "usecrlf" => false,
-        :max_hbread_fails => 0,
-        :max_hbrlck_fails => 0,
+        :maxHbreadFails => 0,
+        :maxHbrlckFails => 0,
+        :fastHbsAdjust => 0.0,
       }
       
       @connection = Stomp::Connection.new(used_hash)
@@ -272,7 +274,9 @@ describe Stomp::Connection do
       
       before(:each) do
         ssl_parameters = {:hosts => [{:login => "login2", :passcode => "passcode2", :host => "remotehost", :ssl => true}]}
-        @ssl_socket = mock(:ssl_socket, :puts => nil, :write => nil, :setsockopt => nil, :flush => true)
+        @ssl_socket = mock(:ssl_socket, :puts => nil, :write => nil, 
+          :setsockopt => nil, :flush => true)
+        @ssl_socket.stub!(:sync_close=)
         
         TCPSocket.should_receive(:open).and_return @tcp_socket
         OpenSSL::SSL::SSLSocket.should_receive(:new).and_return(@ssl_socket)
@@ -344,6 +348,7 @@ describe Stomp::Connection do
           :stompconn => false,
           :max_hbread_fails => 0,
           :max_hbrlck_fails => 0,
+          :fast_hbs_adjust => 0.0,
         }
         
         used_hash =  {
@@ -382,6 +387,7 @@ describe Stomp::Connection do
           :usecrlf => true,
           :max_hbread_fails => 123,
           :max_hbrlck_fails => 456,
+          :fast_hbs_adjust => 0.2,
         }
         
         @connection = Stomp::Connection.new(used_hash)

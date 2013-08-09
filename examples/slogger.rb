@@ -203,7 +203,7 @@ class Slogger
   end
 
   # Stomp 1.1+ - heart beat read (receive) failed.
-  def on_hbread_fail(parms, ticker_data)
+  def on_hbread_fail(parms, ticker_data = {})
     begin
       @log.debug "Hbreadf Parms #{info(parms)}"
       @log.debug "Hbreadf Result #{ticker_data.inspect}"
@@ -213,7 +213,7 @@ class Slogger
   end
 
   # Stomp 1.1+ - heart beat send (transmit) failed.
-  def on_hbwrite_fail(parms, ticker_data)
+  def on_hbwrite_fail(parms, ticker_data = {})
     begin
       @log.debug "Hbwritef Parms #{info(parms)}"
       @log.debug "Hbwritef Result #{ticker_data.inspect}"
@@ -256,7 +256,7 @@ class Slogger
   end
 
   # Log heart beat fires
-  def on_hbfire(parms, srind, curt)
+  def on_hbfire(parms, srind, firedata = {})
     begin
       @log.debug "HeartBeat Fire Parms #{info(parms)}"
       @log.debug "HeartBeat Fire Send/Receive #{srind}"

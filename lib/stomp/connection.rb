@@ -70,6 +70,7 @@ module Stomp
     #     :usecrlf => false,
     #     :max_hbread_fails => 0,
     #     :max_hbrlck_fails => 0,
+    #     :fast_hbs_adjust => 0.0,
     #   }
     #
     #   e.g. c = Stomp::Connection.new(hash)
@@ -116,6 +117,7 @@ module Stomp
         @usecrlf = false      # If true, use \r\n as line ends (1.2 only)
         @max_hbread_fails = 0 # 0 means never retry for HB read failures
         @max_hbrlck_fails = 0 # 0 means never retry for HB read lock failures
+        @fast_hbs_adjust = 0.0 # Fast heartbeat senders sleep adjustment 
         warn "login looks like a URL, do you have the correct parameters?" if @login =~ /:\/\//
       end
 
@@ -150,6 +152,7 @@ module Stomp
       @usecrlf = @parameters[:usecrlf]
       @max_hbread_fails = @parameters[:max_hbread_fails]
       @max_hbrlck_fails = @parameters[:max_hbrlck_fails]
+      @fast_hbs_adjust = @parameters[:fast_hbs_adjust]
       #sets the first host to connect
       change_host
     end

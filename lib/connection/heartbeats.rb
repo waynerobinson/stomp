@@ -91,18 +91,28 @@ module Stomp
     def _start_send_ticker()
       sleeptime = @hbsend_interval / 1000000.0 # Sleep time secs
       reconn = false
+      adjust = 0.0
       @st = Thread.new {
+        first_time = true
         while true do
-          sleep sleeptime
+          #
+          slt = sleeptime - adjust - @fast_hbs_adjust
+          sleep(slt)
           next unless @socket # nil under some circumstances ??
           curt = Time.now.to_f
           if @logger && @logger.respond_to?(:on_hbfire)
-            @logger.on_hbfire(log_params, "send_fire", curt)
+            @logger.on_hbfire(log_params, "send_fire", :curt => curt, :last_sleep => slt)
           end
           delta = curt - @ls
-          if delta > sleeptime
+          # Be tolerant (minus), and always do this the first time through.
+          # Reintroduce logic removed in d922fa.
+          compval = (@hbsend_interval - (@hbsend_interval/5.0)) / 1000000.0
+          if delta > compval || first_time
+            first_time = false
             if @logger && @logger.respond_to?(:on_hbfire)
-              @logger.on_hbfire(log_params, "send_heartbeat", curt)
+              @logger.on_hbfire(log_params, "send_heartbeat", :last_sleep => slt,
+                :curt => curt, :last_send => @ls, :delta => delta,
+                :compval => compval)
             end
             # Send a heartbeat
             @transmit_semaphore.synchronize do
@@ -135,6 +145,7 @@ module Stomp
               Thread.exit       # This sender thread is done
             end
           end
+          adjust = Time.now.to_f - curt
           Thread.pass
         end
       }
@@ -155,17 +166,15 @@ module Stomp
           rdrdy = _is_ready?(@socket)
           curt = Time.now.to_f
           if @logger && @logger.respond_to?(:on_hbfire)
-            @logger.on_hbfire(log_params, "receive_fire", curt)
+            @logger.on_hbfire(log_params, "receive_fire", :curt => curt)
           end
-
           #
           begin
             delta = curt - @lr
             if delta > sleeptime
               if @logger && @logger.respond_to?(:on_hbfire)
-                @logger.on_hbfire(log_params, "receive_heartbeat", curt)
+                @logger.on_hbfire(log_params, "receive_heartbeat", {})
               end
-
               # Client code could be off doing something else (that is, no reading of
               # the socket has been requested by the caller).  Try to  handle that case.
               lock = @read_semaphore.try_lock
@@ -223,7 +232,6 @@ module Stomp
             end
             fail_hard = true
           end
-
           # Do we want to attempt a retry?
           if @reliable
             # Retry on hard fail or max read fails
@@ -245,7 +253,6 @@ module Stomp
               Thread.exit       # This receiver thread is done            
             end
           end
-
           Thread.pass         # Prior to next receive loop
         #
         end # of the "while true"

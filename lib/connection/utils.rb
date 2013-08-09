@@ -181,6 +181,7 @@ module Stomp
         :stompconn => false,
         :max_hbread_fails => 0,
         :max_hbrlck_fails => 0,
+        :fast_hbs_adjust => 0.0,
       }
 
       res_params = default_params.merge(params)
