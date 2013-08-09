@@ -279,7 +279,6 @@ module Stomp
             if @ssl.ciphers # User ciphers list?
               ctx.ciphers = @ssl.ciphers # Accept user supplied ciphers
             else
-              ctx.ciphers = Stomp::DEFAULT_CIPHERS # Just use Stomp defaults
             end
           end
         end

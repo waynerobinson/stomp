@@ -428,7 +428,7 @@ module Stomp
         @rt.kill if @rt # Kill ticker thread if any
         close_socket()
         @closed = true
-        warn 'warning: broker sent EOF, and connection not reliable'
+        warn 'warning: broker sent EOF, and connection not reliable' unless defined?(Test)
       end
       if @logger && @logger.respond_to?(:on_receive)
         @logger.on_receive(log_params, super_result)
