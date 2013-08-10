@@ -26,10 +26,11 @@ module Stomp
       regexp = /^stomp:\/\/#{url_regex}/ # e.g. stomp://login:passcode@host:port or stomp://host:port
       return false unless login =~ regexp
 
-      @login = $2 || ""
-      @passcode = $3 || ""
-      @host = $4
-      @port = $5.to_i
+      @login = $3 || ""
+      @passcode = $4 || ""
+      @host = $5
+      @port = $6.to_i
+
       @reliable = false
       true
     end
@@ -89,13 +90,15 @@ module Stomp
 
     # url_regex defines a regex for e.g. login:passcode@host:port or host:port
     def url_regex
-      '(([\w\.\-]*):(\w*)@)?([\w\.\-]+):(\d+)'
+      '((([\w~!@#$%^&*()\-+=.?:<>,.]*\w):([\w~!@#$%^&*()\-+=.?:<>,.]*))?@)?([\w\.\-]+):(\d+)'
     end
 
     # Parse a stomp URL.
     def parse_hosts(url)
       hosts = []
 
+      # TODO should change to use 'url_regex'.  Deferred to later failover://
+      # testing.
       host_match = /stomp(\+ssl)?:\/\/(([\w\.]*):(\w*)@)?([\w\.]+):(\d+)\)/
       url.scan(host_match).each do |match|
         host = {}
