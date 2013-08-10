@@ -21,7 +21,6 @@ module Stomp
       @reliable = true
       true
     end
-    private :parse_hash_params
 
     def parse_stomp_url(login)
       regexp = /^stomp:\/\/#{url_regex}/ # e.g. stomp://login:passcode@host:port or stomp://host:port
@@ -34,7 +33,6 @@ module Stomp
       @reliable = false
       true
     end
-    private :parse_stomp_url
 
     # e.g. failover://(stomp://login1:passcode1@localhost:61616,stomp://login2:passcode2@remotehost:61617)?option1=param
     def parse_failover_url(login)
@@ -57,7 +55,6 @@ module Stomp
       @reliable = true
       true
     end
-    private :parse_failover_url
 
     def parse_positional_params(login, passcode, host, port, reliable)
       @login = login
@@ -67,7 +64,6 @@ module Stomp
       @reliable = reliable
       true
     end
-    private :parse_positional_params
 
     # Set a subscription id in the headers hash if one does not already exist.
     # For simplicities sake, all subscriptions have a subscription ID.
