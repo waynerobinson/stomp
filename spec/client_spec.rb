@@ -254,7 +254,7 @@ describe Stomp::Client do
     end
     
     it "should properly parse a URL with failover:" do
-      url = "failover:(stomp://login1:passcode1@localhost:61616,stomp://login2:passcode2@remotehost1:61617),stomp://login3:passcode3@remotehost2:61618)"
+      url = "failover:(stomp://login1:passcode1@localhost:61616,stomp://login2:passcode2@remotehost1:61617,stomp://login3:passcode3@remotehost2:61618)"
       
       @parameters[:hosts] = [
         {:login => "login1", :passcode => "passcode1", :host => "localhost", :port => 61616, :ssl => false},
@@ -283,7 +283,7 @@ describe Stomp::Client do
     end
     
     it "should properly parse a URL with user and/or password blank" do
-      url = "failover:(stomp://:@localhost:61616,stomp://:@remotehost:61617)"
+      url = "failover:(stomp://@localhost:61616,stomp://@remotehost:61617)"
       
       @parameters[:hosts] = [
         {:login => "", :passcode => "", :host => "localhost", :port => 61616, :ssl => false},

@@ -23,7 +23,7 @@ module Stomp
     end
 
     def parse_stomp_url(login)
-      regexp = /^stomp:\/\/#{url_regex}/ # e.g. stomp://login:passcode@host:port or stomp://host:port
+      regexp = /^stomp:\/\/#{URL_REPAT}/
       return false unless login =~ regexp
 
       @login = $3 || ""
@@ -37,24 +37,26 @@ module Stomp
 
     # e.g. failover://(stomp://login1:passcode1@localhost:61616,stomp://login2:passcode2@remotehost:61617)?option1=param
     def parse_failover_url(login)
-      regexp = /^failover:(\/\/)?\(stomp(\+ssl)?:\/\/#{url_regex}(,stomp(\+ssl)?:\/\/#{url_regex}\))+(\?(.*))?$/
-      return false unless login =~ regexp
-
-      first_host = {}
-      first_host[:ssl] = !$2.nil?
-      @login = first_host[:login] = $4 || ""
-      @passcode = first_host[:passcode] = $5 || ""
-      @host = first_host[:host] = $6
-      @port = first_host[:port] = $7.to_i || Connection::default_port(first_host[:ssl])
-      options = $16 || ""
-      parts = options.split(/&|=/)
-      options = Hash[*parts]
-      hosts = [first_host] + parse_hosts(login)
-      @parameters = {}
-      @parameters[:hosts] = hosts
-      @parameters.merge! filter_options(options)
-      @reliable = true
-      true
+      rval = nil
+      if md = FAILOVER_REGEX.match(login)
+        finhosts = parse_hosts(login)
+        #
+        @login = finhosts[0][:login] || ""
+        @passcode = finhosts[0][:passcode] || ""
+        @host = finhosts[0][:host] || ""
+        @port = finhosts[0][:port] || ""
+        #
+        options = {}
+        if md_last = md[md.size-1]
+          parts = md_last.split(/&|=/)
+          raise Stomp::Error::MalformedFailoverOptionsError unless (parts.size % 2 ) == 0
+          options = Hash[*parts]
+        end
+        @parameters = {:hosts => finhosts}.merge! filter_options(options)
+        @reliable = true
+        rval = true
+      end
+      rval
     end
 
     def parse_positional_params(login, passcode, host, port, reliable)
@@ -88,31 +90,21 @@ module Stomp
       id
     end
 
-    # url_regex defines a regex for e.g. login:passcode@host:port or host:port
-    def url_regex
-      '((([\w~!@#$%^&*()\-+=.?:<>,.]*\w):([\w~!@#$%^&*()\-+=.?:<>,.]*))?@)?([\w\.\-]+):(\d+)'
-    end
-
-    # Parse a stomp URL.
-    def parse_hosts(url)
-      hosts = []
-
-      # TODO should change to use 'url_regex'.  Deferred to later failover://
-      # testing.
-      host_match = /stomp(\+ssl)?:\/\/(([\w\.]*):(\w*)@)?([\w\.]+):(\d+)\)/
-      url.scan(host_match).each do |match|
-        host = {}
-        host[:ssl] = !match[0].nil?
-        host[:login] =  match[2] || ""
-        host[:passcode] = match[3] || ""
-        host[:host] = match[4]
-        host[:port] = match[5].to_i
-
-        hosts << host
-      end
-
-      hosts
-    end
+# Parse a stomp URL.
+def parse_hosts(url)
+  hosts = []
+  host_match = /stomp(\+ssl)?:\/\/#{URL_REPAT}/
+  url.scan(host_match).each do |match|
+    host = {}
+    host[:ssl] = match[0] == "+ssl" ? true : false
+    host[:login] =  match[3] || ""
+    host[:passcode] = match[4] || ""
+    host[:host] = match[5]
+    host[:port] = match[6].to_i
+    hosts << host
+  end
+  hosts
+end
 
     # A very basic check of required arguments.
     def check_arguments!()

@@ -51,11 +51,11 @@ class Tlogger
   end
 
   # Stomp 1.1+ - heart beat thread fires
-  def on_hbfire(parms, type, time)
+  def on_hbfire(parms, type, firedata)
     begin
       @log.debug "HBfire #{type} " + "=" * 30
       @log.debug "HBfire #{type} Parms #{info(parms)}"
-      @log.debug "HBfire #{type} Time #{time}"
+      @log.debug "HBfire #{type} Firedata #{firedata.inspect}"
     rescue
       @log.debug "HBfire #{type} oops"
     end

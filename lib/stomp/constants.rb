@@ -111,4 +111,11 @@ module Stomp
     ["EXP-RC4-MD5", "TLSv1/SSLv3", 40, 128],
   ]
 
+  # stomp URL regex pattern, for e.g. login:passcode@host:port or host:port
+  URL_REPAT = '((([\w~!@#$%^&*()\-+=.?:<>,.]*\w):([\w~!@#$%^&*()\-+=.?:<>,.]*))?@)?([\w\.\-]+):(\d+)'
+
+  # Failover URL regex, for e.g.
+  #failover:(stomp+ssl://login1:passcode1@remotehost1:61612,stomp://login2:passcode2@remotehost2:61613)
+  FAILOVER_REGEX = /^failover:(\/\/)?\(stomp(\+ssl)?:\/\/#{URL_REPAT}(,stomp(\+ssl)?:\/\/#{URL_REPAT})*\)(\?(.*))?$/
+
 end # Module Stomp

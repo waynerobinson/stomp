@@ -205,6 +205,14 @@ module Stomp
       end
     end
 
+    # MalformedFailoverOptionsError is raised if failover URL
+    # options can not be parsed
+    class MalformedFailoverOptionsError < RuntimeError
+      def message
+        "failover options are malformed"
+      end
+    end
+
   end # module Error
 
 end # module Stomp
