@@ -12,6 +12,7 @@ An implementation of the Stomp protocol for Ruby. See:
 
 See _CHANGELOG.rdoc_ for details.
 
+* Gem version 1.2.12. Miscellaneous issue fixes and cleanup.
 * Gem version 1.2.11. JRuby and AMQ support fixes.
 * Gem version 1.2.10. Support failover from heartbeat threads.
 * Gem version 1.2.9. Miscellaneous fixes and changes.

@@ -1,3 +1,15 @@
+== 1.2.12 20130728
+
+* Fix infinite loop when max reconn attempts is reached
+* Enhance JRuby support in tests
+* Issue #63, nil message on rapid AMQ restarts
+* Issue #63, fast spurious failovers with JRuby and AMQ
+* Issue #67, SSL SNI support (thanks Hiram)
+* Proper cleanup when not reliable adn EOF from broker
+* Remove extraneous privte declarations
+* Issue #65, allow non-word characters in login and passcode using stomp://
+* Issue #66, allow a single broker in a failover URL
+
 == 1.2.11 20130728
 
 * Issue #60, timeout/hang under JRuby
