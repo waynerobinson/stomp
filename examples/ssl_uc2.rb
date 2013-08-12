@@ -26,7 +26,7 @@ class ExampleSSL2
   def run
     ts_flist = []
 
-    # Change the following to the location of your CA's signed certificate.
+    # Change the following to the location of the server's CA signed certificate.
     ts_flist << "/home/gmallard/sslwork/2013/TestCA.crt"
 
     ssl_opts = Stomp::SSLParams.new(:ts_files => ts_flist.join(","), 

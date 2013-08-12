@@ -27,8 +27,8 @@ class ExampleSSL3
   # Run example.
   def run
     # Change the following:
-    # * location of your client's signed certificate
-    # * location of tour client's private key.
+    # * location of the client's signed certificate
+    # * location of the client's private key.
     ssl_opts = Stomp::SSLParams.new(
       :key_file => "/home/gmallard/sslwork/2013/client.key", # the client's private key
       :cert_file => "/home/gmallard/sslwork/2013/client.crt", # the client's signed certificate
