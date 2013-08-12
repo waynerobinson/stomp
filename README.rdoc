@@ -140,4 +140,5 @@ The following people have contributed to Stomp:
 * Jeremy Gailor
 * JP Hastings-Spital
 * Glenn Roberts
+* Ian Smith
 
