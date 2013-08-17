@@ -443,7 +443,7 @@ class TestClient < Test::Unit::TestCase
 
   # Test that a connection frame is received.
   def test_connection_frame
-  	assert_not_nil @client.connection_frame
+    assert_not_nil @client.connection_frame
     checkEmsg(@client)
   end unless RUBY_ENGINE =~ /jruby/
 
@@ -611,6 +611,33 @@ class TestClient < Test::Unit::TestCase
       assert @client.jruby?
     else
       assert !@client.jruby?
+    end
+  end
+
+  # test max redeliveries is not broken (6c2c1c1)
+  def test_max_redeliveries
+    return if ENV['STOMP_RABBIT'] || (ENV['STOMP_APOLLO'] && ENV['STOMP_TEST11p'])
+    @client.close
+    rdmsg = "To Be Redelivered"
+    dest = make_destination
+    [1, 2, 3].each do |max_re|
+      @client = get_client()
+      sid = @client.uuid()
+      received = nil
+      rm_actual = 0
+      sh = @client.protocol() == Stomp::SPL_10 ?  {} : {:id => sid}
+      @client.subscribe(dest, sh) {|msg|
+        rm_actual += 1
+        @client.unreceive(msg, :max_redeliveries => max_re)
+        received = msg if rm_actual - 1 == max_re
+      }
+      @client.publish(dest, rdmsg)
+      sleep 0.01 until received
+      assert_equal rdmsg, received.body
+      sleep 0.5
+      @client.unsubscribe dest, sh
+      assert_equal max_re, rm_actual - 1
+      @client.close
     end
   end
 
