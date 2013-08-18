@@ -1,4 +1,8 @@
-== 1.2.12 20130728
+== 1.2.13 20130817
+
+* Issue #68, Stomp::Client#unreceive max_redeliveries off-by-one error
+
+== 1.2.12 20130811
 
 * Fix infinite loop when max reconn attempts is reached
 * Enhance JRuby support in tests
