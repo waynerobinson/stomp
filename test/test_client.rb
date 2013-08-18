@@ -616,7 +616,6 @@ class TestClient < Test::Unit::TestCase
 
   # test max redeliveries is not broken (6c2c1c1)
   def test_max_redeliveries
-    return if ENV['STOMP_RABBIT'] || (ENV['STOMP_APOLLO'] && ENV['STOMP_TEST11p'])
     @client.close
     rdmsg = "To Be Redelivered"
     dest = make_destination

@@ -336,11 +336,13 @@ module Stomp
       options = { :dead_letter_queue => "/queue/DLQ", :max_redeliveries => 6 }.merge(options)
       # Lets make sure all keys are symbols
       message.headers = message.headers.symbolize_keys
-
       retry_count = message.headers[:retry_count].to_i || 0
       message.headers[:retry_count] = retry_count + 1
       transaction_id = "transaction-#{message.headers[:'message-id']}-#{retry_count}"
       message_id = message.headers.delete(:'message-id')
+
+      # Prevent duplicate 'subscription' headers on subsequent receives
+      message.headers.delete(:subscription) if message.headers[:subscription]
 
       begin
         self.begin transaction_id
