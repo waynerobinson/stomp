@@ -6,7 +6,7 @@ module Stomp
   module Version  #:nodoc: all
     MAJOR = 1
     MINOR = 2
-    PATCH = 12
+    PATCH = 14
     STRING = "#{MAJOR}.#{MINOR}.#{PATCH}"
   end
 end

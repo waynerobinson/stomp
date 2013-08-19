@@ -1,3 +1,8 @@
+== 1.2.14 20130819
+
+* Version bump (1.2.13 release had Stomp::Version of 1.1.12.)
+* Prevent dup subscription header on re-receive
+
 == 1.2.13 20130817
 
 * Issue #68, Stomp::Client#unreceive max_redeliveries off-by-one error
