@@ -213,6 +213,14 @@ module Stomp
       end
     end
 
+    # ConnectReadTimeout is raised if:
+    # * A read for CONNECTED/ERROR is untimely
+    class ConnectReadTimeout < RuntimeError
+      def message
+        "Connect read for CONNECTED/ERROR timeout"
+      end
+    end
+
   end # module Error
 
 end # module Stomp

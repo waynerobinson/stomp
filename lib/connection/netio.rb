@@ -12,28 +12,24 @@ module Stomp
     private
 
     # Really read from the wire.
-    def _receive(read_socket)
+    def _receive(read_socket, connread = false)
       @read_semaphore.synchronize do
-        line = ''
-        if @protocol == Stomp::SPL_10 || (@protocol >= Stomp::SPL_11 && !@hbr)
-          if @jruby
-            # Handle JRuby specific behavior.
-            while true
-              line = read_socket.gets # Data from wire
-              break unless line == "\n"
-              line = ''
+        line = nil
+        if connread
+          begin
+            Timeout::timeout(@connread_timeout, Stomp::Error::ConnectReadTimeout) do
+              line = _init_line_read(read_socket)
             end
-          else
-            line = read_socket.gets # The old way
+          rescue Stomp::Error::ConnectReadTimeout => ex
+            if @reliable
+              _reconn_prep()
+            end
+            raise ex
           end
-        else # We are >= 1.1 *AND* receiving heartbeats.
-          while true
-            line = read_socket.gets # Data from wire
-            break unless line == "\n"
-            line = ''
-            @lr = Time.now.to_f
-          end
+        else
+          line = _init_line_read(read_socket)
         end
+        #
         return nil if line.nil?
         # p [ "wiredatain_01", line ]
         line = _normalize_line_end(line) if @protocol >= Stomp::SPL_12
@@ -346,7 +342,9 @@ module Stomp
 
       @closed = false
       if @parameters # nil in some rspec tests
-        @reconnect_delay = @parameters[:initial_reconnect_delay] ? @parameters[:initial_reconnect_delay] : 0.01
+        unless @reconnect_delay
+          @reconnect_delay = @parameters[:initial_reconnect_delay] ? @parameters[:initial_reconnect_delay] : 0.01
+        end
       end
       # Use keepalive
       used_socket.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)
@@ -365,7 +363,7 @@ module Stomp
       else
         _transmit(used_socket, Stomp::CMD_CONNECT, headers)
       end
-      @connection_frame = _receive(used_socket)
+      @connection_frame = _receive(used_socket, true)
       _post_connect
       @disconnect_receipt = nil
       @session = @connection_frame.headers["session"] if @connection_frame
@@ -373,6 +371,30 @@ module Stomp
       @subscriptions.each {|k,v| 
         _transmit(used_socket, Stomp::CMD_SUBSCRIBE, v)
       }
+    end
+
+    def _init_line_read(read_socket)
+        line = ''
+        if @protocol == Stomp::SPL_10 || (@protocol >= Stomp::SPL_11 && !@hbr)
+          if @jruby
+            # Handle JRuby specific behavior.
+            while true
+              line = read_socket.gets # Data from wire
+              break unless line == "\n"
+              line = ''
+            end
+          else
+            line = read_socket.gets # The old way
+          end
+        else # We are >= 1.1 *AND* receiving heartbeats.
+          while true
+            line = read_socket.gets # Data from wire
+            break unless line == "\n"
+            line = ''
+            @lr = Time.now.to_f
+          end
+        end
+        line
     end
 
   end # class Connection

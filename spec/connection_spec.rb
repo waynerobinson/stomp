@@ -28,11 +28,12 @@ describe Stomp::Connection do
       :max_hbread_fails => 0,
       :max_hbrlck_fails => 0,
       :fast_hbs_adjust => 0.0,
+      :connread_timeout => 0,
    }
         
     #POG:
     class Stomp::Connection
-      def _receive( s )
+      def _receive( s, connread = false )
       end
     end
     
@@ -96,6 +97,7 @@ describe Stomp::Connection do
         :maxHbreadFails => 0,
         :maxHbrlckFails => 0,
         :fastHbsAdjust => 0.0,
+        :connreadTimeout => 0,
       }
       
       @connection = Stomp::Connection.new(used_hash)
@@ -350,6 +352,7 @@ describe Stomp::Connection do
           :max_hbread_fails => 0,
           :max_hbrlck_fails => 0,
           :fast_hbs_adjust => 0.0,
+          :connread_timeout => 0,
         }
         
         used_hash =  {
@@ -389,6 +392,7 @@ describe Stomp::Connection do
           :max_hbread_fails => 123,
           :max_hbrlck_fails => 456,
           :fast_hbs_adjust => 0.2,
+          :connread_timeout => 42,
         }
         
         @connection = Stomp::Connection.new(used_hash)
@@ -438,7 +442,6 @@ describe Stomp::Connection do
       @connection.instance_variable_set(:@connection_attempts, limit)
       @connection.send(:max_reconnect_attempts?).should be_true
     end
-
     # These should be raised for the user to deal with
     it "should not rescue MaxReconnectAttempts" do
       @connection = Stomp::Connection.new(@parameters)

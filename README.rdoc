@@ -60,6 +60,7 @@ See _CHANGELOG.rdoc_ for details.
       :fast_hbs_adjust => 0.0,            # Fast heartbeat senders sleep adjustment, seconds, needed ...
                                           # For fast heartbeat senders.  'fast' == YMMV.  If not
                                           # correct for your environment, expect unnecessary fail overs
+      :connread_timeout => 0,             # Timeout during CONNECT for read of CONNECTED/ERROR, secs
     }
 
     # for client
