@@ -12,23 +12,28 @@ module Stomp
   # in that thread if you have much message volume.
   class Client
 
-    # The login ID used by the client.
-    attr_reader :login
-
-    # The login credentials used by the client.
-    attr_reader :passcode
-
-    # The Stomp host specified by the client.
-    attr_reader :host
-
-    # The Stomp host's listening port.
-    attr_reader :port
-
-    # Is this connection reliable?
-    attr_reader :reliable
-
-    # Parameters Hash, possibly nil for a non-hashed connect.
+    # Parameters hash
     attr_reader :parameters
+
+    # Expose the connection's attributes; if no connection, take the first value
+    # in @parameters
+    [:login,
+     :passcode,
+     :port,
+     :host,
+     :ssl].each do |meth|
+      define_method meth do
+        if @connection && @connection.respond_to?(meth)
+          @connection.send(meth)
+        else
+          @parameters[:hosts].first[meth]
+        end
+      end
+    end
+
+    def reliable
+      @parameters[:reliable]
+    end
 
     # A new Client object can be initialized using three forms:
     #
@@ -100,12 +105,8 @@ module Stomp
     end
 
     def create_connection(autoflush)
-      if @parameters
-        @connection = Connection.new(@parameters)
-      else
-        @connection = Connection.new(@login, @passcode, @host, @port, @reliable)
-        @connection.autoflush = autoflush
-      end
+      @connection = Connection.new(@parameters)
+      @connection.autoflush = autoflush
     end
     private :create_connection
 

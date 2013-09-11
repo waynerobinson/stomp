@@ -7,8 +7,8 @@ require 'client_shared_examples'
 describe Stomp::Client do
 
   before(:each) do
-    @mock_connection = mock('connection', :autoflush= => true)
-    Stomp::Connection.stub!(:new).and_return(@mock_connection)
+    @mock_connection = double('connection', :autoflush= => true)
+    Stomp::Connection.stub(:new).and_return(@mock_connection)
   end
 
   describe "(created with no params)" do
@@ -31,6 +31,56 @@ describe Stomp::Client do
 
     it_should_behave_like "standard Client"
 
+  end
+
+  describe 'delegated params' do
+    context 'if its connection is not nil' do
+      before :each do
+        @mock_connection = double('connection', :autoflush= => true,
+                                                :login => 'dummy login',
+                                                :passcode => 'dummy passcode',
+                                                :port => 12345,
+                                                :host => 'dummy host',
+                                                :ssl => 'dummy ssl')
+        Stomp::Connection.stub(:new).and_return(@mock_connection)
+        @client = Stomp::Client.new
+      end
+
+      describe 'it should delegate parameters to its connection' do
+        subject { @client }
+
+        its(:login) { should eql 'dummy login' }
+        its(:passcode) { should eql 'dummy passcode' }
+        its(:port) { should eql 12345 }
+        its(:host) { should eql 'dummy host' }
+        its(:ssl) { should eql 'dummy ssl' }
+      end
+    end
+
+    context 'if its connection is nil' do
+      before :each do
+        parameters = { :hosts => [{:login => 'dummy login',
+                                   :passcode => 'dummy passcode',
+                                   :port => 12345,
+                                   :host => 'dummy host',
+                                   :ssl => 'dummy ssl' }] }
+
+        # Easier to make the connection not respond_to? our attribute methods
+        @mock_connection = double('connection', :autoflush= => true, :respond_to? => false)
+        Stomp::Connection.stub(:new).and_return(@mock_connection)
+        @client = Stomp::Client.new(parameters)
+      end
+
+      describe 'it should get parameters from the instance variable' do
+        subject { @client }
+
+        its(:login) { should eql 'dummy login' }
+        its(:passcode) { should eql 'dummy passcode' }
+        its(:port) { should eql 12345 }
+        its(:host) { should eql 'dummy host' }
+        its(:ssl) { should eql 'dummy ssl' }
+      end
+    end
   end
 
   describe "(autoflush)" do
@@ -236,7 +286,8 @@ describe Stomp::Client do
         :back_off_multiplier => 2,
         :max_reconnect_attempts => 0,
         :randomize => false,
-        :connect_timeout => 0
+        :connect_timeout => 0,
+        :reliable => true
       }
     end
     it "should properly parse a URL with failover://" do
@@ -303,14 +354,15 @@ describe Stomp::Client do
       url = "failover:(stomp://login1:passcode1@localhost:61616,stomp://login2:passcode2@remotehost:61617)?#{query}"
       
       #
-      @parameters = {  
+      @parameters = {
         :initial_reconnect_delay => 5.0,
         :max_reconnect_delay => 60.0,
         :use_exponential_back_off => false,
         :back_off_multiplier => 3,
         :max_reconnect_attempts => 4,
         :randomize => true,
-        :connect_timeout => 0
+        :connect_timeout => 0,
+        :reliable => true
       }
       
       @parameters[:hosts] = [
