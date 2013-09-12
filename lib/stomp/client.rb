@@ -83,10 +83,11 @@ module Stomp
       @id_mutex = Mutex.new()
       @ids = 1
 
+      @logger = @parameters[:logger] ||= Stomp::NullLogger.new
+
       create_connection(autoflush)
 
       start_listeners()
-
     end
 
     def create_connection(autoflush)

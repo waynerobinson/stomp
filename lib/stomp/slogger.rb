@@ -51,7 +51,7 @@ require 'logger'	# use the standard Ruby logger .....
 # Callback parameters: are a copy of the @parameters instance variable for
 # the Stomp::Connection.
 #
-class Slogger
+class Slogger < Stomp::NullLogger
 
   # Initialize a new callback logger instance.
   def initialize(init_parms = nil)
