@@ -82,21 +82,21 @@ module Stomp
       id
     end
 
-# Parse a stomp URL.
-def parse_hosts(url)
-  hosts = []
-  host_match = /stomp(\+ssl)?:\/\/#{URL_REPAT}/
-  url.scan(host_match).each do |match|
-    host = {}
-    host[:ssl] = match[0] == "+ssl" ? true : false
-    host[:login] =  match[3] || ""
-    host[:passcode] = match[4] || ""
-    host[:host] = match[5]
-    host[:port] = match[6].to_i
-    hosts << host
-  end
-  hosts
-end
+    # Parse a stomp URL.
+    def parse_hosts(url)
+      hosts = []
+      host_match = /stomp(\+ssl)?:\/\/#{URL_REPAT}/
+      url.scan(host_match).each do |match|
+        host = {}
+        host[:ssl] = match[0] == "+ssl" ? true : false
+        host[:login] =  match[3] || ""
+        host[:passcode] = match[4] || ""
+        host[:host] = match[5]
+        host[:port] = match[6].to_i
+        hosts << host
+      end
+      hosts
+    end
 
     # A very basic check of required arguments.
     def check_arguments!()
