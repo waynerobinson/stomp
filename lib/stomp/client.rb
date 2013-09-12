@@ -239,6 +239,7 @@ module Stomp
 
     # set_logger identifies a new callback logger.
     def set_logger(logger)
+      @logger = logger
       @connection.set_logger(logger)
     end
 
