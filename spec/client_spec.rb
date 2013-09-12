@@ -34,52 +34,25 @@ describe Stomp::Client do
   end
 
   describe 'delegated params' do
-    context 'if its connection is not nil' do
-      before :each do
-        @mock_connection = double('connection', :autoflush= => true,
-                                                :login => 'dummy login',
-                                                :passcode => 'dummy passcode',
-                                                :port => 12345,
-                                                :host => 'dummy host',
-                                                :ssl => 'dummy ssl')
-        Stomp::Connection.stub(:new).and_return(@mock_connection)
-        @client = Stomp::Client.new
-      end
-
-      describe 'it should delegate parameters to its connection' do
-        subject { @client }
-
-        its(:login) { should eql 'dummy login' }
-        its(:passcode) { should eql 'dummy passcode' }
-        its(:port) { should eql 12345 }
-        its(:host) { should eql 'dummy host' }
-        its(:ssl) { should eql 'dummy ssl' }
-      end
+    before :each do
+      @mock_connection = double('connection', :autoflush= => true,
+                                              :login => 'dummy login',
+                                              :passcode => 'dummy passcode',
+                                              :port => 12345,
+                                              :host => 'dummy host',
+                                              :ssl => 'dummy ssl')
+      Stomp::Connection.stub(:new).and_return(@mock_connection)
+      @client = Stomp::Client.new
     end
 
-    context 'if its connection is nil' do
-      before :each do
-        parameters = { :hosts => [{:login => 'dummy login',
-                                   :passcode => 'dummy passcode',
-                                   :port => 12345,
-                                   :host => 'dummy host',
-                                   :ssl => 'dummy ssl' }] }
+    describe 'it should delegate parameters to its connection' do
+      subject { @client }
 
-        # Easier to make the connection not respond_to? our attribute methods
-        @mock_connection = double('connection', :autoflush= => true, :respond_to? => false)
-        Stomp::Connection.stub(:new).and_return(@mock_connection)
-        @client = Stomp::Client.new(parameters)
-      end
-
-      describe 'it should get parameters from the instance variable' do
-        subject { @client }
-
-        its(:login) { should eql 'dummy login' }
-        its(:passcode) { should eql 'dummy passcode' }
-        its(:port) { should eql 12345 }
-        its(:host) { should eql 'dummy host' }
-        its(:ssl) { should eql 'dummy ssl' }
-      end
+      its(:login) { should eql 'dummy login' }
+      its(:passcode) { should eql 'dummy passcode' }
+      its(:port) { should eql 12345 }
+      its(:host) { should eql 'dummy host' }
+      its(:ssl) { should eql 'dummy ssl' }
     end
   end
 
@@ -148,17 +121,17 @@ describe Stomp::Client do
 
 
   describe "(created with positional params)" do
-
     before(:each) do
       @client = Stomp::Client.new('testlogin', 'testpassword', 'localhost', '12345', false)
     end
 
     it "should properly parse the URL provided" do
-      @client.login.should eql('testlogin')
-      @client.passcode.should eql('testpassword')
-      @client.host.should eql('localhost')
-      @client.port.should eql(12345)
-      @client.reliable.should be_false
+      Stomp::Connection.should_receive(:new).with(:hosts => [{:login => 'testlogin',
+                                                              :passcode => 'testpassword',
+                                                              :host => 'localhost',
+                                                              :port => 12345}],
+                                                  :reliable => false)
+      Stomp::Client.new('testlogin', 'testpassword', 'localhost', '12345', false)
     end
 
     it_should_behave_like "standard Client"
@@ -172,11 +145,12 @@ describe Stomp::Client do
     end
 
     it "should properly parse the URL provided" do
-      @client.login.should eql('')
-      @client.passcode.should eql('')
-      @client.host.should eql('foobar')
-      @client.port.should eql(12345)
-      @client.reliable.should be_false
+      Stomp::Connection.should_receive(:new).with(:hosts => [{:login => '',
+                                                              :passcode => '',
+                                                              :host => 'foobar',
+                                                              :port => 12345}],
+                                                  :reliable => false)
+      Stomp::Client.new('stomp://foobar:12345')
     end
 
     it_should_behave_like "standard Client"
@@ -190,11 +164,12 @@ describe Stomp::Client do
     end
 
     it "should properly parse the URL provided" do
-      @client.login.should eql('')
-      @client.passcode.should eql('')
-      @client.host.should eql('foo-bar')
-      @client.port.should eql(12345)
-      @client.reliable.should be_false
+      Stomp::Connection.should_receive(:new).with(:hosts => [{:login => '',
+                                                              :passcode => '',
+                                                              :host => 'foo-bar',
+                                                              :port => 12345}],
+                                                  :reliable => false)
+      Stomp::Client.new('stomp://foo-bar:12345')
     end
 
     it_should_behave_like "standard Client"
@@ -208,11 +183,12 @@ describe Stomp::Client do
     end
 
     it "should properly parse the URL provided" do
-      @client.login.should eql('test-login')
-      @client.passcode.should eql('testpasscode')
-      @client.host.should eql('foobar')
-      @client.port.should eql(12345)
-      @client.reliable.should be_false
+      Stomp::Connection.should_receive(:new).with(:hosts => [{:login => 'test-login',
+                                                              :passcode => 'testpasscode',
+                                                              :host => 'foobar',
+                                                              :port => 12345}],
+                                                  :reliable => false)
+      Stomp::Client.new('stomp://test-login:testpasscode@foobar:12345')
     end
 
     it_should_behave_like "standard Client"
@@ -226,11 +202,12 @@ describe Stomp::Client do
     end
 
     it "should properly parse the URL provided" do
-      @client.login.should eql('test-login')
-      @client.passcode.should eql('testpasscode')
-      @client.host.should eql('foo-bar')
-      @client.port.should eql(12345)
-      @client.reliable.should be_false
+      Stomp::Connection.should_receive(:new).with(:hosts => [{:login => 'test-login',
+                                                              :passcode => 'testpasscode',
+                                                              :host => 'foo-bar',
+                                                              :port => 12345}],
+                                                  :reliable => false)
+      Stomp::Client.new('stomp://test-login:testpasscode@foo-bar:12345')
     end
 
     it_should_behave_like "standard Client"
@@ -247,11 +224,12 @@ describe Stomp::Client do
     end
 
     it "should properly parse the URL provided" do
-      @client.login.should eql('')
-      @client.passcode.should eql('')
-      @client.host.should eql('host.foobar.com')
-      @client.port.should eql(12345)
-      @client.reliable.should be_false
+      Stomp::Connection.should_receive(:new).with(:hosts => [{:login => '',
+                                                              :passcode => '',
+                                                              :host => 'host.foobar.com',
+                                                              :port => 12345}],
+                                                  :reliable => false)
+      Stomp::Client.new('stomp://host.foobar.com:12345')
     end
 
     it_should_behave_like "standard Client"
@@ -265,11 +243,12 @@ describe Stomp::Client do
     end
 
     it "should properly parse the URL provided" do
-      @client.login.should eql('testlogin')
-      @client.passcode.should eql('testpasscode')
-      @client.host.should eql('host.foobar.com')
-      @client.port.should eql(12345)
-      @client.reliable.should be_false
+      Stomp::Connection.should_receive(:new).with(:hosts => [{:login => 'testlogin',
+                                                              :passcode => 'testpasscode',
+                                                              :host => 'host.foobar.com',
+                                                              :port => 12345}],
+                                                  :reliable => false)
+      Stomp::Client.new('stomp://testlogin:testpasscode@host.foobar.com:12345')
     end
 
     it_should_behave_like "standard Client"

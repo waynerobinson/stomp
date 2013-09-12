@@ -2,6 +2,7 @@
 
 require 'thread'
 require 'digest/sha1'
+require 'forwardable'
 
 module Stomp
 
@@ -11,29 +12,13 @@ module Stomp
   # Receives all happen in one thread, so consider not doing much processing
   # in that thread if you have much message volume.
   class Client
+    extend Forwardable
 
     # Parameters hash
     attr_reader :parameters
 
-    # Expose the connection's attributes; if no connection, take the first value
-    # in @parameters
-    [:login,
-     :passcode,
-     :port,
-     :host,
-     :ssl].each do |meth|
-      define_method meth do
-        if @connection && @connection.respond_to?(meth)
-          @connection.send(meth)
-        else
-          @parameters[:hosts].first[meth]
-        end
-      end
-    end
-
-    def reliable
-      @parameters[:reliable]
-    end
+    def_delegators :@connection, :login, :passcode, :port, :host, :ssl
+    def_delegator :@parameters, :reliable
 
     # A new Client object can be initialized using three forms:
     #
