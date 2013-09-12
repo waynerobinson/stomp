@@ -20,13 +20,13 @@ module Stomp
 
     def parse_stomp_url(login)
       regexp = /^stomp:\/\/#{URL_REPAT}/
-      return false unless login =~ regexp
+      return false unless url = regexp.match(login)
 
       @parameters = { :reliable => false,
-                      :hosts => [ { :login => $3 || "",
-                                    :passcode => $4 || "",
-                                    :host => $5,
-                                    :port => $6.to_i} ] }
+                      :hosts => [ { :login => url[3] || "",
+                                    :passcode => url[4] || "",
+                                    :host => url[5],
+                                    :port => url[6].to_i} ] }
       true
     end
 
