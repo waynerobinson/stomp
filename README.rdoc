@@ -12,6 +12,8 @@ An implementation of the Stomp protocol for Ruby. See:
 
 See _CHANGELOG.rdoc_ for details.
 
+* Gem version 1.2.16. Fixed Stomp::Client to expose its connection's host parameters.
+* Gem version 1.2.15. Timeout cleanup, added license info to gemspec.
 * Gem version 1.2.14. Cleanup.
 * Gem version 1.2.13. Stomp::Client#unreceive max_redeliveries fix.
 * Gem version 1.2.12. Miscellaneous issue fixes and cleanup.

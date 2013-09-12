@@ -1,3 +1,13 @@
+== 1.2.16 20130812
+
+* Stomp::Client's should expose connection's host params
+
+== 1.2.15 20130809
+
+* Add user-specified timeout for initial CONNECTED/ERROR frame read.
+* Eliminate dup Timeout::timeout in ssl connect
+* Add license information to gemspec (#69)
+
 == 1.2.14 20130819
 
 * Version bump (1.2.13 release had Stomp::Version of 1.1.12.)
