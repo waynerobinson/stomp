@@ -73,11 +73,7 @@ module Stomp
 
     # Register a receipt listener.
     def register_receipt_listener(listener)
-      id = -1
-      @id_mutex.synchronize do
-        id = @ids.to_s
-        @ids = @ids.succ
-      end
+      id = uuid
       @receipt_listeners[id] = listener
       id
     end
