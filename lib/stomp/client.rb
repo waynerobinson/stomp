@@ -2,6 +2,7 @@
 
 require 'thread'
 require 'digest/sha1'
+require 'timeout'
 require 'forwardable'
 
 module Stomp
@@ -83,10 +84,11 @@ module Stomp
       @id_mutex = Mutex.new()
       @ids = 1
 
-      create_connection(autoflush)
-
-      start_listeners()
-
+      @start_timeout = @parameters[:start_timeout] || 10
+      Timeout.timeout(@start_timeout, Stomp::Error::StartTimeoutException.new(@start_timeout)) do
+        create_connection(autoflush)
+        start_listeners()
+      end
     end
 
     def create_connection(autoflush)
