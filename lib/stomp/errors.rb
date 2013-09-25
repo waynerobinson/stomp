@@ -46,6 +46,15 @@ module Stomp
       end
     end
 
+    # StartTimeoutException is raised if:
+    # * A timeout occurs during initialization when creating connection and
+    # starting listeners
+    class StartTimeoutException < RuntimeError
+      def message
+        "Timeout creating connection and starting listeners."
+      end
+    end
+
     # NoCurrentConnection is raised if:
     # * Any method is called when a current connection does not exist.
     # * And @closed_check is true (the default).
