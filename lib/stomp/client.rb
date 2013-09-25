@@ -81,6 +81,8 @@ module Stomp
 
       check_arguments!()
 
+      @logger = @parameters[:logger] ||= Stomp::NullLogger.new
+
       @start_timeout = @parameters[:start_timeout] || 10
       Timeout.timeout(@start_timeout, Stomp::Error::StartTimeoutException.new(@start_timeout)) do
         create_connection(autoflush)
