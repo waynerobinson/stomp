@@ -160,7 +160,7 @@ module Stomp
     # Acknowledge a message, used when a subscription has specified
     # client acknowledgement ( connection.subscribe("/queue/a",{:ack => 'client'}).
     # Accepts a transaction header ( :transaction => 'some_transaction_id' ).
-    def acknowledge(message, headers = {})
+    def ack(message, headers = {})
       txn_id = headers[:transaction]
       if txn_id
         # lets keep around messages ack'd in this transaction in case we rollback
@@ -176,14 +176,20 @@ module Stomp
       end
       if protocol() == Stomp::SPL_12
         @connection.ack(message.headers['ack'], headers)
+      elsif protocol == Stomp::SPL_11
+        headers.merge!(:subscription => message.headers['subscription'])
+        @connection.ack(message.headers['message-id'], headers)
       else
         @connection.ack(message.headers['message-id'], headers)
       end
     end
 
+    # For posterity, we alias:
+    alias acknowledge ack
+
     # Stomp 1.1+ NACK.
-    def nack(message_id, headers = {})
-      @connection.nack(message_id, headers)
+    def nack(message, headers = {})
+      @connection.nack(message, headers)
     end
 
     # Unreceive a message, sending it back to its queue or to the DLQ.
