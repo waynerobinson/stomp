@@ -339,7 +339,7 @@ module Stomp
       used_socket.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)
 
       # TCP_NODELAY option (disables Nagle's algorithm)
-      used_socket.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, (@parameters && @parameters[:tcp_nodelay]))
+      used_socket.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, !!(@parameters && @parameters[:tcp_nodelay]))
 
       used_socket
     end
