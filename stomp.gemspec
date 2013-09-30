@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "stomp"
-  s.version = "1.2.16"
+  s.version = "1.3.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Brian McCallister", "Marius Mathiesen", "Thiago Morello", "Guy M. Allard"]
-  s.date = "2013-09-27"
+  s.date = "2013-09-30"
   s.description = "Ruby client for the Stomp messaging protocol.  Note that this gem is no longer supported on rubyforge."
   s.email = ["brianm@apache.org", "marius@stones.com", "morellon@gmail.com", "allard.guy.m@gmail.com"]
   s.executables = ["catstomp", "stompcat"]
@@ -59,6 +59,7 @@ Gem::Specification.new do |s|
     "lib/stomp/slogger.rb",
     "lib/stomp/sslparams.rb",
     "lib/stomp/version.rb",
+    "test/test_anonymous.rb",
     "test/test_client.rb",
     "test/test_codec.rb",
     "test/test_connection.rb",
@@ -125,6 +126,7 @@ Gem::Specification.new do |s|
     "spec/message_spec.rb",
     "spec/spec_helper.rb",
     "stomp.gemspec",
+    "test/test_anonymous.rb",
     "test/test_client.rb",
     "test/test_codec.rb",
     "test/test_connection.rb",
