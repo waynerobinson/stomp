@@ -9,10 +9,10 @@ end
 
 =begin
 
-  Main class for testing Stomp::Connection instances.
+  Main class for testing Stomp::Connection instances with anonymous logins.
 
 =end
-class TestConnection < Test::Unit::TestCase
+class TestAnonymous < Test::Unit::TestCase
   include TestBase
 
   def setup
