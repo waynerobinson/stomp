@@ -84,10 +84,15 @@ module Stomp
       @logger = @parameters[:logger] ||= Stomp::NullLogger.new
 
       @start_timeout = @parameters[:start_timeout] || 10
-      Timeout.timeout(@start_timeout, Stomp::Error::StartTimeoutException.new(@start_timeout)) do
-        create_error_handler
-        create_connection(autoflush)
-        start_listeners()
+      begin
+        timeout(@start_timeout) {
+          create_error_handler
+          create_connection(autoflush)
+          start_listeners()
+        }
+      rescue TimeoutError
+        ex = Stomp::Error::StartTimeoutException.new(@start_timeout)
+        raise ex
       end
     end
 
