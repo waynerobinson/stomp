@@ -183,7 +183,9 @@ module Stomp
       headers = headers.symbolize_keys
       headers[:transaction] = name
       _headerCheck(headers)
-      @logger.on_begin(log_params, headers)
+      if @logger && @logger.respond_to?(:on_begin)
+        @logger.on_begin(log_params, headers)
+      end
       transmit(Stomp::CMD_BEGIN, headers)
     end
 
@@ -214,7 +216,9 @@ module Stomp
           headers[:'message-id'] = message_id
       end
       _headerCheck(headers)
-      @logger.on_ack(log_params, headers)
+      if @logger && @logger.respond_to?(:on_ack)
+        @logger.on_ack(log_params, headers)
+      end
       transmit(Stomp::CMD_ACK, headers)
     end
 
@@ -238,7 +242,9 @@ module Stomp
           raise Stomp::Error::SubscriptionRequiredError unless headers[:subscription]
       end
       _headerCheck(headers)
-      @logger.on_nack(log_params, headers)
+      if @logger && @logger.respond_to?(:on_nack)
+        @logger.on_nack(log_params, headers)
+      end
       transmit(Stomp::CMD_NACK, headers)
     end
 
@@ -258,7 +264,9 @@ module Stomp
       headers = headers.symbolize_keys
       headers[:transaction] = name
       _headerCheck(headers)
-      @logger.on_abort(log_params, headers)
+      if @logger && @logger.respond_to?(:on_abort)
+        @logger.on_abort(log_params, headers)
+      end
       transmit(Stomp::CMD_ABORT, headers)
     end
 
@@ -273,7 +281,9 @@ module Stomp
         headers[:id] = subId if headers[:id].nil?
       end
       _headerCheck(headers)
-      @logger.on_subscribe(log_params, headers)
+      if @logger && @logger.respond_to?(:on_subscribe)
+        @logger.on_subscribe(log_params, headers)
+      end
 
       # Store the subscription so that we can replay if we reconnect.
       if @reliable
@@ -296,7 +306,9 @@ module Stomp
         headers[:id] = subId unless headers[:id]
       end
       _headerCheck(headers)
-      @logger.on_unsubscribe(log_params, headers)
+      if @logger && @logger.respond_to?(:on_unsubscribe)
+        @logger.on_unsubscribe(log_params, headers)
+      end
       transmit(Stomp::CMD_UNSUBSCRIBE, headers)
       if @reliable
         subId = dest if subId.nil?
@@ -312,7 +324,9 @@ module Stomp
       headers = headers.symbolize_keys
       headers[:destination] = destination
       _headerCheck(headers)
-      @logger.on_publish(log_params, message, headers)
+      if @logger && @logger.respond_to?(:on_publish)
+        @logger.on_publish(log_params, message, headers)
+      end
       transmit(Stomp::CMD_SEND, headers, message)
     end
 
@@ -375,7 +389,9 @@ module Stomp
       end
       transmit(Stomp::CMD_DISCONNECT, headers)
       @disconnect_receipt = receive if headers[:receipt]
-      @logger.on_disconnect(log_params)
+      if @logger && @logger.respond_to?(:on_disconnect)
+        @logger.on_disconnect(log_params)
+      end
       close_socket
     end
 
@@ -398,7 +414,9 @@ module Stomp
       super_result = __old_receive()
       if super_result.nil? && @reliable && !closed?
         errstr = "connection.receive returning EOF as nil - resetting connection.\n"
-        @logger.on_miscerr(log_params, "es_recv: " + errstr)
+        if @logger && @logger.respond_to?(:on_miscerr)
+          @logger.on_miscerr(log_params, "es_recv: " + errstr)
+        end
         $stderr.print errstr
 
         # !!! This initiates a re-connect !!!
@@ -417,7 +435,9 @@ module Stomp
         @closed = true
         warn 'warning: broker sent EOF, and connection not reliable' unless defined?(Test)
       end
-      @logger.on_receive(log_params, super_result)
+      if @logger && @logger.respond_to?(:on_receive)
+        @logger.on_receive(log_params, super_result)
+      end
       return super_result
     end
 
