@@ -75,6 +75,8 @@ module Stomp
     #     :max_hbrlck_fails => 0,
     #     :fast_hbs_adjust => 0.0,
     #     :connread_timeout => 0,
+    #     :tcp_nodelay => true,
+    #     :start_timeout => 10,
     #   }
     #
     #   e.g. c = Stomp::Connection.new(hash)
@@ -123,6 +125,8 @@ module Stomp
         @max_hbrlck_fails = 0 # 0 means never retry for HB read lock failures
         @fast_hbs_adjust = 0.0 # Fast heartbeat senders sleep adjustment
         @connread_timeout = 0 # Connect read CONNECTED/ERROR timeout
+        @tcp_nodelay = true # Disable Nagle
+        @start_timeout = 10 # Client only, startup timeout
         warn "login looks like a URL, do you have the correct parameters?" if @login =~ /:\/\//
       end
 

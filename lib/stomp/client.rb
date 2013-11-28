@@ -50,6 +50,8 @@ module Stomp
     #     :max_hbrlck_fails => 0,
     #     :fast_hbs_adjust => 0.0,
     #     :connread_timeout => 0,
+    #     :tcp_nodelay => true,
+    #     :start_timeout => 10,
     #   }
     #
     #   e.g. c = Stomp::Client.new(hash)
