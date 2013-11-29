@@ -219,15 +219,19 @@ module Stomp
         ctx = OpenSSL::SSL::SSLContext.new
         ctx.verify_mode = OpenSSL::SSL::VERIFY_NONE # Assume for now
         #
-        # Note: if a client uses :ssl => true this results in the gem using
+        # Note: if a client uses :ssl => true this would result in the gem using
         # the _default_ Ruby ciphers list.  This is _known_ to fail in later
-        # Ruby releases.  The gem provides a default cipher list that may
-        # function in these cases.  To use this connect with:
+        # Ruby releases.  The gem now detects :ssl => true, and replaces that
+        # with:
         # * :ssl => Stomp::SSLParams.new
+        #
+        # The above results in the use of Stomp default parameters.
+        #
+        # To specifically request Stomp default parameters, use:
         # * :ssl => Stomp::SSLParams.new(..., :ciphers => Stomp::DEFAULT_CIPHERS)
         #
         # If connecting with an SSLParams instance, and the _default_ Ruby
-        # ciphers list is required, use:
+        # ciphers list is actually required, use:
         # * :ssl => Stomp::SSLParams.new(..., :use_ruby_ciphers => true)
         #
         # If a custom ciphers list is required, connect with:
@@ -285,6 +289,8 @@ module Stomp
         if @logger && @logger.respond_to?(:on_ssl_connecting)
           @logger.on_ssl_connecting(log_params)
         end
+
+        # _dump_ctx(ctx)
 
         Timeout::timeout(@connect_timeout, Stomp::Error::SocketOpenTimeout) do
           tcp_socket = TCPSocket.open(@host, @port)
@@ -402,6 +408,11 @@ module Stomp
         line
     end
 
+    # Used for debugging
+    def _dump_ctx(ctx)
+      p [ "dc01", ctx.inspect ]
+      p [ "dc02ciphers", ctx.ciphers ]
+    end
   end # class Connection
 
 end # module Stomp
