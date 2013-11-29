@@ -102,7 +102,9 @@ module Stomp
         @jruby = true
       end
       if login.is_a?(Hash)
-        hashed_initialize(login)
+        lp = {}
+        lp.merge!(login)
+        hashed_initialize(lp)
       else
         @host = host
         @port = port
