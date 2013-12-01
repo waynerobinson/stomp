@@ -240,11 +240,11 @@ module Stomp
       headers = headers.symbolize_keys
       case @protocol
         when Stomp::SPL_12
-          # The ACK frame MUST include an id header matching the ack header 
+          # The NACK frame MUST include an id header matching the ack header 
           # of the MESSAGE being acknowledged.
           headers[:id] = message_id
         else # Stomp::SPL_11 only
-          # ACK has two REQUIRED headers: message-id, which MUST contain a value 
+          # NACK has two REQUIRED headers: message-id, which MUST contain a value 
           # matching the message-id for the MESSAGE being acknowledged and 
           # subscription, which MUST be set to match the value of the subscription's 
           # id header.
