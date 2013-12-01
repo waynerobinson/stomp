@@ -102,9 +102,7 @@ module Stomp
         @jruby = true
       end
       if login.is_a?(Hash)
-        lp = {}
-        lp.merge!(login)
-        hashed_initialize(lp)
+        hashed_initialize(login)
       else
         @host = host
         @port = port
@@ -148,7 +146,8 @@ module Stomp
     # hashed_initialize prepares a new connection with a Hash of initialization
     # parameters.
     def hashed_initialize(params)
-      @parameters = refine_params(params)
+      lp = _hdup(params)
+      @parameters = refine_params(lp)
       @reliable =  @parameters[:reliable]
       @reconnect_delay = @parameters[:initial_reconnect_delay]
       @connect_headers = @parameters[:connect_headers]

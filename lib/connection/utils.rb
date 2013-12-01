@@ -209,6 +209,17 @@ module Stomp
       @passcode = current_host[:passcode] || ""
     end
 
+    # Duplicate parameters hash
+    def _hdup(h)
+      ldup = {}
+      ldup.merge!(h)
+      ldup[:hosts] = []
+      h[:hosts].each do |hv|
+        ldup[:hosts] << hv.dup
+      end
+      ldup
+    end
+
     # max_reconnect_attempts? returns nil or the number of maximum reconnect
     # attempts.
     def max_reconnect_attempts?
