@@ -143,9 +143,7 @@ module Stomp
       @replay_messages_by_txn = {}
 
       @listener_map = Hash.new do |message|
-        if @logger && @logger.respond_to?(:on_miscerr)
-          @logger.on_miscerr(@connection.log_params, "Received unknown frame type: '#{message.command}'\n")
-        else
+        unless @connection.slog(:on_miscerr, @connection.log_params, "Received unknown frame type: '#{message.command}'\n")
           warn "Received unknown frame type: '#{message.command}'\n"
         end
       end

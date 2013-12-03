@@ -1,3 +1,5 @@
+# -*- encoding: utf-8 -*-
+
 module Stomp
   class NullLogger
     def on_miscerr(parms, error_msg)
