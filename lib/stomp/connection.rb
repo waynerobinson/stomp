@@ -75,6 +75,8 @@ module Stomp
     #     :max_hbrlck_fails => 0,
     #     :fast_hbs_adjust => 0.0,
     #     :connread_timeout => 0,
+    #     :tcp_nodelay => true,
+    #     :start_timeout => 10,
     #   }
     #
     #   e.g. c = Stomp::Connection.new(hash)
@@ -123,6 +125,8 @@ module Stomp
         @max_hbrlck_fails = 0 # 0 means never retry for HB read lock failures
         @fast_hbs_adjust = 0.0 # Fast heartbeat senders sleep adjustment
         @connread_timeout = 0 # Connect read CONNECTED/ERROR timeout
+        @tcp_nodelay = true # Disable Nagle
+        @start_timeout = 10 # Client only, startup timeout
         warn "login looks like a URL, do you have the correct parameters?" if @login =~ /:\/\//
       end
 
@@ -142,7 +146,8 @@ module Stomp
     # hashed_initialize prepares a new connection with a Hash of initialization
     # parameters.
     def hashed_initialize(params)
-      @parameters = refine_params(params)
+      lp = _hdup(params)
+      @parameters = refine_params(lp)
       @reliable =  @parameters[:reliable]
       @reconnect_delay = @parameters[:initial_reconnect_delay]
       @connect_headers = @parameters[:connect_headers]
@@ -158,6 +163,11 @@ module Stomp
       @max_hbrlck_fails = @parameters[:max_hbrlck_fails]
       @fast_hbs_adjust = @parameters[:fast_hbs_adjust]
       @connread_timeout = @parameters[:connread_timeout]
+      #
+       # Try to support Ruby 1.9.x and 2.x ssl.
+      @parameters[:hosts].each do |ah|
+        ah[:ssl] = Stomp::SSLParams.new if ah[:ssl] == true
+      end
       #sets the first host to connect
       change_host
     end
@@ -183,7 +193,9 @@ module Stomp
       headers = headers.symbolize_keys
       headers[:transaction] = name
       _headerCheck(headers)
-      @logger.on_begin(log_params, headers)
+      if @logger && @logger.respond_to?(:on_begin)
+        @logger.on_begin(log_params, headers)
+      end
       transmit(Stomp::CMD_BEGIN, headers)
     end
 
@@ -214,7 +226,9 @@ module Stomp
           headers[:'message-id'] = message_id
       end
       _headerCheck(headers)
-      @logger.on_ack(log_params, headers)
+      if @logger && @logger.respond_to?(:on_ack)
+        @logger.on_ack(log_params, headers)
+      end
       transmit(Stomp::CMD_ACK, headers)
     end
 
@@ -226,11 +240,11 @@ module Stomp
       headers = headers.symbolize_keys
       case @protocol
         when Stomp::SPL_12
-          # The ACK frame MUST include an id header matching the ack header 
+          # The NACK frame MUST include an id header matching the ack header 
           # of the MESSAGE being acknowledged.
           headers[:id] = message_id
         else # Stomp::SPL_11 only
-          # ACK has two REQUIRED headers: message-id, which MUST contain a value 
+          # NACK has two REQUIRED headers: message-id, which MUST contain a value 
           # matching the message-id for the MESSAGE being acknowledged and 
           # subscription, which MUST be set to match the value of the subscription's 
           # id header.
@@ -238,7 +252,9 @@ module Stomp
           raise Stomp::Error::SubscriptionRequiredError unless headers[:subscription]
       end
       _headerCheck(headers)
-      @logger.on_nack(log_params, headers)
+      if @logger && @logger.respond_to?(:on_nack)
+        @logger.on_nack(log_params, headers)
+      end
       transmit(Stomp::CMD_NACK, headers)
     end
 
@@ -258,7 +274,9 @@ module Stomp
       headers = headers.symbolize_keys
       headers[:transaction] = name
       _headerCheck(headers)
-      @logger.on_abort(log_params, headers)
+      if @logger && @logger.respond_to?(:on_abort)
+        @logger.on_abort(log_params, headers)
+      end
       transmit(Stomp::CMD_ABORT, headers)
     end
 
@@ -273,7 +291,9 @@ module Stomp
         headers[:id] = subId if headers[:id].nil?
       end
       _headerCheck(headers)
-      @logger.on_subscribe(log_params, headers)
+      if @logger && @logger.respond_to?(:on_subscribe)
+        @logger.on_subscribe(log_params, headers)
+      end
 
       # Store the subscription so that we can replay if we reconnect.
       if @reliable
@@ -296,7 +316,9 @@ module Stomp
         headers[:id] = subId unless headers[:id]
       end
       _headerCheck(headers)
-      @logger.on_unsubscribe(log_params, headers)
+      if @logger && @logger.respond_to?(:on_unsubscribe)
+        @logger.on_unsubscribe(log_params, headers)
+      end
       transmit(Stomp::CMD_UNSUBSCRIBE, headers)
       if @reliable
         subId = dest if subId.nil?
@@ -312,7 +334,9 @@ module Stomp
       headers = headers.symbolize_keys
       headers[:destination] = destination
       _headerCheck(headers)
-      @logger.on_publish(log_params, message, headers)
+      if @logger && @logger.respond_to?(:on_publish)
+        @logger.on_publish(log_params, message, headers)
+      end
       transmit(Stomp::CMD_SEND, headers, message)
     end
 
@@ -375,7 +399,9 @@ module Stomp
       end
       transmit(Stomp::CMD_DISCONNECT, headers)
       @disconnect_receipt = receive if headers[:receipt]
-      @logger.on_disconnect(log_params)
+      if @logger && @logger.respond_to?(:on_disconnect)
+        @logger.on_disconnect(log_params)
+      end
       close_socket
     end
 
@@ -398,7 +424,9 @@ module Stomp
       super_result = __old_receive()
       if super_result.nil? && @reliable && !closed?
         errstr = "connection.receive returning EOF as nil - resetting connection.\n"
-        @logger.on_miscerr(log_params, "es_recv: " + errstr)
+        if @logger && @logger.respond_to?(:on_miscerr)
+          @logger.on_miscerr(log_params, "es_recv: " + errstr)
+        end
         $stderr.print errstr
 
         # !!! This initiates a re-connect !!!
@@ -417,7 +445,9 @@ module Stomp
         @closed = true
         warn 'warning: broker sent EOF, and connection not reliable' unless defined?(Test)
       end
-      @logger.on_receive(log_params, super_result)
+      if @logger && @logger.respond_to?(:on_receive)
+        @logger.on_receive(log_params, super_result)
+      end
       return super_result
     end
 

@@ -28,7 +28,6 @@ class TestURLLogins < Test::Unit::TestCase
     ]
     @tdfailover = [
       "failover://(stomp://#{hostname}:#{portnum})",
-      "failover://(stomp+ssl://#{hostname}:#{sslpn})",
       "failover://(stomp://#{hostname}:#{portnum})",
       "failover://(stomp://#{hostname}:#{portnum})?whatup=doc&coyote=kaboom",
       "failover://(stomp://#{hostname}:#{portnum})?whatup=doc",
@@ -38,14 +37,15 @@ class TestURLLogins < Test::Unit::TestCase
       'failover://(stomp://f@#$$%^&*()_+=o.o::b~!@#$%^&*()+-_=?:<>,.@@' + "localhost" + ":#{portnum}" + ")?a=b",
       'failover://(stomp://f@#$$%^&*()_+=o.o::b~!@#$%^&*()+-_=:<>,.@@' + "localhost" + ":#{portnum}" + ")?c=d&e=f",
       "failover://(stomp://usera:passa@#{hostname}:#{portnum})",
-      "failover://(stomp+ssl://usera:passa@#{hostname}:#{sslpn})",
       "failover://(stomp://usera:@#{hostname}:#{portnum})",
       "failover://(stomp://#{hostname}:#{portnum},stomp://#{hostname}:#{portnum})",
       "failover://(stomp://usera:passa@#{hostname}:#{portnum},stomp://#{hostname}:#{portnum})",
       "failover://(stomp://usera:@#{hostname}:#{portnum},stomp://#{hostname}:#{portnum})",
-      "failover://(stomp://usera:@#{hostname}:#{portnum},stomp+ssl://#{hostname}:#{sslpn})",
       "failover://(stomp://#{hostname}:#{portnum},stomp://#{hostname}:#{portnum})?a=b&c=d",
       "failover://(stomp://#{hostname}:#{portnum},stomp://#{hostname}:#{portnum})?a=b&c=d&connect_timeout=2020",
+      "failover://(stomp+ssl://#{hostname}:#{sslpn})",
+      "failover://(stomp+ssl://usera:passa@#{hostname}:#{sslpn})",
+      "failover://(stomp://usera:@#{hostname}:#{portnum},stomp+ssl://#{hostname}:#{sslpn})",
     ]
 
     @badparms = "failover://(stomp://#{hostname}:#{portnum})?a=b&noequal"

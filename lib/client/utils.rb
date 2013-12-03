@@ -143,7 +143,11 @@ module Stomp
       @replay_messages_by_txn = {}
 
       @listener_map = Hash.new do |message|
-        @logger.on_miscerr(@connection.log_params, "Received unknown frame type: '#{message.command}'\n")
+        if @logger && @logger.respond_to?(:on_miscerr)
+          @logger.on_miscerr(@connection.log_params, "Received unknown frame type: '#{message.command}'\n")
+        else
+          warn "Received unknown frame type: '#{message.command}'\n"
+        end
       end
 
       @listener_map[Stomp::CMD_MESSAGE] = lambda {|message| find_listener(message) }

@@ -183,7 +183,8 @@ module Stomp
         :max_hbrlck_fails => 0,
         :fast_hbs_adjust => 0.0,
         :connread_timeout => 0,
-        :tcp_nodelay => true
+        :tcp_nodelay => true,
+        :start_timeout => 10,
       }
 
       res_params = default_params.merge(params)
@@ -206,6 +207,17 @@ module Stomp
       @port = current_host[:port] || Connection::default_port(@ssl)
       @login = current_host[:login] || ""
       @passcode = current_host[:passcode] || ""
+    end
+
+    # Duplicate parameters hash
+    def _hdup(h)
+      ldup = {}
+      ldup.merge!(h)
+      ldup[:hosts] = []
+      h[:hosts].each do |hv|
+        ldup[:hosts] << hv.dup
+      end
+      ldup
     end
 
     # max_reconnect_attempts? returns nil or the number of maximum reconnect
