@@ -208,7 +208,8 @@ module Stomp
       ldup = {}
       ldup.merge!(h)
       ldup[:hosts] = []
-      h[:hosts].each do |hv|
+      hvals = h[:hosts].nil? ? h["hosts"] : h[:hosts]
+      hvals.each do |hv|
         ldup[:hosts] << hv.dup
       end
       ldup

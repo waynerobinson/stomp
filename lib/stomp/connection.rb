@@ -164,9 +164,11 @@ module Stomp
       @fast_hbs_adjust = @parameters[:fast_hbs_adjust]
       @connread_timeout = @parameters[:connread_timeout]
       #
-       # Try to support Ruby 1.9.x and 2.x ssl.
-      @parameters[:hosts].each do |ah|
-        ah[:ssl] = Stomp::SSLParams.new if ah[:ssl] == true
+      # Try to support Ruby 1.9.x and 2.x ssl.
+      unless defined?(RSpec)
+        @parameters[:hosts].each do |ah|
+          ah[:ssl] = Stomp::SSLParams.new if ah[:ssl] == true
+        end
       end
       #sets the first host to connect
       change_host
