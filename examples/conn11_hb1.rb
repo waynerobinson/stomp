@@ -6,11 +6,11 @@
 #
 if Kernel.respond_to?(:require_relative)
   require_relative("./stomp11_common")
-  require_relative("./slogger")
+  require_relative("./examplogger")
 else
   $LOAD_PATH << File.dirname(__FILE__)
   require "stomp11_common"
-  require "slogger"
+  require "examplogger"
 end
 include Stomp11Common
 
