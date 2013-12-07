@@ -130,9 +130,7 @@ module Stomp
           @failure = $!
           raise unless @reliable
           errstr = "transmit to #{@host} failed: #{$!}\n"
-          if @logger && @logger.respond_to?(:on_miscerr)
-            @logger.on_miscerr(log_params, "es_trans: " + errstr)
-          else
+          unless slog(:on_miscerr, log_params, "es_trans: " + errstr)
             $stderr.print errstr
           end
           # !!! This loop initiates a re-connect !!!
@@ -200,15 +198,10 @@ module Stomp
     # open_tcp_socket opens a TCP socket.
     def open_tcp_socket()
       tcp_socket = nil
-
-      if @logger && @logger.respond_to?(:on_connecting)
-        @logger.on_connecting(log_params)
-      end
-
+      slog(:on_connecting, log_params)
       Timeout::timeout(@connect_timeout, Stomp::Error::SocketOpenTimeout) do
         tcp_socket = TCPSocket.open(@host, @port)
       end
-
       tcp_socket
     end
 
@@ -286,12 +279,8 @@ module Stomp
 
         #
         ssl = nil
-        if @logger && @logger.respond_to?(:on_ssl_connecting)
-          @logger.on_ssl_connecting(log_params)
-        end
-
+        slog(:on_ssl_connecting, log_params)
         # _dump_ctx(ctx)
-
         Timeout::timeout(@connect_timeout, Stomp::Error::SocketOpenTimeout) do
           tcp_socket = TCPSocket.open(@host, @port)
           ssl = OpenSSL::SSL::SSLSocket.new(tcp_socket, ctx)
@@ -311,16 +300,12 @@ module Stomp
           end
           @ssl.peer_cert = ssl.peer_cert
         end
-        if @logger && @logger.respond_to?(:on_ssl_connected)
-          @logger.on_ssl_connected(log_params)
-        end
+        slog(:on_ssl_connected, log_params)
         ssl
       rescue Exception => ex
-        if @logger && @logger.respond_to?(:on_ssl_connectfail)
-          lp = log_params.clone
-          lp[:ssl_exception] = ex
-          @logger.on_ssl_connectfail(lp)
-        end
+        lp = log_params.clone
+        lp[:ssl_exception] = ex
+        slog(:on_ssl_connectfail, lp)
         #
         raise # Reraise
       end

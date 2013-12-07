@@ -116,9 +116,7 @@ module Stomp
             used_socket = open_socket() # sets @closed = false if OK
             # Open is complete
             connect(used_socket)
-            if @logger && @logger.respond_to?(:on_connected)
-              @logger.on_connected(log_params)
-            end
+            slog(:on_connected, log_params)
             @connection_attempts = 0
           rescue
             @failure = $!
@@ -132,20 +130,16 @@ module Stomp
             # b) should never be retried
             raise if @failure.is_a?(Stomp::Error::ProtocolError11p)
 
-            if @logger && @logger.respond_to?(:on_connectfail)
-              # on_connectfail may raise
-              begin
-                @logger.on_connectfail(log_params)
-              rescue Exception => aex
-                raise if aex.is_a?(Stomp::Error::LoggerConnectionError)
+            begin
+              unless slog(:on_connectfail,log_params)
+                $stderr.print "connect to #{@host} failed: #{$!} will retry(##{@connection_attempts}) in #{@reconnect_delay}\n"
               end
-            else
-              $stderr.print "connect to #{@host} failed: #{$!} will retry(##{@connection_attempts}) in #{@reconnect_delay}\n"
+            rescue Exception => aex
+              raise if aex.is_a?(Stomp::Error::LoggerConnectionError)
             end
+
             raise Stomp::Error::MaxReconnectAttempts if max_reconnect_attempts?
-
             sleep(@reconnect_delay)
-
             @connection_attempts += 1
 
             if @parameters
@@ -214,7 +208,8 @@ module Stomp
       ldup = {}
       ldup.merge!(h)
       ldup[:hosts] = []
-      h[:hosts].each do |hv|
+      hvals = h[:hosts].nil? ? h["hosts"] : h[:hosts]
+      hvals.each do |hv|
         ldup[:hosts] << hv.dup
       end
       ldup
@@ -249,9 +244,7 @@ module Stomp
           @failure = $!
           raise unless @reliable
           errstr = "receive failed: #{$!}"
-          if @logger && @logger.respond_to?(:on_miscerr)
-            @logger.on_miscerr(log_params, "es_oldrecv: " + errstr)
-          else
+          unless slog(:on_miscerr, log_params, "es_oldrecv: " + errstr)
             $stderr.print errstr
           end
 
