@@ -5,10 +5,10 @@ require 'stomp'
 require 'logger'  # for the 'local' logger
 #
 if Kernel.respond_to?(:require_relative)
-  require_relative("./slogger")
+  require_relative("./examplogger")
 else
   $LOAD_PATH << File.dirname(__FILE__)
-  require "slogger"
+  require "examplogger"
 end
 #
 # == A STOMP::Connection program which uses the callback logging facility.

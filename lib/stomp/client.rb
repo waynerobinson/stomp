@@ -50,6 +50,8 @@ module Stomp
     #     :max_hbrlck_fails => 0,
     #     :fast_hbs_adjust => 0.0,
     #     :connread_timeout => 0,
+    #     :tcp_nodelay => true,
+    #     :start_timeout => 10,
     #   }
     #
     #   e.g. c = Stomp::Client.new(hash)
@@ -84,10 +86,15 @@ module Stomp
       @logger = @parameters[:logger] ||= Stomp::NullLogger.new
 
       @start_timeout = @parameters[:start_timeout] || 10
-      Timeout.timeout(@start_timeout, Stomp::Error::StartTimeoutException.new(@start_timeout)) do
-        create_error_handler
-        create_connection(autoflush)
-        start_listeners()
+      begin
+        timeout(@start_timeout) {
+          create_error_handler
+          create_connection(autoflush)
+          start_listeners()
+        }
+      rescue TimeoutError
+        ex = Stomp::Error::StartTimeoutException.new(@start_timeout)
+        raise ex
       end
     end
 
@@ -190,14 +197,8 @@ module Stomp
       if block_given?
         headers['receipt'] = register_receipt_listener lambda {|r| yield r}
       end
-      if protocol() == Stomp::SPL_12
-        @connection.ack(message.headers['ack'], headers)
-      elsif protocol == Stomp::SPL_11
-        headers.merge!(:subscription => message.headers['subscription'])
-        @connection.ack(message.headers['message-id'], headers)
-      else
-        @connection.ack(message.headers['message-id'], headers)
-      end
+      context = ack_context_for(message, headers)
+      @connection.ack context[:message_id], context[:headers]
     end
 
     # For posterity, we alias:
@@ -205,7 +206,22 @@ module Stomp
 
     # Stomp 1.1+ NACK.
     def nack(message, headers = {})
-      @connection.nack(message, headers)
+      context = ack_context_for(message, headers)
+      @connection.nack context[:message_id], context[:headers]
+    end
+
+    #
+    def ack_context_for(message, headers)
+      id = case protocol
+        when Stomp::SPL_12
+         'ack'
+        when Stomp::SPL_11
+         headers.merge!(:subscription => message.headers['subscription'])
+         'message-id'
+        else
+         'message-id'
+      end
+      {:message_id => message.headers[id], :headers => headers}
     end
 
     # Unreceive a message, sending it back to its queue or to the DLQ.

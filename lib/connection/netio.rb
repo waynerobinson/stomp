@@ -130,9 +130,7 @@ module Stomp
           @failure = $!
           raise unless @reliable
           errstr = "transmit to #{@host} failed: #{$!}\n"
-          if @logger && @logger.respond_to?(:on_miscerr)
-            @logger.on_miscerr(log_params, "es_trans: " + errstr)
-          else
+          unless slog(:on_miscerr, log_params, "es_trans: " + errstr)
             $stderr.print errstr
           end
           # !!! This loop initiates a re-connect !!!
@@ -200,15 +198,10 @@ module Stomp
     # open_tcp_socket opens a TCP socket.
     def open_tcp_socket()
       tcp_socket = nil
-
-      if @logger && @logger.respond_to?(:on_connecting)
-        @logger.on_connecting(log_params)
-      end
-
+      slog(:on_connecting, log_params)
       Timeout::timeout(@connect_timeout, Stomp::Error::SocketOpenTimeout) do
         tcp_socket = TCPSocket.open(@host, @port)
       end
-
       tcp_socket
     end
 
@@ -219,15 +212,19 @@ module Stomp
         ctx = OpenSSL::SSL::SSLContext.new
         ctx.verify_mode = OpenSSL::SSL::VERIFY_NONE # Assume for now
         #
-        # Note: if a client uses :ssl => true this results in the gem using
+        # Note: if a client uses :ssl => true this would result in the gem using
         # the _default_ Ruby ciphers list.  This is _known_ to fail in later
-        # Ruby releases.  The gem provides a default cipher list that may
-        # function in these cases.  To use this connect with:
+        # Ruby releases.  The gem now detects :ssl => true, and replaces that
+        # with:
         # * :ssl => Stomp::SSLParams.new
+        #
+        # The above results in the use of Stomp default parameters.
+        #
+        # To specifically request Stomp default parameters, use:
         # * :ssl => Stomp::SSLParams.new(..., :ciphers => Stomp::DEFAULT_CIPHERS)
         #
         # If connecting with an SSLParams instance, and the _default_ Ruby
-        # ciphers list is required, use:
+        # ciphers list is actually required, use:
         # * :ssl => Stomp::SSLParams.new(..., :use_ruby_ciphers => true)
         #
         # If a custom ciphers list is required, connect with:
@@ -275,16 +272,15 @@ module Stomp
             if @ssl.ciphers # User ciphers list?
               ctx.ciphers = @ssl.ciphers # Accept user supplied ciphers
             else
+              ctx.ciphers = Stomp::DEFAULT_CIPHERS # Just use Stomp defaults
             end
           end
         end
 
         #
         ssl = nil
-        if @logger && @logger.respond_to?(:on_ssl_connecting)
-          @logger.on_ssl_connecting(log_params)
-        end
-
+        slog(:on_ssl_connecting, log_params)
+        # _dump_ctx(ctx)
         Timeout::timeout(@connect_timeout, Stomp::Error::SocketOpenTimeout) do
           tcp_socket = TCPSocket.open(@host, @port)
           ssl = OpenSSL::SSL::SSLSocket.new(tcp_socket, ctx)
@@ -304,16 +300,12 @@ module Stomp
           end
           @ssl.peer_cert = ssl.peer_cert
         end
-        if @logger && @logger.respond_to?(:on_ssl_connected)
-          @logger.on_ssl_connected(log_params)
-        end
+        slog(:on_ssl_connected, log_params)
         ssl
       rescue Exception => ex
-        if @logger && @logger.respond_to?(:on_ssl_connectfail)
-          lp = log_params.clone
-          lp[:ssl_exception] = ex
-          @logger.on_ssl_connectfail(lp)
-        end
+        lp = log_params.clone
+        lp[:ssl_exception] = ex
+        slog(:on_ssl_connectfail, lp)
         #
         raise # Reraise
       end
@@ -401,6 +393,11 @@ module Stomp
         line
     end
 
+    # Used for debugging
+    def _dump_ctx(ctx)
+      p [ "dc01", ctx.inspect ]
+      p [ "dc02ciphers", ctx.ciphers ]
+    end
   end # class Connection
 
 end # module Stomp
