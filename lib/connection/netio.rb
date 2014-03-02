@@ -171,7 +171,7 @@ module Stomp
           end
         end
         _wire_write(used_socket,"")
-        used_socket.write body
+        used_socket.write body unless body == ''
         used_socket.write "\0"
         used_socket.flush if autoflush
 
