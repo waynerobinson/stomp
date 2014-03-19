@@ -306,6 +306,10 @@ module Stomp
         lp = log_params.clone
         lp[:ssl_exception] = ex
         slog(:on_ssl_connectfail, lp)
+        if ssl
+          # shut down the TCP socket - we just failed to do the SSL handshake in time
+          ssl.close
+        end
         #
         raise # Reraise
       end
