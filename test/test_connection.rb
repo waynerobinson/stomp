@@ -231,7 +231,7 @@ class TestConnection < Test::Unit::TestCase
   
   # Test that a connection frame is present.
   def test_connection_frame
-  	assert_not_nil @conn.connection_frame
+    assert_not_nil @conn.connection_frame
   end
   
   # Test messages with multiple line ends.
@@ -516,6 +516,48 @@ class TestConnection < Test::Unit::TestCase
       assert @conn.jruby
     else
       assert !@conn.jruby
+    end
+  end
+
+  # Test that methods detect an empty header key.
+  def test_empty_header_key
+    #
+    bad_headers = {"a" => "11", "" => "emptykey", :c => "ccc"}
+    #
+    assert_raise Stomp::Error::ProtocolErrorEmptyHeaderKey do
+      @conn.ack("dummy_data", bad_headers)
+    end
+    #
+    assert_raise Stomp::Error::ProtocolErrorEmptyHeaderKey do
+      @conn.nack("dummy_data", bad_headers)
+    end if @conn.protocol != Stomp::SPL_10
+    #
+    assert_raise Stomp::Error::ProtocolErrorEmptyHeaderKey do
+      @conn.begin("dummy_data", bad_headers)
+    end
+    #
+    assert_raise Stomp::Error::ProtocolErrorEmptyHeaderKey do
+      @conn.commit("dummy_data", bad_headers)
+    end
+    #
+    assert_raise Stomp::Error::ProtocolErrorEmptyHeaderKey do
+      @conn.abort("dummy_data", bad_headers)
+    end
+    #
+    assert_raise Stomp::Error::ProtocolErrorEmptyHeaderKey do
+      @conn.subscribe("dummy_data", bad_headers)
+    end
+    #
+    assert_raise Stomp::Error::ProtocolErrorEmptyHeaderKey do
+      @conn.unsubscribe("dummy_data", bad_headers)
+    end
+    #
+    assert_raise Stomp::Error::ProtocolErrorEmptyHeaderKey do
+      @conn.publish("dummy_data","dummy_data", bad_headers)
+    end
+    #
+    assert_raise Stomp::Error::ProtocolErrorEmptyHeaderKey do
+      @conn.disconnect(bad_headers)
     end
   end
 
