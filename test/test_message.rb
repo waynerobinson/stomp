@@ -172,5 +172,37 @@ class TestMessage < Test::Unit::TestCase
     assert_equal "val1", bframe.headers["h2"][2], "Expected val1"
   end
 
+	# Test headers with empty key / value
+	def test_0060_hdr_ekv
+    #
+    amsg = "MESSAGE\n" +
+      "h1:val1\n" +
+      ":val3\n" +
+      "h2:val2\n" +
+      "\n" +
+      "payload" +
+      "\0\n"
+    assert_raise Stomp::Error::ProtocolErrorEmptyHeaderKey do
+      aframe = Stomp::Message.new(amsg, false)
+    end
+    assert_raise Stomp::Error::ProtocolErrorEmptyHeaderKey do
+      aframe = Stomp::Message.new(amsg, true)
+    end
+    #
+    amsg = "MESSAGE\n" +
+      "h1:val1\n" +
+      "h2:val3\n" +
+      "h3:\n" +
+      "\n" +
+      "payload" +
+      "\0\n"
+    assert_raise Stomp::Error::ProtocolErrorEmptyHeaderValue do
+      aframe = Stomp::Message.new(amsg, false)
+    end
+    assert_nothing_raised {
+      aframe = Stomp::Message.new(amsg, true)
+    }
+  end
+
 end
 

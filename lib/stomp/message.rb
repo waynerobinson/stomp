@@ -85,6 +85,9 @@ module Stomp
         end
       end
 
+      raise Stomp::Error::ProtocolErrorEmptyHeaderKey if self.headers.has_key?("")
+      raise Stomp::Error::ProtocolErrorEmptyHeaderValue if (!protocol11p) && self.headers.has_value?("")
+
       body_length = -1
 
       if self.headers['content-length']
