@@ -561,5 +561,52 @@ class TestConnection < Test::Unit::TestCase
     end
   end
 
+  # Test that methods detect an empty header value.
+  # STOMP 1.0 only.
+  def test_empty_header_value
+    if @conn.protocol != Stomp::SPL_10
+      assert true
+      return
+    end
+    #
+    bad_headers = {"a" => "11", "hdra" => "", :c => "ccc"}
+    #
+    assert_raise Stomp::Error::ProtocolErrorEmptyHeaderValue do
+      @conn.ack("dummy_data", bad_headers)
+    end
+    #
+    assert_raise Stomp::Error::ProtocolErrorEmptyHeaderValue do
+      @conn.nack("dummy_data", bad_headers)
+    end if @conn.protocol != Stomp::SPL_10
+    #
+    assert_raise Stomp::Error::ProtocolErrorEmptyHeaderValue do
+      @conn.begin("dummy_data", bad_headers)
+    end
+    #
+    assert_raise Stomp::Error::ProtocolErrorEmptyHeaderValue do
+      @conn.commit("dummy_data", bad_headers)
+    end
+    #
+    assert_raise Stomp::Error::ProtocolErrorEmptyHeaderValue do
+      @conn.abort("dummy_data", bad_headers)
+    end
+    #
+    assert_raise Stomp::Error::ProtocolErrorEmptyHeaderValue do
+      @conn.subscribe("dummy_data", bad_headers)
+    end
+    #
+    assert_raise Stomp::Error::ProtocolErrorEmptyHeaderValue do
+      @conn.unsubscribe("dummy_data", bad_headers)
+    end
+    #
+    assert_raise Stomp::Error::ProtocolErrorEmptyHeaderValue do
+      @conn.publish("dummy_data","dummy_data", bad_headers)
+    end
+    #
+    assert_raise Stomp::Error::ProtocolErrorEmptyHeaderValue do
+      @conn.disconnect(bad_headers)
+    end
+  end
+
 end
 

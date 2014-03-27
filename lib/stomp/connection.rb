@@ -193,6 +193,7 @@ module Stomp
     def begin(name, headers = {})
       raise Stomp::Error::NoCurrentConnection if @closed_check && closed?
       raise Stomp::Error::ProtocolErrorEmptyHeaderKey if headers.has_key?("")
+      raise Stomp::Error::ProtocolErrorEmptyHeaderValue if @protocol == Stomp::SPL_10 && headers.has_value?("")
       headers = headers.symbolize_keys
       headers[:transaction] = name
       _headerCheck(headers)
@@ -207,6 +208,7 @@ module Stomp
     def ack(message_id, headers = {})
       raise Stomp::Error::NoCurrentConnection if @closed_check && closed?
       raise Stomp::Error::ProtocolErrorEmptyHeaderKey if headers.has_key?("")
+      raise Stomp::Error::ProtocolErrorEmptyHeaderValue if @protocol == Stomp::SPL_10 && headers.has_value?("")
       raise Stomp::Error::MessageIDRequiredError if message_id.nil? || message_id == ""
       headers = headers.symbolize_keys
 
@@ -261,6 +263,7 @@ module Stomp
     def commit(name, headers = {})
       raise Stomp::Error::NoCurrentConnection if @closed_check && closed?
       raise Stomp::Error::ProtocolErrorEmptyHeaderKey if headers.has_key?("")
+      raise Stomp::Error::ProtocolErrorEmptyHeaderValue if @protocol == Stomp::SPL_10 && headers.has_value?("")
       headers = headers.symbolize_keys
       headers[:transaction] = name
       _headerCheck(headers)
@@ -272,6 +275,7 @@ module Stomp
     def abort(name, headers = {})
       raise Stomp::Error::NoCurrentConnection if @closed_check && closed?
       raise Stomp::Error::ProtocolErrorEmptyHeaderKey if headers.has_key?("")
+      raise Stomp::Error::ProtocolErrorEmptyHeaderValue if @protocol == Stomp::SPL_10 && headers.has_value?("")
       headers = headers.symbolize_keys
       headers[:transaction] = name
       _headerCheck(headers)
@@ -284,6 +288,7 @@ module Stomp
     def subscribe(name, headers = {}, subId = nil)
       raise Stomp::Error::NoCurrentConnection if @closed_check && closed?
       raise Stomp::Error::ProtocolErrorEmptyHeaderKey if headers.has_key?("")
+      raise Stomp::Error::ProtocolErrorEmptyHeaderValue if @protocol == Stomp::SPL_10 && headers.has_value?("")
       headers = headers.symbolize_keys
       headers[:destination] = name
       if @protocol >= Stomp::SPL_11
@@ -308,6 +313,7 @@ module Stomp
     def unsubscribe(dest, headers = {}, subId = nil)
       raise Stomp::Error::NoCurrentConnection if @closed_check && closed?
       raise Stomp::Error::ProtocolErrorEmptyHeaderKey if headers.has_key?("")
+      raise Stomp::Error::ProtocolErrorEmptyHeaderValue if @protocol == Stomp::SPL_10 && headers.has_value?("")
       headers = headers.symbolize_keys
       headers[:destination] = dest
       if @protocol >= Stomp::SPL_11
@@ -329,6 +335,7 @@ module Stomp
     def publish(destination, message, headers = {})
       raise Stomp::Error::NoCurrentConnection if @closed_check && closed?
       raise Stomp::Error::ProtocolErrorEmptyHeaderKey if headers.has_key?("")
+      raise Stomp::Error::ProtocolErrorEmptyHeaderValue if @protocol == Stomp::SPL_10 && headers.has_value?("")
       headers = headers.symbolize_keys
       headers[:destination] = destination
       _headerCheck(headers)
@@ -388,6 +395,7 @@ module Stomp
     def disconnect(headers = {})
       raise Stomp::Error::NoCurrentConnection if @closed_check && closed?
       raise Stomp::Error::ProtocolErrorEmptyHeaderKey if headers.has_key?("")
+      raise Stomp::Error::ProtocolErrorEmptyHeaderValue if @protocol == Stomp::SPL_10 && headers.has_value?("")
       headers = headers.symbolize_keys
       _headerCheck(headers)
       if @protocol >= Stomp::SPL_11
