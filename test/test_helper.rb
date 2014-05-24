@@ -184,5 +184,58 @@ module TestBase
     jr = defined?(RUBY_ENGINE) && RUBY_ENGINE =~ /jruby/ ? true : false
   end
 
+  # OK Data For Default Tests
+  def dflt_data_ok()
+    [
+       #
+       {  :hosts => [
+          {:login => 'guest', :passcode => 'guest', :host => "localhost", :port => 61613, :ssl => false},
+          ],
+       :reliable => false,
+       },
+       #
+       {  :hosts => [
+          {:login => 'guest', :passcode => 'guest', :ssl => false},
+          ],
+       :reliable => false,
+       },
+       #
+       {  :hosts => [
+          {:login => 'guest', :passcode => 'guest', :port => 61613, :ssl => false},
+          ],
+       :reliable => false,
+       },
+       #
+       {  :hosts => [
+          {:login => 'guest', :passcode => 'guest', :host => "localhost" , :ssl => false},
+          ],
+       :reliable => false,
+       },
+       #
+       {  :hosts => [
+          {:login => 'guest', :passcode => 'guest', :host => '' , :ssl => false},
+          ],
+       :reliable => false,
+       },
+    ]
+  end
+
+  # Exception Data For Default Tests
+  def dflt_data_ex()
+    [
+      {},
+      {:hosts => 123},
+      {  :hosts => [
+        {:login => 'guest', :passcode => 'guest', :host => "localhost", :port => '' , :ssl => false},
+        ],
+      :reliable => false,
+      },
+      {  :hosts => [
+        {:login => 'guest', :passcode => 'guest', :host => "localhost", :port => -1 , :ssl => false},
+        ],
+      :reliable => false,
+      },
+    ]
+  end
 end
 

@@ -87,13 +87,20 @@ module Stomp
       hosts
     end
 
-    # A very basic check of required arguments.
+    # A sanity check of required arguments.
     def check_arguments!()
-      first_host = @parameters && @parameters[:hosts] && @parameters[:hosts].first
-
-      raise ArgumentError if first_host.nil?
-      raise ArgumentError if first_host[:host].nil? || first_host[:host].empty?
-      raise ArgumentError if first_host[:port].nil? || first_host[:port] == '' || first_host[:port] < 1 || first_host[:port] > 65535
+      raise ArgumentError.new("missing :hosts parameter") unless @parameters[:hosts]
+      raise ArgumentError.new("invalid :hosts type") unless @parameters[:hosts].is_a?(Array)
+      @parameters[:hosts].each do |hv|
+        # Validate port requested
+        raise ArgumentError.new("empty :port value in #{hv.inspect}") if hv[:port] == ''
+        unless hv[:port].nil? 
+          tpv = hv[:port].to_i
+          raise ArgumentError.new("invalid :port value=#{tpv} from #{hv.inspect}") if tpv < 1 || tpv > 65535
+        end
+        # Validate host requested (no validation here.  if nil or '', localhost will
+        # be used in #Connection.)
+      end
       raise ArgumentError unless @parameters[:reliable].is_a?(TrueClass) || @parameters[:reliable].is_a?(FalseClass)
     end
 

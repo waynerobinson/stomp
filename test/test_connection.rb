@@ -608,5 +608,18 @@ class TestConnection < Test::Unit::TestCase
     end
   end
 
+  # test issue99, OK values
+  def test_con_iss99_ok
+    return unless host() == "localhost" && port() == 61613
+    #
+    ok_vals = dflt_data_ok()
+    ok_vals.each do |hsv|
+      assert_nothing_raised {
+        conn = Stomp::Connection.new(hsv)
+        conn.disconnect
+      }
+    end
+  end
+
 end
 

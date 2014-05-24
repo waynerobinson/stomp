@@ -640,6 +640,33 @@ class TestClient < Test::Unit::TestCase
     end
   end
 
+  # test issue99, OK values
+  def test_cli_iss99_ok
+    return unless host() == "localhost" && port() == 61613
+    @client.close
+    #
+    ok_vals = dflt_data_ok()
+    ok_vals.each do |hsv|
+      assert_nothing_raised {
+        cli = Stomp::Client.open(hsv)
+        cli.close
+      }
+    end
+  end
+
+  # test issue99, exception values
+  def test_cli_iss99_ex
+    return unless host() == "localhost" && port() == 61613
+    @client.close
+    #
+    ex_vals = dflt_data_ex()
+    ex_vals.each do |hsv|
+      assert_raise ArgumentError do
+        cli = Stomp::Client.open(hsv)
+      end
+    end
+  end
+
   private
     def message_text
       name = caller_method_name unless name
