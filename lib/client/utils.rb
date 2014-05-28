@@ -13,7 +13,8 @@ module Stomp
       return false unless params.is_a?(Hash)
 
       @parameters = params
-      @parameters[:reliable] = true
+      # Do not override user choice of false.
+      @parameters[:reliable] = true unless @parameters[:reliable] == false
 
       true
     end
