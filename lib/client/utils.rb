@@ -103,6 +103,13 @@ module Stomp
         # be used in #Connection.)
       end
       raise ArgumentError unless @parameters[:reliable].is_a?(TrueClass) || @parameters[:reliable].is_a?(FalseClass)
+      #
+      if @parameters[:reliable] && @start_timeout > 0
+        warn "WARN detected :reliable == true and :start_timeout > 0"
+        warn "WARN this may cause incorrect fail-over behavior"
+        warn "WARN use :start_timeout => 0 to correct"
+        warn "WARN !! :start_timeout default will change to 0 in the next release"
+      end
     end
 
     # filter_options returns a new Hash of filtered options.

@@ -81,11 +81,10 @@ module Stomp
         parse_failover_url(login) ||
         parse_positional_params(login, passcode, host, port, reliable)
 
+      @logger = @parameters[:logger] ||= Stomp::NullLogger.new
+      @start_timeout = @parameters[:start_timeout] || 10.0
       check_arguments!()
 
-      @logger = @parameters[:logger] ||= Stomp::NullLogger.new
-
-      @start_timeout = @parameters[:start_timeout] || 10
       begin
         timeout(@start_timeout) {
           create_error_handler
