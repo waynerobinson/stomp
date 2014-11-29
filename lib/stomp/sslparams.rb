@@ -41,6 +41,9 @@ module Stomp
   # Client wants file existance check on initialize. true/value or false/nil.
   attr_reader :fsck #
 
+  # SSLContext options.
+  attr_reader :ssl_ctxopts #
+
   # initialize returns a valid instance of SSLParams or raises an error.
   def initialize(opts={})
 
@@ -76,6 +79,8 @@ module Stomp
      end
     end
    end
+   # SSLContext options.  See example:  ssl_ctxoptions.rb.
+   @ssl_ctxopts = opts[:ssl_ctxopts]  # nil or options to set
   end
 
  end # of class SSLParams

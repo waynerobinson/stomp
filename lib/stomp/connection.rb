@@ -46,6 +46,18 @@ module Stomp
       ssl ? 61612 : 61613
     end
 
+    # SSL Helper
+    def self.ssl_v2xoptions()
+        require 'openssl' unless defined?(OpenSSL)
+        # Mimic code in later versions of Ruby 2.x (and backported to later
+        # versions of 1.9.3).
+        opts = OpenSSL::SSL::OP_ALL
+        opts &= ~OpenSSL::SSL::OP_DONT_INSERT_EMPTY_FRAGMENTS if defined?(OpenSSL::SSL::OP_DONT_INSERT_EMPTY_FRAGMENTS)
+        opts |= OpenSSL::SSL::OP_NO_COMPRESSION if defined?(OpenSSL::SSL::OP_NO_COMPRESSION)
+        opts |= OpenSSL::SSL::OP_NO_SSLv2 if defined?(OpenSSL::SSL::OP_NO_SSLv2)
+        opts |= OpenSSL::SSL::OP_NO_SSLv3 if defined?(OpenSSL::SSL::OP_NO_SSLv3)
+    end
+
     # A new Connection object can be initialized using two forms:
     #
     # Hash (this is the recommended Connection initialization method):

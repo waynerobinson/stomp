@@ -275,6 +275,13 @@ module Stomp
               ctx.ciphers = Stomp::DEFAULT_CIPHERS # Just use Stomp defaults
             end
           end
+
+          # Set SSLContext Options if user asks for it in Stomp::SSLParams
+          # and SSL supports it.
+          if @ssl.ssl_ctxopts && ctx.respond_to?(:options=)
+	          ctx.options = @ssl.ssl_ctxopts
+          end
+
         end
 
         #
