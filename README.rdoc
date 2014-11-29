@@ -68,6 +68,7 @@ See _CHANGELOG.rdoc_ for details.
       :connread_timeout => 0,             # Timeout during CONNECT for read of CONNECTED/ERROR, secs
       :tcp_nodelay => true,               # Turns on the TCP_NODELAY socket option; disables Nagle's algorithm
       :start_timeout => 10,               # Timeout around Stomp::Client initialization
+      :sslctx_newparm => nil,             # Param for SSLContext.new
     }
 
     # for client

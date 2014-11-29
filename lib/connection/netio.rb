@@ -209,7 +209,7 @@ module Stomp
     def open_ssl_socket()
       require 'openssl' unless defined?(OpenSSL)
       begin # Any raised SSL exceptions
-        ctx = OpenSSL::SSL::SSLContext.new
+        ctx = @sslctx_newparm ? OpenSSL::SSL::SSLContext.new(@sslctx_newparm) : OpenSSL::SSL::SSLContext.new
         ctx.verify_mode = OpenSSL::SSL::VERIFY_NONE # Assume for now
         #
         # Note: if a client uses :ssl => true this would result in the gem using

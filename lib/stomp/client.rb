@@ -52,6 +52,7 @@ module Stomp
     #     :connread_timeout => 0,
     #     :tcp_nodelay => true,
     #     :start_timeout => 10,
+    #     :sslctx_newparm => nil,
     #   }
     #
     #   e.g. c = Stomp::Client.new(hash)

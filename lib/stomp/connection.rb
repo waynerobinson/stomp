@@ -89,6 +89,7 @@ module Stomp
     #     :connread_timeout => 0,
     #     :tcp_nodelay => true,
     #     :start_timeout => 10,
+    #     :sslctx_newparm => nil,
     #   }
     #
     #   e.g. c = Stomp::Connection.new(hash)
@@ -139,6 +140,7 @@ module Stomp
         @connread_timeout = 0 # Connect read CONNECTED/ERROR timeout
         @tcp_nodelay = true # Disable Nagle
         @start_timeout = 10 # Client only, startup timeout
+        @sslctx_newparm = nil # SSLContext.new paramater
         warn "login looks like a URL, do you have the correct parameters?" if @login =~ /:\/\//
       end
 
@@ -175,6 +177,7 @@ module Stomp
       @max_hbrlck_fails = @parameters[:max_hbrlck_fails]
       @fast_hbs_adjust = @parameters[:fast_hbs_adjust]
       @connread_timeout = @parameters[:connread_timeout]
+      @sslctx_newparm = @parameters[:sslctx_newparm]
       #
       # Try to support Ruby 1.9.x and 2.x ssl.
       unless defined?(RSpec)
