@@ -30,8 +30,7 @@ class ExampleSSL2
     ts_flist << "/home/gmallard/sslwork/2013/TestCA.crt"
 
     ssl_opts = Stomp::SSLParams.new(:ts_files => ts_flist.join(","), 
-      :fsck => true,
-    )
+      :fsck => true)
     #
     hash = { :hosts => [
         {:login => 'guest', :passcode => 'guest', :host => 'localhost', :port => 61612, :ssl => ssl_opts},
