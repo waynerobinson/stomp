@@ -77,18 +77,6 @@ describe Stomp::Client do
 
   describe "(created with invalid params)" do
 
-    it "should return ArgumentError if host is nil" do
-      lambda {
-        @client = Stomp::Client.new('login', 'passcode', nil)
-      }.should raise_error
-    end
-
-    it "should return ArgumentError if host is empty" do
-      lambda {
-        @client = Stomp::Client.new('login', 'passcode', '')
-      }.should raise_error
-    end
-
     it "should return ArgumentError if port is nil" do
       lambda {
         @client = Stomp::Client.new('login', 'passcode', 'localhost', nil)

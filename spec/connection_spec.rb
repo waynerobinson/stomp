@@ -30,7 +30,8 @@ describe Stomp::Connection do
       :fast_hbs_adjust => 0.0,
       :connread_timeout => 0,
       :tcp_nodelay => true,
-      :start_timeout => 10,
+      :start_timeout => 0,
+      :sslctx_newparm => nil,
    }
         
     #POG:
@@ -101,7 +102,9 @@ describe Stomp::Connection do
         :fastHbsAdjust => 0.0,
         :connreadTimeout => 0,
         :tcpNodelay => true,
-        :startTimeout => 10,
+        :startTimeout => 0,
+        :sslctxNewparm => nil,
+
       }
       
       @connection = Stomp::Connection.new(used_hash)
@@ -358,7 +361,8 @@ describe Stomp::Connection do
           :fast_hbs_adjust => 0.0,
           :connread_timeout => 0,
           :tcp_nodelay => true,
-          :start_timeout => 10,
+          :start_timeout => 0,
+          :sslctx_newparm => nil,
         }
         
         used_hash =  {
@@ -401,6 +405,7 @@ describe Stomp::Connection do
           :connread_timeout => 42,
           :tcp_nodelay => false,
           :start_timeout => 6,
+          :sslctx_newparm=>:TLSv1,
         }
         
         @connection = Stomp::Connection.new(used_hash)
