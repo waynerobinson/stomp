@@ -12,6 +12,8 @@ An implementation of the Stomp protocol for Ruby. See:
 
 See _CHANGELOG.rdoc_ for details.
 
+* Gem version 1.3.4. Miscellaneous fixes, see CHANGELOG.rdoc for details.
+* Gem version 1.3.3. Miscellaneous fixes, see CHANGELOG.rdoc for details.
 * Gem version 1.3.2. Miscellaneous fixes, see changelog for details.
 * Gem version 1.3.1. Bugfix for logging.
 * Gem version 1.3.0. Added ERROR frame raising as exception, added anonymous connections, miscellaneous other fixes.
@@ -67,7 +69,7 @@ See _CHANGELOG.rdoc_ for details.
                                           # correct for your environment, expect unnecessary fail overs
       :connread_timeout => 0,             # Timeout during CONNECT for read of CONNECTED/ERROR, secs
       :tcp_nodelay => true,               # Turns on the TCP_NODELAY socket option; disables Nagle's algorithm
-      :start_timeout => 10,               # Timeout around Stomp::Client initialization
+      :start_timeout => 0,                # Timeout around Stomp::Client initialization
       :sslctx_newparm => nil,             # Param for SSLContext.new
     }
 
