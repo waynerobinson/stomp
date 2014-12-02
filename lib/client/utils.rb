@@ -107,8 +107,7 @@ module Stomp
       if @parameters[:reliable] && @start_timeout > 0
         warn "WARN detected :reliable == true and :start_timeout > 0"
         warn "WARN this may cause incorrect fail-over behavior"
-        warn "WARN use :start_timeout => 0 to correct"
-        warn "WARN !! :start_timeout default will change to 0 in the next release"
+        warn "WARN use :start_timeout => 0 to correct fail-over behavior"
       end
     end
 
