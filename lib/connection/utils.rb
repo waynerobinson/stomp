@@ -178,7 +178,8 @@ module Stomp
         :fast_hbs_adjust => 0.0,
         :connread_timeout => 0,
         :tcp_nodelay => true,
-        :start_timeout => 10,
+        :start_timeout => 0,
+        :sslctx_newparm => nil,
       }
 
       res_params = default_params.merge(params)

@@ -88,7 +88,7 @@ module Stomp
     #     :fast_hbs_adjust => 0.0,
     #     :connread_timeout => 0,
     #     :tcp_nodelay => true,
-    #     :start_timeout => 10,
+    #     :start_timeout => 0,
     #     :sslctx_newparm => nil,
     #   }
     #
@@ -139,7 +139,7 @@ module Stomp
         @fast_hbs_adjust = 0.0 # Fast heartbeat senders sleep adjustment
         @connread_timeout = 0 # Connect read CONNECTED/ERROR timeout
         @tcp_nodelay = true # Disable Nagle
-        @start_timeout = 10 # Client only, startup timeout
+        @start_timeout = 0 # Client only, startup timeout
         @sslctx_newparm = nil # SSLContext.new paramater
         warn "login looks like a URL, do you have the correct parameters?" if @login =~ /:\/\//
       end
